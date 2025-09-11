@@ -84,6 +84,13 @@
                     </a>
                 </li>
                 <li class="pc-item">
+                    <a href="{{ route('admin.jadwal-kegiatan') }}" class="pc-link"><span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-calendar-1"></use>
+                            </svg> </span><span class="pc-mtext">Jadwal Kegiatan</span>
+                    </a>
+                </li>
+                <li class="pc-item">
                     <a href="../pages/register-v1.html" class="pc-link" target="_blank"><span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-password-check"></use>

@@ -1,14 +1,10 @@
 @extends('admin.template.master-template')
 
-@section('title', 'Beasiswa')
+@section('title', 'Jadwal Kegiatan')
 
 @section('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
-    <style>
-        .swal2-container {
-            z-index: 2000 !important;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 @endsection
 
 @section('content')
@@ -22,12 +18,12 @@
                         <div class="col-md-12">
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                                <li class="breadcrumb-item" aria-current="page">Beasiswa</li>
+                                <li class="breadcrumb-item" aria-current="page">Jadwal Kegiatan</li>
                             </ul>
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Beasiswa</h2>
+                                <h2 class="mb-0">Jadwal Kegiatan</h2>
                             </div>
                         </div>
                     </div>
@@ -39,24 +35,43 @@
             <div class="row" id="app-vue">
                 <div class="col-sm-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5>Data Beasiswa</h5>
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+                            <h5 class="mb-3 mb-sm-0">Data Jadwal Kegiatan</h5>
+                            <div class="d-flex gap-1">
+                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
+                                    id="flt_tahun">
+                                    @foreach ($tahun_kegiatan as $item)
+                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
+                                    @foreach ($beasiswa as $item)
+                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
+                            </div>
                         </div>
+
                         <div class="card-body">
-                            <div class="btn-group mb-3" role="group" aria-label="Button Modal Beasiswa">
+                            <div class="btn-group mb-3" role="group" aria-label="Button Modal Jadwal Kegiatan">
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#modalBeasiswa"><span class="ti ti-circle-plus"></span>
+                                    data-bs-target="#modalJadwal"><span class="ti ti-circle-plus"></span>
                                     Tambah
                                     Data</button>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-striped align-middle text-center" id="tableBeasiswa">
+                                <table class="table table-striped align-middle text-center" id="tableJadwal">
                                     <thead class="bg-cyan-100">
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Nama Beasiswa</th>
+                                            <th scope="col">Beasiswa</th>
+                                            <th scope="col">Jadwal</th>
+                                            <th scope="col">Tanggal Mulai</th>
+                                            <th scope="col">Tanggal Selesai</th>
                                             <th scope="col">Deskripsi</th>
-                                            <th scope="col">Status</th>
                                             <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
@@ -71,40 +86,76 @@
             <!--[ Main Content ] end-->
 
             <!-- Modal -->
-            <div class="modal fade" id="modalBeasiswa" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="modalBeasiswaLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal fade" id="modalJadwal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="modalJadwalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
                     <form class="needs-validation">
                         @csrf
-                        <input type="hidden" name="beasiswa_id" id="beasiswa_id">
+                        <input type="hidden" name="jadwal_id" id="jadwal_id">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="modalBeasiswaLabel">Manajemen Data Beasiswa</h1>
+                                <h1 class="modal-title fs-5" id="modalJadwalLabel">Manajemen Data Jadwal</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="nama" class="form-label">Nama Beasiswa</label>
-                                    <input type="text" class="form-control" id="nama" name="nama"
-                                        autocomplete="off" autofocus required>
+                                <div class="row mb-3">
+                                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                        <label for="tahun" class="form-label">Tahun Kegiatan</label>
+                                        <input type="number" class="form-control" id="tahun" name="tahun"
+                                            value="{{ $tahun_kegiatan->filter(function ($item) {
+                                                    return $item->status === 1;
+                                                })->first()?->tahun }}"
+                                            readonly required>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6">
+                                        <label for="beasiswa" class="form-label">Beasiswa</label>
+                                        <select class="form-select" aria-label="Beasiswa" name="beasiswa" id="beasiswa"
+                                            required>
+                                            <option value="" selected>-- Pilih salah satu --</option>
+                                            @foreach ($beasiswa as $item)
+                                                <option value="{{ $item->id }}">{{ $item->nama }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                        <label for="role" class="form-label">Role</label>
+                                        <select class="form-select" aria-label="Role Kegiatan" name="role"
+                                            id="role" required>
+                                            <option value="" selected>-- Pilih salah satu --</option>
+                                            @foreach ($role_kegiatan as $item)
+                                                <option value="{{ $item }}">{{ str_ireplace('_', ' ', $item) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6">
+                                        <label for="nama" class="form-label">Nama Kegiatan</label>
+                                        <input type="text" class="form-control" id="nama" name="nama"
+                                            autocomplete="off" required>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                        <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                                        <input type="text" class="form-control datetimepicker" id="tanggal_mulai"
+                                            name="tanggal_mulai" autocomplete="off" required>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6">
+                                        <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                                        <input type="text" class="form-control datetimepicker" id="tanggal_selesai"
+                                            name="tanggal_selesai" autocomplete="off" required>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="deskripsi" class="form-label">Deskripsi</label>
                                     <textarea class="form-control" id="deskripsi" name="deskripsi"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="form-check ps-0">
-                                        <input type="radio" class="btn-check" name="status" id="status-aktif"
-                                            autocomplete="off" value="on" checked>
-                                        <label class="btn btn-sm btn-outline-success" for="status-aktif"><span
-                                                class="small">Aktif</span></label>
-
-                                        <input type="radio" class="btn-check" name="status" value="off"
-                                            id="status-nonaktif" autocomplete="off">
-                                        <label class="btn btn-sm btn-outline-danger" for="status-nonaktif"><span
-                                                class="small">Tidak Aktif</span></label>
-                                    </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -125,6 +176,69 @@
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script>
+        $(function() {
+            $('#role').on('change', (e) => {
+                // $(this) tidak bisa untuk arrow function, gunakan e.currentTarget
+                $('#nama').val($(e.currentTarget).val().replaceAll('_', ' '));
+            });
+
+            // Range picker
+            $('.datetimepicker').daterangepicker({
+                singleDatePicker: true,
+                timePicker: true,
+                timePicker24Hour: true,
+                drops: "auto",
+                showDropdowns: true,
+                autoUpdateInput: false,
+                applyButtonClasses: "btn-success",
+                cancelClass: "btn-danger",
+                locale: {
+                    format: 'D/M/YYYY HH:mm',
+                    applyLabel: 'Terapkan',
+                    cancelLabel: 'Batal',
+                    "daysOfWeek": [
+                        "Min",
+                        "Sen",
+                        "Sel",
+                        "Rab",
+                        "Kam",
+                        "Jum",
+                        "Sab"
+                    ],
+                    "monthNames": [
+                        "Januari",
+                        "Februari",
+                        "Maret",
+                        "April",
+                        "Mei",
+                        "Juni",
+                        "Juli",
+                        "Agustus",
+                        "September",
+                        "Oktober",
+                        "November",
+                        "Desember"
+                    ],
+                }
+            });
+
+            $('.datetimepicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('D/M/YYYY HH:mm'));
+            });
+
+            $('.datetimepicker').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+        });
+
+        function reloadData() {
+            dataTable.ajax.reload(null, false);
+        }
+    </script>
 
     <script>
         // Prevent Bootstrap dialog from blocking focusin
@@ -222,25 +336,43 @@
         const validForm = $("form.needs-validation").validate({
             ignore: "",
             rules: {
+                tahun: {
+                    required: true
+                },
+                beasiswa: {
+                    required: true
+                },
+                role: {
+                    required: true
+                },
                 nama: {
                     required: true
                 },
-                deskripsi: {
+                tanggal_mulai: {
                     required: true
                 },
-                status: {
+                tanggal_selesai: {
                     required: true
                 }
             },
             messages: {
+                tahun: {
+                    required: 'Tahun kegiatan harus diisi'
+                },
+                beasiswa: {
+                    required: 'Beasiswa harus dipilih'
+                },
+                role: {
+                    required: 'Role kegiatan harus dipilih'
+                },
                 nama: {
-                    required: 'Nama beasiswa harus diisi'
+                    required: 'Nama kegiatan harus diisi'
                 },
-                deskripsi: {
-                    required: 'Deskripsi beasiswa harus diisi'
+                tanggal_mulai: {
+                    required: 'Tanggal mulai harus diisi'
                 },
-                status: {
-                    required: 'Status beasiswa harus dipilih'
+                tanggal_selesai: {
+                    required: 'Tanggal selesai harus diisi'
                 }
             },
             errorPlacement: function(error, element) {
@@ -275,14 +407,15 @@
                     <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
                     <span role="status">Loading...</span>`;
 
-                const id = $('#beasiswa_id').val();
+                const id = $('#jadwal_id').val();
+                let url, type = "POST";
+                url = "{{ route('admin.jadwal-kegiatan.store') }}";
+
                 // Serialize form
                 const formData = new URLSearchParams(new FormData(form)).toString();
-                let url, type = "POST";
-                url = "{{ route('admin.beasiswa.store') }}";
 
                 if (id) {
-                    url = "{{ route('admin.beasiswa.update', ':id') }}";
+                    url = "{{ route('admin.jadwal-kegiatan.update', ':id') }}";
                     url = url.replace(':id', id);
                     type = "PUT";
                 }
@@ -293,7 +426,7 @@
                     data: formData,
                     success: function(data) {
                         form.reset();
-                        $('#modalBeasiswa').modal('hide');
+                        $('#modalJadwal').modal('hide');
                         dataTable.ajax.reload(null, false);
 
                         const msg = JSON.parse(JSON.stringify(data));
@@ -327,12 +460,17 @@
     </script>
 
     <script>
-        const dataTable = $("#tableBeasiswa").DataTable({
+        const dataTable = $("#tableJadwal").DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('admin.beasiswa.create') }}",
-                type: "GET"
+                url: "{{ route('admin.jadwal-kegiatan.create') }}",
+                type: "GET",
+                data: (data) => {
+                    data._token = "{{ csrf_token() }}";
+                    data.flt_tahun = $('#flt_tahun').val();
+                    data.flt_beasiswa = $('#flt_beasiswa').val();
+                }
             },
             columns: [{
                     data: null,
@@ -341,13 +479,19 @@
                     render: (data, type, row, meta) => meta.row + meta.settings._iDisplayStart + 1
                 },
                 {
+                    data: 'beasiswa'
+                },
+                {
                     data: 'nama'
                 },
                 {
-                    data: 'deskripsi'
+                    data: 'tanggal_mulai'
                 },
                 {
-                    data: 'status'
+                    data: 'tanggal_selesai'
+                },
+                {
+                    data: 'deskripsi'
                 },
                 {
                     data: 'action',
@@ -357,32 +501,24 @@
                 }
             ],
             "columnDefs": [{
-                    "targets": 0,
-                    "width": "5%"
-                },
-                {
-                    "targets": 1,
-                    "width": "15%"
-                },
-                {
-                    "targets": 2,
-                    "width": "20%"
-                },
-                {
-                    "targets": 3,
-                    "width": "5%"
-                },
-                {
-                    "targets": 4,
-                    "width": "10%"
-                },
-                {
                     "targets": "_all",
                     "className": "dt-head-center dt-body-center cell-border",
                     "visible": true
                 },
+                {
+                    "targets": 0,
+                    "width": "5%"
+                },
+                {
+                    "targets": 5,
+                    "width": "15%"
+                },
+                {
+                    "targets": 6,
+                    "width": "10%"
+                },
             ],
-            "order": [1, 'asc'],
+            "order": [3, 'asc'],
             "responsive": true,
             "autoWidth": true,
             "fixedColumns": true,
@@ -395,7 +531,7 @@
 
     <script>
         function getData(id) {
-            let url = "{{ route('admin.beasiswa.edit', ':id') }}";
+            let url = "{{ route('admin.jadwal-kegiatan.edit', ':id') }}";
             url = url.replace(':id', id);
 
             return $.ajax({
@@ -419,18 +555,29 @@
         }
 
         async function editData(id) {
-            const response = await getData(id);
+            const response = await getData(id),
+                tanggal_mulai = new Date(response.tanggal_mulai),
+                tanggal_selesai = new Date(response.tanggal_selesai);
 
-            $('#beasiswa_id').val(response.encrypted_id);
+            $('#jadwal_id').val(response.encrypted_id);
+            $(`#beasiswa option[value="${response.beasiswa_id}"]`).prop('selected', true);
+            $(`#role option[value="${response.role}"]`).prop('selected', true);
             $('#nama').val(response.nama);
-            tinymce.activeEditor.setProgressState(true)
-            tinymce.activeEditor.setProgressState(false, 1000)
-            setTimeout(() => {
-                tinymce.activeEditor.setContent(response.deskripsi);
-                tinymce.triggerSave();
-            }, 500);
-            $(`input[name="status"][value="${response.status === 1 ? 'on' : 'off'}"]`).prop('checked', true);
-            $('#modalBeasiswa').modal('show');
+            $('#tanggal_mulai').data('daterangepicker').setStartDate(tanggal_mulai);
+            $('#tanggal_mulai').data('daterangepicker').setEndDate(tanggal_mulai);
+            $('#tanggal_selesai').data('daterangepicker').setStartDate(tanggal_selesai);
+            $('#tanggal_selesai').data('daterangepicker').setEndDate(tanggal_selesai);
+            $('#tanggal_mulai').val(moment(tanggal_mulai).format('D/M/YYYY HH:mm'));
+            $('#tanggal_selesai').val(moment(tanggal_selesai).format('D/M/YYYY HH:mm'));
+            if (response.deskripsi) {
+                tinymce.activeEditor.setProgressState(true)
+                tinymce.activeEditor.setProgressState(false, 1000)
+                setTimeout(() => {
+                    tinymce.activeEditor.setContent(response.deskripsi);
+                    tinymce.triggerSave();
+                }, 500);
+            }
+            $('#modalJadwal').modal('show');
         }
 
         async function deleteData(id) {
@@ -438,7 +585,7 @@
 
             Swal.fire({
                 title: 'Apa Anda Yakin?',
-                html: `Anda akan menghapus data beasiswa : <span class="fw-bold fst-italic">"${response.nama}"</span>`,
+                html: `Anda akan menghapus data jadwal : <span class="fw-bold fst-italic">"${response.nama} (${response.beasiswa?.nama} - ${response.tahun_kegiatan?.tahun})"</span>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus!',
@@ -446,7 +593,7 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    url = "{{ route('admin.beasiswa.destroy', ':id') }}";
+                    url = "{{ route('admin.jadwal-kegiatan.destroy', ':id') }}";
                     url = url.replace(':id', id);
 
                     Swal.fire({
