@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\{
     BeasiswaController,
+    FormDataController,
     JadwalKegiatanController,
     TahunKegiatanController
 };
@@ -41,6 +42,20 @@ Route::group(['prefix' => 'administrator', 'middleware' => []], function () {
             'edit' => 'admin.jadwal-kegiatan.edit',
             'update' => 'admin.jadwal-kegiatan.update',
             'destroy' => 'admin.jadwal-kegiatan.destroy'
+        ]
+    ]);
+
+    Route::post("/form-data/detail", [FormDataController::class, 'detail'])->name('admin.form-data.detail');
+    Route::post("/form-data/copy", [FormDataController::class, 'copy'])->name('admin.form-data.copy');;
+    Route::delete("/form-data", [FormDataController::class, 'destroy_master'])->name('admin.form-data.destroy.master');;
+    Route::resource('/form-data', FormDataController::class, [
+        'names' => [
+            'index' => 'admin.form-data',
+            'store' => 'admin.form-data.store',
+            'create' => 'admin.form-data.create',
+            'edit' => 'admin.form-data.edit',
+            'update' => 'admin.form-data.update',
+            'destroy' => 'admin.form-data.destroy'
         ]
     ]);
 });

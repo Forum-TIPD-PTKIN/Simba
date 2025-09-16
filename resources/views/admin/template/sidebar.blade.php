@@ -91,10 +91,10 @@
                     </a>
                 </li>
                 <li class="pc-item">
-                    <a href="../pages/register-v1.html" class="pc-link" target="_blank"><span class="pc-micon">
+                    <a href="{{ route('admin.form-data') }}" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
-                                <use xlink:href="#custom-password-check"></use>
-                            </svg> </span><span class="pc-mtext">Register</span></a>
+                                <use xlink:href="#custom-note-1"></use>
+                            </svg> </span><span class="pc-mtext">Form Data</span></a>
                 </li>
                 <li class="pc-item pc-caption">
                     <label>UI Components</label>
