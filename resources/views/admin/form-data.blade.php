@@ -41,35 +41,40 @@
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
                             <h5 class="mb-3 mb-sm-0">Data Form Data</h5>
                             <div class="d-flex gap-1">
-                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
-                                    id="flt_tahun">
+                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan" id="flt_tahun"
+                                    v-model="form.tahun_kegiatan">
                                     @foreach ($tahun_kegiatan as $item)
                                         <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
+                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa"
+                                    v-model="form.beasiswa">
                                     @foreach ($beasiswa as $item)
                                         <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
+                                <button class="btn btn-sm btn-primary" v-on:click="reloadData()">Filter</button>
                             </div>
                         </div>
 
                         <div class="card-body">
                             <div class="form-group mb-3">
                                 <div class="d-flex" style="gap:0.4rem">
-                                    <button class="btn btn-primary" title="Tambah Form" data-bs-toggle="modal"
+                                    <button class="btn btn-sm btn-primary" title="Tambah Form" data-bs-toggle="modal"
                                         data-bs-target="#modalTambahFormData" v-on:click="onReset()"><i
                                             class="ti ti-plus"></i></button>
-                                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#copyModal"
-                                        v-on:click="onReset()" title="Salin Form"><i class="ti ti-copy"></i></button>
-                                    <button class="btn btn-danger" v-on:click="onDeleteMaster()"
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#modalCopyFormData" v-on:click="edit_form = true"
+                                        v-if="master_jenis.length>0" title="Edit Form"><i class="ti ti-edit"></i></button>
+                                    <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                        data-bs-target="#modalCopyFormData" v-on:click="onReset()" title="Salin Form"><i
+                                            class="ti ti-copy"></i></button>
+                                    <button class="btn btn-sm btn-danger" v-on:click="onDeleteMaster()"
                                         v-if="master_jenis.length>1" title="Hapus Form"><i class="ti ti-trash"></i></button>
 
-                                    <select class="form-select" id="jenisform" v-model="form.jenis"
+                                    <select class="form-select form-select-sm" id="jenisform" v-model="form.jenis"
                                         v-on:change="onFilter()">
                                         <option value="FORM_BARU">
                                             Data Form Baru
@@ -96,7 +101,7 @@
                                         <tr v-for="(item,index) in data">
                                             <td class="text-center">@{{ item.indexed + 1 }}</td>
                                             <td>
-                                                @{{ item.judul }}
+                                                @{{ item.config.title }}
                                                 <div class="text-muted small">
                                                     @{{ item.config.type }}
                                                 </div>
@@ -108,7 +113,7 @@
                                                     @{{ item.config.option.length }} Option
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="text-start">
                                                 <ul>
                                                     <li v-for="v in formatValidator(item.config.validator)">
                                                         @{{ v.validator }} : @{{ v.message }}</li>
@@ -147,8 +152,8 @@
             <!-- Modal Tambah Form Data -->
             <div class="modal fade" id="modalTambahFormData" data-bs-backdrop="static" data-bs-keyboard="false"
                 tabindex="-1" aria-labelledby="modalTambahFormDataLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <form class="needs-validation" id="formData">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                    <form class="needs-validation" id="formData" @submit.prevent="onSave">
                         @csrf
                         <div class="modal-content">
                             <div class="modal-header">
@@ -159,8 +164,8 @@
                             <div class="modal-body">
                                 <div class="col-12 mb-3" v-if="mode === 'NEW_FORM'">
                                     <label for="tahun" class="form-label">Tahun</label>
-                                    <select class="form-select" id="tahun" name="tahun" v-model="form.tahun"
-                                        data-msg="Harus diisi" required>
+                                    <select class="form-select" id="tahun" name="tahun"
+                                        v-model="form.tahun_kegiatan" data-msg="Harus diisi" required>
                                         <option value="" disabled> - pilih - </option>
                                         @foreach ($tahun_kegiatan as $key => $item)
                                             <option value="{{ $item->id }}">{{ $item->tahun }}</option>
@@ -169,12 +174,12 @@
                                 </div>
 
                                 <div class="col-12 mb-3" v-if="mode === 'NEW_FORM'">
-                                    <label for="tahun" class="form-label">Tahun</label>
-                                    <select class="form-select" id="tahun" name="tahun" v-model="form.tahun"
+                                    <label for="beasiswa" class="form-label">Beasiswa</label>
+                                    <select class="form-select" id="beasiswa" name="beasiswa" v-model="form.beasiswa"
                                         data-msg="Harus diisi" required>
                                         <option value="" disabled> - pilih - </option>
-                                        @foreach ($tahun_kegiatan as $key => $item)
-                                            <option value="{{ $item->id }}">{{ $item->tahun }}</option>
+                                        @foreach ($beasiswa as $key => $item)
+                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -195,7 +200,7 @@
                                         <template v-for="(item,index) in data">
                                             <option v-if="form.id!==item.id && index<data.length-1"
                                                 :value="(+item.indexed) + 1">Setelah
-                                                @{{ item.judul }}</option>
+                                                @{{ item.config.title }}</option>
                                         </template>
                                     </select>
                                 </div>
@@ -328,7 +333,38 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" v-on:click="onSave()">Simpan</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal Copy Form Data -->
+            <div class="modal fade" id="modalCopyFormData" data-bs-backdrop="static" data-bs-keyboard="false"
+                tabindex="-1" aria-labelledby="modalCopyFormDataLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <form class="needs-validation" id="formCopy" @submit.prevent="onCopy">
+                        @csrf
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="modalCopyFormDataLabel">@{{ formTitle }} :
+                                    @{{ form.jenis }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="col-12 mb-3">
+                                    <label for="namabarumasterform" class="form-label">Nama Master Form Baru</label>
+                                    <input type="text" id="namabarumasterform" class="form-control"
+                                        name="namabarumasterform" autocomplete="off" v-model="form.nama"
+                                        placeholder="Nama Form Baru" data-msg="Harus diisi" required />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    v-on:click="edit_form = false">Close</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
                             </div>
                         </div>
                     </form>
@@ -348,33 +384,35 @@
         var app;
 
         $(document).ready(function() {
-            $('#formData').validate({
-                // debug: true,
-                // invalidHandler: function(event, validator) {
-                //     console.log('Form tidak valid');
-                //     console.log(validator.errorList);
-                // }
-                errorPlacement: function(error, element) {
-                    // Cek apakah elemen adalah TinyMCE (textarea yang diubah menjadi TinyMCE)
-                    if (element.siblings().hasClass('tox-tinymce')) {
-                        const editorContainer = tinymce.activeEditor.getContainer();
-                        // Tempatkan error di bawah editor TinyMCE
-                        error.insertAfter(editorContainer).addClass('invalid-feedback');
-                    } else if (element.attr("type") === "radio") {
-                        // Untuk radio buttons, tempatkan error setelah .form-check
-                        error.insertAfter(element.closest('.form-check'));
-                    } else {
-                        // Untuk input biasa, tempatkan error setelah input
-                        error.addClass('invalid-feedback');
-                        error.insertAfter(element);
+            $('#formData, #formCopy').each(function() {
+                $(this).validate({
+                    // debug: true,
+                    // invalidHandler: function(event, validator) {
+                    //     console.log('Form tidak valid');
+                    //     console.log(validator.errorList);
+                    // }
+                    errorPlacement: function(error, element) {
+                        // Cek apakah elemen adalah TinyMCE (textarea yang diubah menjadi TinyMCE)
+                        if (element.siblings().hasClass('tox-tinymce')) {
+                            const editorContainer = tinymce.activeEditor.getContainer();
+                            // Tempatkan error di bawah editor TinyMCE
+                            error.insertAfter(editorContainer).addClass('invalid-feedback');
+                        } else if (element.attr("type") === "radio") {
+                            // Untuk radio buttons, tempatkan error setelah .form-check
+                            error.insertAfter(element.closest('.form-check'));
+                        } else {
+                            // Untuk input biasa, tempatkan error setelah input
+                            error.addClass('invalid-feedback');
+                            error.insertAfter(element);
+                        }
+                    },
+                    highlight: function(element, errorClass, validClass) {
+                        $(element).addClass('is-invalid').removeClass('is-valid');
+                    },
+                    unhighlight: function(element, errorClass, validClass) {
+                        $(element).removeClass('is-invalid').addClass('is-valid');
                     }
-                },
-                highlight: function(element, errorClass, validClass) {
-                    $(element).addClass('is-invalid').removeClass('is-valid');
-                },
-                unhighlight: function(element, errorClass, validClass) {
-                    $(element).removeClass('is-invalid').addClass('is-valid');
-                }
+                });
             });
         })
 
@@ -386,11 +424,14 @@
                 dataType: "JSON",
                 data: {
                     _token: '{{ csrf_token() }}',
-                    jenis: app.form.jenis
+                    jenis: app.form.jenis,
+                    tahun_kegiatan: app.form.tahun_kegiatan,
+                    beasiswa: app.form.beasiswa
                 },
                 complete: (data) => {
-                    app.data = data.responseJSON;
-                    app.form.indexed = app.data.length
+                    app.data = data.responseJSON.data;
+                    app.form.indexed = app.data.length;
+                    app.master_jenis = data.responseJSON.master_jenis;
                 }
             });
         }
@@ -404,6 +445,8 @@
                     id: '',
                     jenis: '{{ $jenis }}',
                     old_jenis: '{{ $jenis }}',
+                    tahun_kegiatan: @json($curr_tahun_kegiatan),
+                    beasiswa: @json($curr_beasiswa),
                     nama: '',
                     name: '',
                     type: 'text',
@@ -415,6 +458,7 @@
                 data: [],
                 master_jenis: @json($master_jenis),
                 mode: null,
+                edit_form: false,
                 namajenis: '',
             },
             methods: {
@@ -438,7 +482,9 @@
                                 type: "DELETE",
                                 data: {
                                     "_token": "{{ csrf_token() }}",
-                                    jenis: app.form.jenis
+                                    jenis: app.form.jenis,
+                                    tahun_kegiatan: app.form.tahun_kegiatan,
+                                    beasiswa: app.form.beasiswa
                                 },
                                 success: function(res) {
                                     const i = app.master_jenis.indexOf(app.form.jenis);
@@ -467,7 +513,7 @@
                 onDelete: (item) => {
                     Swal.fire({
                         title: 'Konfirmasi',
-                        html: `Anda akan menghapus form Form Data : <span class="fw-bold fst-italic text-danger"> ${item.judul}</span>`,
+                        html: `Anda akan menghapus form Form Data : <span class="fw-bold fst-italic text-danger"> ${item.config.title}</span>`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Hapus!',
@@ -483,7 +529,9 @@
                                 type: "DELETE",
                                 data: {
                                     "_token": "{{ csrf_token() }}",
-                                    jenis: item.jenis
+                                    jenis: item.jenis,
+                                    tahun_kegiatan: item.tahun_kegiatan_id,
+                                    beasiswa: item.beasiswa_id
                                 },
                                 success: function(res) {
                                     app.data = res;
@@ -506,6 +554,8 @@
                 },
                 onReset: () => {
                     app.form.id = '';
+                    app.form.tahun_kegiatan = app.data.length > 0 ? app.data[0].tahun_kegiatan_id : '';
+                    app.form.beasiswa = app.data.length > 0 ? app.data[0].beasiswa_id : ''
                     app.form.nama = '';
                     app.form.name = '';
                     app.form.type = 'text';
@@ -517,7 +567,9 @@
                     app.namajenis = ''
                 },
                 onCopyData: item => {
-                    app.form.nama = item.judul;
+                    app.form.tahun_kegiatan = item.tahun_kegiatan_id;
+                    app.form.beasiswa = item.beasiswa_id;
+                    app.form.nama = item.config.title;
                     app.form.name = item.config.name;
                     app.form.type = item.config.type;
                     app.form.deskripsi = item.deskripsi;
@@ -526,11 +578,12 @@
                     app.form.indexed = item.indexed;
                 },
                 onCopy: () => {
-                    let url = "{{ route('admin.form-data.copy') }}";
+                    let url_edit =
+                        "{{ route('admin.form-data.edit', ['ID_ITEM_PATCH']) }}",
+                        url_copy = "{{ route('admin.form-data.copy') }}";
+                    url_edit = url_edit.replaceAll('ID_ITEM_PATCH', app.form.jenis);
 
-                    $('#formCopy').parsley().validate();
-
-                    if ($('#formCopy').parsley().isValid()) {
+                    if ($('#formCopy').valid()) {
                         $('#formCopy')
                             .find('button[type="submit"]')
                             .prop('disabled', true)
@@ -539,22 +592,31 @@
                             );
 
                         $.ajax({
-                            url: url,
-                            type: "POST",
+                            url: app.edit_form ? url_edit : url_copy,
+                            type: app.edit_form ? "GET" : "POST",
                             data: {
                                 "_token": "{{ csrf_token() }}",
                                 jenis: app.form.jenis,
-                                nama: app.form.nama
+                                nama: app.form.nama,
+                                tahun_kegiatan: app.form.tahun_kegiatan,
+                                beasiswa: app.form.beasiswa
                             },
                             success: function(res) {
-                                app.form.jenis = app.form.nama
+                                app.form.jenis = app.form.nama.toUpperCase();
                                 $('.modal').modal('hide');
-                                app.master_jenis.push(app.form.nama);
+                                app.master_jenis.push(app.form.nama.toUpperCase());
+                                if (app.edit_form) {
+                                    const i = app.master_jenis.indexOf(app.form.jenis);
+                                    app.master_jenis.splice(i, 1);
+                                }
                                 Swal.fire({
                                     title: 'Berhasil',
-                                    text: 'Master Form Data Berhasil Disalin',
+                                    text: app.edit_form ?
+                                        'Master Form Data Berhasil Disunting' :
+                                        'Master Form Data Berhasil Disalin',
                                     icon: 'success'
                                 });
+                                app.edit_form = false;
                                 getDetail();
                             },
                             error: function(res) {
@@ -570,7 +632,7 @@
                                     .find('button[type="submit"]')
                                     .prop('disabled', false)
                                     .html(
-                                        `Submit`
+                                        `Simpan`
                                     );
                             }
                         });
@@ -605,7 +667,9 @@
                 },
                 onEdit: (item) => {
                     app.form.id = item.id;
-                    app.form.nama = item.judul;
+                    app.form.tahun_kegiatan = item.tahun_kegiatan_id;
+                    app.form.beasiswa = item.beasiswa_id;
+                    app.form.nama = item.config.title;
                     app.form.name = item.config.name;
                     app.form.type = item.config.type;
                     app.form.deskripsi = item.deskripsi;
@@ -614,16 +678,16 @@
                     app.form.indexed = item.indexed;
                 },
                 onSave: () => {
-                    if (app.mode === 'NEW_FORM' && !app.namajenis) {
-                        Swal.fire({
-                            title: 'Berhasil',
-                            text: '?',
-                            icon: 'success'
-                        });
-                        return;
-                    }
-
                     if ($('#formData').valid()) {
+                        if (app.mode === 'NEW_FORM' && !app.namajenis) {
+                            Swal.fire({
+                                title: 'Berhasil',
+                                text: '?',
+                                icon: 'success'
+                            });
+                            return;
+                        }
+
                         $('#formData')
                             .find('button[type="submit"]')
                             .prop('disabled', true)
@@ -648,7 +712,7 @@
                             success: function(res) {
                                 $('.modal').modal('hide');
                                 if (app.mode === 'NEW_FORM') {
-                                    app.master_jenis.push(app.namajenis);
+                                    app.master_jenis.push(app.namajenis.toUpperCase());
                                     Swal.fire({
                                         title: 'Berhasil',
                                         text: 'Item Form Data Berhasil Disimpan',
@@ -694,15 +758,17 @@
                         app.mode = null;
                         getDetail();
                     }
+                },
+                reloadData: () => {
+                    getDetail();
+                }
+            },
+            computed: {
+                formTitle() {
+                    return this.edit_form ? 'Edit Master Form' : 'Salin Master Form';
                 }
             }
         })
         getDetail();
-    </script>
-
-    <script>
-        function reloadData() {
-            dataTable.ajax.reload(null, false);
-        }
     </script>
 @endsection
