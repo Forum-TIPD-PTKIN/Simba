@@ -279,6 +279,12 @@ class FormDataController extends Controller
             ->pluck('jenis')
             ->toArray();
 
+        if ($request->reset === 'true') {
+            $request->merge([
+                'jenis' => count($master_jenis) ? $master_jenis[0] : '',
+            ]);
+        }
+
         return response()->json([
             'data' => $this->getRaw($request),
             'master_jenis' => $master_jenis

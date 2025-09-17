@@ -66,7 +66,7 @@
                                         data-bs-target="#modalTambahFormData" v-on:click="onReset()"><i
                                             class="ti ti-plus"></i></button>
                                     <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                                        data-bs-target="#modalCopyFormData" v-on:click="edit_form = true"
+                                        data-bs-target="#modalCopyFormData" v-on:click="editForm()"
                                         v-if="master_jenis.length>0" title="Edit Form"><i class="ti ti-edit"></i></button>
                                     <button class="btn btn-sm btn-info" data-bs-toggle="modal"
                                         data-bs-target="#modalCopyFormData" v-on:click="onReset()" title="Salin Form"><i
@@ -416,7 +416,7 @@
             });
         })
 
-        function getDetail() {
+        function getDetail(reset = false) {
             const url = "{{ route('admin.form-data.detail') }}";
             return $.ajax({
                 type: 'post',
@@ -426,12 +426,17 @@
                     _token: '{{ csrf_token() }}',
                     jenis: app.form.jenis,
                     tahun_kegiatan: app.form.tahun_kegiatan,
-                    beasiswa: app.form.beasiswa
+                    beasiswa: app.form.beasiswa,
+                    reset: reset
                 },
                 complete: (data) => {
                     app.data = data.responseJSON.data;
                     app.form.indexed = app.data.length;
                     app.master_jenis = data.responseJSON.master_jenis;
+                    if (reset) {
+                        app.form.jenis = data.responseJSON.master_jenis[0];
+                        app.form.old_jenis = data.responseJSON.master_jenis[0];
+                    }
                 }
             });
         }
@@ -759,8 +764,12 @@
                         getDetail();
                     }
                 },
+                editForm: () => {
+                    app.edit_form = true;
+                    app.form.nama = app.form.jenis;
+                },
                 reloadData: () => {
-                    getDetail();
+                    getDetail(true);
                 }
             },
             computed: {
