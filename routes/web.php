@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\{
 };
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Pendaftar\{
+    DaftarController,
     DashboardController
 };
 use Illuminate\Support\Facades\Route;
@@ -70,4 +71,6 @@ Route::group(['prefix' => 'administrator'], function () {
 Route::group(['prefix' => 'pendaftar', 'middleware' => []], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
+
+    Route::get('/daftar/{id}', [DaftarController::class, 'index'])->name('pendaftar.daftar');
 });

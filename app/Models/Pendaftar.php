@@ -6,6 +6,7 @@ class Pendaftar extends Uuid
 {
     protected $fillable = [
         'beasiswa_id',
+        'tahun_kegiatan_id',
         'user_id'
     ];
 
@@ -22,6 +23,11 @@ class Pendaftar extends Uuid
     public function beasiswa()
     {
         return $this->belongsTo(Beasiswa::class);
+    }
+
+    public function tahun_kegiatan()
+    {
+        return $this->belongsTo(TahunKegiatan::class);
     }
 
     public function user()
