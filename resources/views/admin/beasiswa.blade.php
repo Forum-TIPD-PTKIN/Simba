@@ -76,7 +76,7 @@
                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
                     <form class="needs-validation">
                         @csrf
-                        <input type="hidden" name="beasiswa_id" id="beasiswa_id">
+                        <input class="d-none" type="text" name="beasiswa_id" id="beasiswa_id">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="modalBeasiswaLabel">Manajemen Data Beasiswa</h1>

@@ -232,10 +232,10 @@ function layout_change(layout) {
     dark_flag = false;
 
     // Update logo to dark version for light theme
-    updateLogo('.pc-sidebar .m-header .logo-lg', '../assets/admin/images/logo-dark.svg');
-    updateLogo('.navbar-brand .logo-lg', '../assets/admin/images/logo-dark.svg');
-    updateLogo('.auth-main.v1 .auth-sidefooter img', '../assets/admin/images/logo-dark.svg');
-    updateLogo('.footer-top .footer-logo', '../assets/admin/images/logo-dark.svg');
+    // updateLogo('.pc-sidebar .m-header .logo-lg', '../assets/admin/images/logo-dark.svg');
+    // updateLogo('.navbar-brand .logo-lg', '../assets/admin/images/logo-dark.svg');
+    // updateLogo('.auth-main.v1 .auth-sidefooter img', '../assets/admin/images/logo-dark.svg');
+    // updateLogo('.footer-top .footer-logo', '../assets/admin/images/logo-dark.svg');
 
     // Update active button state for light theme
     updateActiveButton('.theme-layout .btn[data-value="true"]');

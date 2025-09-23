@@ -13,6 +13,12 @@ class JadwalKegiatan extends Uuid
         return Crypt::encryptString($this->id);
     }
 
+    public function scopeIs_Active($query)
+    {
+        return $query->where('tanggal_mulai', '<=', now())
+            ->where('tanggal_selesai', '>=', now());
+    }
+
     public function tahun_kegiatan()
     {
         return $this->belongsTo(TahunKegiatan::class);

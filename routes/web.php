@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\{
     JadwalKegiatanController,
     TahunKegiatanController
 };
+use App\Http\Controllers\Pendaftar\{
+    DashboardController
+};
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'administrator', 'middleware' => []], function () {
@@ -58,4 +61,9 @@ Route::group(['prefix' => 'administrator', 'middleware' => []], function () {
             'destroy' => 'admin.form-data.destroy'
         ]
     ]);
+});
+
+Route::group(['prefix' => 'pendaftar', 'middleware' => []], function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
+    Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 });

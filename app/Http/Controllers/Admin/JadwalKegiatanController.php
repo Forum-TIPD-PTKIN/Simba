@@ -55,6 +55,7 @@ class JadwalKegiatanController extends Controller
                         return $query->whereRaw('1')->limit(1);
                     });
                 })
+                ->orderBy('tanggal_mulai', 'asc')
                 ->get();
 
             return DataTables::of($data)
