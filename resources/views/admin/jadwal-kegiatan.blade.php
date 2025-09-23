@@ -91,7 +91,7 @@
                 <div class="modal-dialog modal-lg">
                     <form class="needs-validation">
                         @csrf
-                        <input type="hidden" name="jadwal_id" id="jadwal_id">
+                        <input class="d-none" type="text" name="jadwal_id" id="jadwal_id">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="modalJadwalLabel">Manajemen Data Jadwal</h1>
@@ -518,7 +518,6 @@
                     "width": "10%"
                 },
             ],
-            "order": [3, 'asc'],
             "responsive": true,
             "autoWidth": true,
             "fixedColumns": true,

@@ -14,4 +14,9 @@ class Beasiswa extends Uuid
     {
         return Crypt::encryptString($this->id);
     }
+
+    public function jadwal_kegiatan()
+    {
+        return $this->hasMany(JadwalKegiatan::class);
+    }
 }

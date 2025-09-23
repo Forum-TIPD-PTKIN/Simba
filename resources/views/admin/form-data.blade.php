@@ -433,7 +433,7 @@
                     app.data = data.responseJSON.data;
                     app.form.indexed = app.data.length;
                     app.master_jenis = data.responseJSON.master_jenis;
-                    if (reset) {
+                    if (reset === true) {
                         app.form.jenis = data.responseJSON.master_jenis[0];
                         app.form.old_jenis = data.responseJSON.master_jenis[0];
                     }
@@ -703,7 +703,7 @@
                             "{{ route('admin.form-data.update', ['ID_ITEM_PATCH']) }}";
                         url_update = url_update.replaceAll('ID_ITEM_PATCH', app.form.id);
                         if (app.mode === 'NEW_FORM' && app.form.jenis == '') {
-                            app.form.jenis = app.namajenis;
+                            app.form.jenis = app.namajenis.toUpperCase();
                         }
 
                         $.ajax({
@@ -723,7 +723,7 @@
                                         text: 'Item Form Data Berhasil Disimpan',
                                         icon: 'success'
                                     });
-                                    app.form.jenis = app.namajenis;
+                                    app.form.jenis = app.namajenis.toUpperCase();
                                     getDetail();
                                 } else {
                                     app.data = res;
@@ -777,7 +777,7 @@
                     return this.edit_form ? 'Edit Master Form' : 'Salin Master Form';
                 }
             }
-        })
+        });
         getDetail();
     </script>
 @endsection
