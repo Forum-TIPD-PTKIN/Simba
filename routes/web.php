@@ -4,11 +4,15 @@ use App\Http\Controllers\Admin\{
     BeasiswaController,
     FormDataController,
     JadwalKegiatanController,
-    TahunKegiatanController
+    TahunKegiatanController,
 };
+use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'administrator', 'middleware' => []], function () {
+
+Route::get("/login/sso", [LoginController::class, 'login_sso'])->name('login.sso');
+
+Route::group(['prefix' => 'administrator'], function () {
     Route::get('/', function () {
         return view('admin.index');
     })->name('admin.dashboard');
