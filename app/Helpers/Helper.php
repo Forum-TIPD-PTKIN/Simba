@@ -1,5 +1,6 @@
 <?php
 
+use App\Api;
 use Illuminate\Support\Facades\DB;
 
 if (!function_exists('getEnumValues')) {
@@ -12,5 +13,12 @@ if (!function_exists('getEnumValues')) {
         return array_map(function ($value) {
             return trim($value, "'");
         }, explode(',', $matches[1]));
+    }
+}
+
+if (! function_exists('api')) {
+    function api(): Api
+    {
+        return new Api();
     }
 }
