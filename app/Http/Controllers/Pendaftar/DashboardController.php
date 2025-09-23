@@ -48,7 +48,10 @@ class DashboardController extends Controller
      */
     public function show(string $id)
     {
-        $beasiswa = Beasiswa::findOrFail($id);
+        $beasiswa = Beasiswa::with(['jadwal_kegiatan' => function ($query) {
+            $query->orderBy('tanggal_mulai', 'asc');
+        }])
+            ->findOrFail($id);
 
         return view('pendaftar.detail-beasiswa', [
             'beasiswa' => $beasiswa

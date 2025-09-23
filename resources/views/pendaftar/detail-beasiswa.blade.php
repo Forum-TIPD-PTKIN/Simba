@@ -28,95 +28,54 @@
             <!-- [ breadcrumb ] end -->
             <!-- [ Main Content ] start -->
             <div class="row">
-                <div class="col-lg-9">
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ $beasiswa->nama }}</h5>
+                            <h5 class="mb-0">Deskripsi</h5>
                         </div>
                         <div class="card-body">
                             {!! $beasiswa->deskripsi !!}
-                            <div class="d-grid mt-3">
-                                <button class="btn btn-primary d-flex align-items-center justify-content-center btnDetail"
-                                    data-id="{{ $beasiswa->id }}"><i class="ti ti-eye"></i> Lebih Detail</button>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-4">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Project - Able Pro</h5>
+                            <h5 class="mb-0">Jadwal Kegiatan</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-4">
-                                <p class="mb-2">Release v1.2.0<span class="float-end">70%</span></p>
-                                <div class="progress progress-primary" style="height: 8px">
-                                    <div class="progress-bar" style="width: 70%"></div>
+                        <div class="card-body border-bottom py-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach ($beasiswa->jadwal_kegiatan ?: [] as $item)
+                                    <li class="list-group-item ps-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 ms-3">
+                                                <div class="row g-1 align-items-center">
+                                                    <div class="col-6">
+                                                        <h6 class="mb-0">{{ $item->nama }}</h6>
+                                                    </div>
+                                                    <div class="col-6 text-end fw-bold">
+                                                        <p class="text-success mb-0 small">{{ $item->tgl_mulai_formatted }}
+                                                        </p>
+                                                        <p class="text-danger mb-0 small">{{ $item->tgl_selesai_formatted }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row g-2 justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <a class="btn btn-primary d-grid"
+                                            href="{{ route('pendaftar.daftar', [$beasiswa->id]) }}"><span
+                                                class="text-truncate w-100">Daftar
+                                                Beasiswa</span></a>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="#" class="btn btn-link-secondary">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-warning rounded-circle">
-                                                <span class="visually-hidden">New alerts</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 mx-2">
-                                            <p class="mb-0 d-grid text-start">
-                                                <span class="text-truncate w-100">Horizontal Layout</span>
-                                            </p>
-                                        </div>
-                                        <div class="badge bg-light-secondary f-12"><i class="ti ti-paperclip text-sm"></i>
-                                            2</div>
-                                    </div>
-                                </a>
-                                <a href="#" class="btn btn-link-secondary">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-warning rounded-circle">
-                                                <span class="visually-hidden">New alerts</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 mx-2">
-                                            <p class="mb-0 d-grid text-start">
-                                                <span class="text-truncate w-100">Invoice Generator</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="btn btn-link-secondary">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-warning rounded-circle">
-                                                <span class="visually-hidden">New alerts</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 mx-2">
-                                            <p class="mb-0 d-grid text-start">
-                                                <span class="text-truncate w-100">Package Upgrades</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="btn btn-link-secondary">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-success rounded-circle">
-                                                <span class="visually-hidden">New alerts</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 mx-2">
-                                            <p class="mb-0 d-grid text-start">
-                                                <span class="text-truncate w-100">Figma Auto Layout</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="d-grid mt-3">
-                                <button class="btn btn-primary d-flex align-items-center justify-content-center"><i
-                                        class="ti ti-plus"></i> Add task</button>
                             </div>
                         </div>
                     </div>
@@ -129,14 +88,4 @@
 @endsection
 
 @section('script')
-    <script>
-        $(document).ready(function() {
-            $('.btnDetail').on('click', function() {
-                const id = $(this).data('id');
-                let url = "{{ route('pendaftar.detail-beasiswa', ':id') }}";
-                url = url.replace(':id', id);
-                window.location.href = url;
-            });
-        });
-    </script>
 @endsection

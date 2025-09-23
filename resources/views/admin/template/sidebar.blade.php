@@ -13,12 +13,12 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <img src="{{ asset('assets/admin/images/user/avatar-1.jpg') }}" alt="user-image"
+                            <img src="{{ asset('assets/admin/images/user/avatar-2.jpg') }}" alt="user-image"
                                 class="user-avtar wid-45 rounded-circle" />
                         </div>
                         <div class="flex-grow-1 ms-3 me-2">
-                            <h6 class="mb-0">Jonh Smith</h6>
-                            <small>Administrator</small>
+                            <h6 class="mb-0">{{ Auth::user()->name }}</h6>
+                            <small>{{ in_array(0, Auth::user()->access) ? 'Administrator' : 'Verifikator' }}</small>
                         </div>
                         <a class="btn btn-icon btn-link-secondary avtar" data-bs-toggle="collapse"
                             href="#pc_sidebar_userlink">
@@ -41,7 +41,7 @@
                                 <i class="ti ti-lock"></i>
                                 <span>Lock Screen</span>
                             </a>
-                            <a href="#!">
+                            <a href="{{ route('logout') }}" class="logout">
                                 <i class="ti ti-power"></i>
                                 <span>Logout</span>
                             </a>

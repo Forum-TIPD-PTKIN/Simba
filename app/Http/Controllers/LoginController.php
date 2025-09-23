@@ -51,4 +51,70 @@ class LoginController extends Controller
         Auth::loginUsingId($user->id);
         return redirect()->route('daftar.dashboard');
     }
+
+    public function login_view()
+    {
+        if (Auth::check()) {
+            if (in_array(0, Auth::user()->access)) {
+                // admin
+                return redirect(route('admin.dashboard'));
+            } else if (in_array(1, Auth::user()->access)) {
+                //verifikator
+                return redirect(route('verifikator.dashboard'));
+            } else if (in_array(2, Auth::user()->access)) {
+                //pendaftar
+                return redirect(route('pendaftar.dashboard'));
+            }
+        }
+
+        return view('login');
+    }
+
+    public function login_secret()
+    {
+        return view('login-secret');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('username', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+            if (in_array(0, $user->access)) {
+                // admin
+                return redirect()->route('admin.dashboard');
+            } else if (in_array(1, $user->access)) {
+                //verifikator
+                return redirect()->route('verifikator.dashboard');
+            } else if (in_array(2, $user->access)) {
+                //pendaftar
+                return redirect()->route('pendaftar.dashboard');
+            }
+        }
+
+        return back()->withErrors([
+            'username' => 'The provided credentials do not match our records.',
+        ])->onlyInput('username');
+    }
+
+    public function logout(Request $request)
+    {
+        if ($request->ajax()) {
+            Auth::logout();
+
+            $request->session()->invalidate();
+
+            $request->session()->regenerateToken();
+
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => 'Sedang dialihkan...',
+                'redirect' => route('login')
+            ]);
+        }
+    }
 }

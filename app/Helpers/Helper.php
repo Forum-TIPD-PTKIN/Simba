@@ -16,7 +16,7 @@ if (!function_exists('getEnumValues')) {
     }
 }
 
-if (! function_exists('api')) {
+if (!function_exists('api')) {
     function api(): Api
     {
         return new Api();

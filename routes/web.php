@@ -12,10 +12,16 @@ use App\Http\Controllers\Pendaftar\{
 };
 use Illuminate\Support\Facades\Route;
 
-
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 Route::get("/login/sso", [LoginController::class, 'login_sso'])->name('login.sso');
+Route::get("/login/secret", [LoginController::class, 'login_secret'])->name('login.secret');
+Route::get("/login", [LoginController::class, 'login_view'])->name('login');
+Route::post("/login", [LoginController::class, 'login'])->name('login.post');
+Route::get("/logout", [LoginController::class, 'logout'])->name('logout');
 
-Route::group(['prefix' => 'administrator'], function () {
+Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function () {
     Route::get('/', function () {
         return view('admin.index');
     })->name('admin.dashboard');
