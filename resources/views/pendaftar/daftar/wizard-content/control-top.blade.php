@@ -5,7 +5,9 @@
         <div class="step-circle">1</div>
         <div class="xsmall">Tentang Beasiswa</div>
     </div>
-    <div class="wizard-step @if ($step == 2) active @endif"> {{-- completed --}}
+    <div
+        class="wizard-step @if ($step == 2) active @elseif ($step > 2) completed @endif">
+        {{-- completed --}}
         <div class="step-circle">2</div>
         <div class="xsmall">Biodata Mahasiswa</div>
     </div>
