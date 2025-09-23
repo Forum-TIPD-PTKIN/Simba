@@ -37,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('pemberkasan_items');
+        Schema::dropIfExists('pemberkasan_items');
     }
 };

@@ -49,7 +49,7 @@ class LoginController extends Controller
         $user->save();
 
         Auth::loginUsingId($user->id);
-        return redirect()->route('daftar.dashboard');
+        return redirect()->route('pendaftar.dashboard');
     }
 
     public function login_view()
