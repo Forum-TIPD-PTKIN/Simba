@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\PendaftarStatusLast;
+use App\Models\Scopes\PendaftarStatusLates;
+
 class Pendaftar extends Uuid
 {
     protected $fillable = [
@@ -33,5 +36,20 @@ class Pendaftar extends Uuid
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pendaftar_status()
+    {
+        return $this->hasMany(PendaftarStatus::class)->orderByDesc('created_at');
+    }
+
+    public function getLatestStatusAttribute($val)
+    {
+        return json_decode($val);
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new PendaftarStatusLates);
     }
 }

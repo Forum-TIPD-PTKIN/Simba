@@ -16,4 +16,14 @@ class PemberkasanItem extends Uuid
         'extension',
         'description',
     ];
+    protected $appends = ['url'];
+
+    public function getUrlAttribute()
+    {
+        if ($this->attributes['path']) {
+            return url('attachment/' . str_replace('.', '/', $this->attributes['path']));
+        } else if ($this->attributes['link_direct']) {
+            return $this->attributes['link_direct'];
+        }
+    }
 }
