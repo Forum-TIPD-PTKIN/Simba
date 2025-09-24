@@ -50,7 +50,7 @@
                     <div class="card-body">
                         <div class="text-center">
                             <a href="#"><img src="{{ asset('assets/admin/images/logo_app_beasiswa.png') }}"
-                                    alt="img"></a>
+                                    alt="img" class="w-50"></a>
                         </div>
                         <h4 class="text-center f-w-500 mb-3 mt-5">Halaman Login</h4>
                         <div class="d-grid mt-4">

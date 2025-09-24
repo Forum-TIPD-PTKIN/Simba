@@ -3,8 +3,8 @@
 <div class="row">
     <div class="col-12 col-md-8 col-lg-6 col-xl-4">
         <div class="alert alert-info">
-            <strong>Informasi</strong> Apabila data anda terdapat kesalahan dibawah ini, silahkan mengajukan perbaikan
-            data di sistem SIAKAD anda.
+            <strong>Informasi</strong> Apabila data Anda terdapat kesalahan dibawah ini, silahkan mengajukan perbaikan
+            data di sistem SIAKAD Anda.
         </div>
         <div class="row mb-3">
             <div class="col-5">
@@ -60,8 +60,10 @@
     </div>
     <div class="col-12 col-md-4 col-lg-6 col-xl-8">
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-3 mb-sm-0 text-success">Data PMB</h5>
+            </div>
             <div class="card-body">
-                <div class="card-title fw-bold text-success">Data PMB</div>
                 <div class="row">
                     <div class="col-12 col-md-8 mb-3">
                         <label for="jalur" class="form-label">Jalur Masuk PMB</label>
@@ -69,23 +71,23 @@
                             value="{{ $jalur->nama ?? 'NOT FOUND' }}">
                     </div>
                     <div class="col-12 col-md-4 mb-3">
-                        <label for="tahun_masuk" class="form-label">Tahun Masuk PMB</label>
+                        <label for="tahun_masuk" class="form-label">Tahun Masuk</label>
                         <input type="text" disabled class="form-control" id="tahun_masuk"
                             value="{{ $jalur->tahun_masuk ?? 'NOT FOUND' }}">
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12 col-xl-7 mb-3">
+                    <div class="col-12 col-md-8 mb-3">
                         <label for="jalur" class="form-label">Sekolah Asal</label>
                         <input type="text" disabled class="form-control" id="jalur"
                             value="{{ $jalur->sekolah_asal->master_sekolah->nama ?? 'NOT FOUND' }}">
                     </div>
-                    <div class="col-md-6 col-xl-5 mb-3">
+                    <div class="col-12 col-md-4 mb-3">
                         <label for="tahun_masuk" class="form-label">Tahun Lulus Sekolah</label>
                         <input type="text" disabled class="form-control" id="tahun_masuk"
                             value="{{ $jalur->sekolah_asal->tahun_lulus ?? 'NOT FOUND' }}">
                     </div>
-                    <div class="col-md-6 col-xl-5 mb-3">
+                    <div class="col-6 mb-3">
                         <label for="tahun_masuk" class="form-label">Jurusan (Saat Sekolah)</label>
                         <input type="text" disabled class="form-control" id="tahun_masuk"
                             value="{{ $jalur->sekolah_asal->master_jurusan_sekolah->nama ?? 'NOT FOUND' }}">
@@ -95,15 +97,19 @@
         </div>
 
         @if (!$register)
-            <div class="alert alert-warning fs-5">
-                Silakan konfirmasi persetujuan Anda untuk melakukan pendaftaran Beasiswa KIP Kuliah
+            <div class="alert alert-warning fs-6">
+                <h4 class="alert-heading"><i class="ti ti-info-circle"></i> Perhatian!</h4>
+                Silakan konfirmasi persetujuan Anda untuk melakukan pendaftaran Beasiswa
                 {{ $beasiswa->nama }}
             </div>
             <form onsubmit="return confirmPendaftaran(event);" id="form-daftar"
                 action="{{ route('pendaftar.daftar.store', ['id' => $beasiswa->id]) }}" method="post">
                 @csrf
                 @method('POST')
-                <button type="submit" class="btn btn-primary btn-lg w-100 fs-3">KONFIRMASI PENDAFTARAN</button>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fs-5"><i class="ti ti-checkbox"></i>
+                        KONFIRMASI PENDAFTARAN</button>
+                </div>
             </form>
         @else
             <div class="alert alert-success fs-4">
@@ -123,19 +129,56 @@
                 text: "Apakah Anda yakin ingin melakukan pendaftaran Beasiswa {{ $beasiswa->nama }}?",
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonColor: "#3085d6",
+                confirmButtonColor: "#198754",
                 cancelButtonColor: "#d33",
                 confirmButtonText: "Ya, daftar",
-                cancelButtonText: "Batal"
+                cancelButtonText: "Batal",
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById("form-daftar").submit(); // lanjut submit form
+                    // document.getElementById("form-daftar").submit(); // lanjut submit form
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ route('pendaftar.daftar.store', ['id' => $beasiswa->id]) }}",
+                        data: {
+                            '_token': "{{ csrf_token() }}",
+                            'tahun_masuk': "{{ $jalur->tahun_masuk }}",
+                            'tahun_lulus': "{{ $jalur->sekolah_asal?->tahun_lulus }}",
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: response.title,
+                                text: response.message,
+                                icon: response.icon,
+                                timer: 1500,
+                                timerProgressBar: true,
+                            }).then(() => {
+                                if (response.icon === 'success') {
+                                    window.location.replace(response.redirect);
+                                }
+                            });
+                        },
+                        error: function(response) {
+                            if (response.status !== 200) {
+                                const errors = response.responseJSON?.errors;
+                                errorText = errors ? Object.values(errors).map(err => err.join(', '))
+                                    .join('\n') : null;
+                            }
+                            Swal.fire({
+                                title: "Gagal",
+                                icon: "error",
+                                text: errorText || response.responseJSON ||
+                                    'Terjadi kesalahan',
+                            });
+                        }
+                    });
                 }
             });
 
             return false;
         }
     </script>
+
     @if (session()->has('error_register'))
         <script>
             Swal.fire({

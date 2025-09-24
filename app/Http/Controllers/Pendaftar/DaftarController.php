@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pendaftar;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
+use App\Models\JadwalKegiatan;
 use App\Models\Mahasiswa;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
@@ -35,16 +36,12 @@ class DaftarController extends Controller
             })
             ->find($id);
 
-
         $pendaftar = Pendaftar::with('pendaftar_status')->whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
             })
             ->whereUserId($user->id)
             ->first();
-
-        return $pendaftar;
-
 
         if (!$beasiswa) {
             return view('pendaftar.no-page', [
@@ -93,6 +90,15 @@ class DaftarController extends Controller
      */
     public function store(Request $request, $id)
     {
+        $config = [
+            [
+                'beasiswa' => 'KIP',
+                'setting' => [
+                    'tahun_lulus' => [2023, 2024, 2025],
+                    'tahun_masuk' => 2025
+                ]
+            ]
+        ];
 
         $beasiswa = Beasiswa::where('status', 1)
             ->whereHas('jadwal_kegiatan', function ($query) {
@@ -111,35 +117,38 @@ class DaftarController extends Controller
             ->whereUserId(Auth::id())
             ->first();
 
-
         if (!$beasiswa) {
-            return view('pendaftar.no-page', [
-                'message' => 'Beasiswa yang dimaksud tidak tersedia',
-                'title' => 'Opz..',
-                'bg' => 'danger'
-            ]);
+            return response()->json('Beasiswa yang dimaksud tidak tersedia', 422);
+            // return view('pendaftar.no-page', [
+            //     'message' => 'Beasiswa yang dimaksud tidak tersedia',
+            //     'title' => 'Opz..',
+            //     'bg' => 'danger'
+            // ]);
         }
 
         if ($pendaftar) {
-            return view('pendaftar.no-page', [
-                'message' => 'Anda telah melakukan pendaftaran',
-                'title' => 'Opz..',
-                'bg' => 'danger'
-            ]);
+            return response()->json('Anda telah melakukan pendaftaran pada beasiswa ini', 422);
+            // return view('pendaftar.no-page', [
+            //     'message' => 'Anda telah melakukan pendaftaran',
+            //     'title' => 'Opz..',
+            //     'bg' => 'danger'
+            // ]);
         }
 
         $kegiatan = TahunKegiatan::whereStatus(1)->first();
         if (!$kegiatan) {
-            return view('pendaftar.no-page', [
-                'message' => 'Tahun kegiatan tidak ada yang aktif',
-                'title' => 'Opz..',
-                'bg' => 'danger'
-            ]);
+            return response()->json('Tahun kegiatan tidak ada yang aktif', 422);
+            // return view('pendaftar.no-page', [
+            //     'message' => 'Tahun kegiatan tidak ada yang aktif',
+            //     'title' => 'Opz..',
+            //     'bg' => 'danger'
+            // ]);
         }
 
         /* PROSES CEK VALIDASI PENDAFTARAN */
-
         $valid = true;
+
+        return response()->json($request->all(), 422);
 
         if (!$valid) {
             /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
