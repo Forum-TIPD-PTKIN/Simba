@@ -134,6 +134,8 @@ class DaftarController extends Controller
             ]);
         }
 
+        /* PROSES CEK VALIDASI PENDAFTARAN */
+
         $user = Auth::user();
 
         $pendafar = new Pendaftar();
