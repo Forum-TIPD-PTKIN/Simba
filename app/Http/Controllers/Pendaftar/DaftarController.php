@@ -141,7 +141,7 @@ class DaftarController extends Controller
         if (!$valid) {
             /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran anda!');
-            return redirect()->to(route('pendaftar.daftar', ['id' => $id]) . '?step=2');
+            return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2');
         }
 
         /* =============================== */
