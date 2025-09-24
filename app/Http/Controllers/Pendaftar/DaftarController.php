@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\Mahasiswa;
 use App\Models\Pendaftar;
+use App\Models\PendaftarStatus;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
@@ -35,12 +36,14 @@ class DaftarController extends Controller
             ->find($id);
 
 
-        $pendaftar = Pendaftar::whereBeasiswaId($id)
+        $pendaftar = Pendaftar::with('pendaftar_status')->whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
             })
             ->whereUserId($user->id)
             ->first();
+
+        return $pendaftar;
 
 
         if (!$beasiswa) {
@@ -153,6 +156,11 @@ class DaftarController extends Controller
         $pendafar->beasiswa_id = $beasiswa->id;
         $pendafar->tahun_kegiatan_id = $kegiatan->id;
         $pendafar->save();
+
+        $status = new PendaftarStatus();
+        $status->pendaftar_id = $pendafar->id;
+        $status->status = 'DAFTAR';
+        $status->save();
 
         $mahasiswa_api = SiakadMahasiswa::with('prodi.fakultas')
             ->whereNpm($user->username)
