@@ -2,13 +2,13 @@
 
 @section('title', 'Form Data')
 
-@section('head')
+@push('head')
     <style>
         .swal2-container {
             z-index: 2000 !important;
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <!-- [ Main Content ] start -->
@@ -375,7 +375,7 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
+@push('script')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
@@ -780,4 +780,4 @@
         });
         getDetail();
     </script>
-@endsection
+@endpush

@@ -87,5 +87,5 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
-@endsection
+@push('script')
+@endpush

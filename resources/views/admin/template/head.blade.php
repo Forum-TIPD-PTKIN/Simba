@@ -26,6 +26,6 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/css/style.css') }}" id="main-style-link">
     <link rel="stylesheet" href="{{ asset('assets/admin/css/style-preset.css') }}">
 
-    @yield('head')
+    @stack('head')
 </head>
 <!-- [Head] end -->

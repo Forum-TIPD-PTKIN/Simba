@@ -51,7 +51,7 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
+@push('script')
     <script>
         $(document).ready(function() {
             $('.btnDetail').on('click', function() {
@@ -62,4 +62,4 @@
             });
         });
     </script>
-@endsection
+@endpush

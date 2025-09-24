@@ -94,4 +94,4 @@
     });
 </script>
 
-@yield('script')
+@stack('script')

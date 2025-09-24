@@ -2,14 +2,14 @@
 
 @section('title', 'Beasiswa')
 
-@section('head')
+@push('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
     <style>
         .swal2-container {
             z-index: 2000 !important;
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <!-- [ Main Content ] start -->
@@ -120,7 +120,7 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
+@push('script')
     <script src="{{ asset('assets/admin/plugins/tinymce/tinymce.min.js') }}"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
@@ -490,4 +490,4 @@
             });
         }
     </script>
-@endsection
+@endpush

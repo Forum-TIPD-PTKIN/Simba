@@ -61,3 +61,11 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    <script>
+        Swal.fire({
+            message: 'xx'
+        })
+    </script>
+@endpush

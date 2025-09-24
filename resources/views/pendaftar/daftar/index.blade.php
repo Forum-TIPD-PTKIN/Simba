@@ -48,7 +48,7 @@
     </div>
 @endsection
 
-@section('head')
+@push('head')
     <style>
         .wizard-step {
             text-align: center;
@@ -82,9 +82,9 @@
             color: var(--bs-secondary);
         }
     </style>
-@endsection
+@endpush
 
-@section('script')
+@push('script')
     <script>
         $(document).ready(function() {
             $('.btnDetail').on('click', function() {
@@ -95,4 +95,4 @@
             });
         });
     </script>
-@endsection
+@endpush

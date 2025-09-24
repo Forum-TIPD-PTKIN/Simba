@@ -2,10 +2,10 @@
 
 @section('title', 'Jadwal Kegiatan')
 
-@section('head')
+@push('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-@endsection
+@endpush
 
 @section('content')
     <!-- [ Main Content ] start -->
@@ -171,7 +171,7 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
+@push('script')
     <script src="{{ asset('assets/admin/plugins/tinymce/tinymce.min.js') }}"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
@@ -636,4 +636,4 @@
             });
         }
     </script>
-@endsection
+@endpush

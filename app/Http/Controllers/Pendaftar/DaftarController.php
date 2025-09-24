@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pendaftar;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
+use App\Models\Pendaftar;
 use App\Models\SiakadMahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,8 @@ class DaftarController extends Controller
      */
     public function index(string $id)
     {
-        $nim = Auth::user()->username;
+        $user = Auth::user();
+        $nim = $user->username;
         $mahasiswa = SiakadMahasiswa::with('prodi.fakultas')
             ->whereNpm($nim)
             ->first();
@@ -30,6 +32,15 @@ class DaftarController extends Controller
             })
             ->find($id);
 
+
+        $pendaftar = Pendaftar::whereBeasiswaId($id)
+            ->whereHas('tahun_kegiatan', function ($db) {
+                $db->whereStatus(1);
+            })
+            ->whereUserId($user->id)
+            ->first();
+
+
         if (!$beasiswa) {
             return view('pendaftar.no-page', [
                 'message' => 'Beasiswa yang dimaksud tidak tersedia',
@@ -38,10 +49,23 @@ class DaftarController extends Controller
             ]);
         }
 
+
+        $notif = null;
+        $register = $pendaftar ? true : false;
         $step = intval(request()->get('step') ?? '1');
+        if ($step > 2 && !$pendaftar) {
+            $step = 2;
+            $notif = 'Silahkan konfirmasi terlebih dahulu pendaftaran anda!';
+        }
         if ($step < 1) $step = 1;
         else if ($step > 3) $step = 3;
-        return view('pendaftar.daftar.index', compact('beasiswa', 'step', 'mahasiswa'));
+        return view('pendaftar.daftar.index', compact(
+            'beasiswa',
+            'step',
+            'mahasiswa',
+            'notif',
+            'register'
+        ));
     }
 
     /**

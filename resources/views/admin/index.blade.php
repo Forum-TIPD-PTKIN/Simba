@@ -864,9 +864,9 @@
     <!-- [ Main Content ] end -->
 @endsection
 
-@section('script')
+@push('script')
     <!-- [Page Specific JS] start -->
     <script src="{{ asset('assets/admin/js/plugins/apexcharts.min.js') }}"></script>
     <script src="{{ asset('assets/admin/js/pages/dashboard-default.js') }}"></script>
     <!-- [Page Specific JS] end -->
-@endsection
+@endpush
