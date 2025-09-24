@@ -1,0 +1,24 @@
+API kebutuhan data maba PMB
+Pengambilan berdasarkan NIM
+
+===================================================
+
+Mengambil informasi jalur masuk Mahasiswa
+/api/info/jalur/[nim]?key=[key]
+
+Mengambil daftar berkas pendaftaran
+/api/info/file/pendaftaran/[nim]?key=[key]
+
+Mengambil daftar berkas pengisian form UKT
+/api/info/file/ukt/[nim]?key=[key]
+
+Menampilkan informasi mahasiswa valid
+/api/info/mahasiswa/[nim]?key=[key]
+
+Menampilkan foto mahasiswa via siakad
+/api/info/foto/[nim]?key=[key]
+
+====================================================
+
+key = Z5H0iJtI105vkCoLU5c0ZAAjsX8A4IHw
+nim = nim mahasiswa
