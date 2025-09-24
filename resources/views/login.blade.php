@@ -15,7 +15,7 @@
     <meta name="author" content="Phoenixcoded">
 
     <!-- [Favicon] icon -->
-    <link rel="icon" href="{{ asset('assets/admin/images/favicon.svg') }}" type="image/x-icon">
+    <link rel="icon" href="https://api.iainmadura.ac.id/assets/imgs/logo.png" type="image/x-icon">
     <!-- [Font] Family -->
     <link rel="stylesheet" href="{{ asset('assets/admin/fonts/inter/inter.css') }}" id="main-font-link" />
     <!-- [Tabler Icons] https://tablericons.com -->
@@ -49,7 +49,7 @@
                 <div class="card my-5">
                     <div class="card-body">
                         <div class="text-center">
-                            <a href="#"><img src="{{ asset('assets/admin/images/logo-dark.svg') }}"
+                            <a href="#"><img src="{{ asset('assets/admin/images/logo_app_beasiswa.png') }}"
                                     alt="img"></a>
                         </div>
                         <h4 class="text-center f-w-500 mb-3 mt-5">Halaman Login</h4>

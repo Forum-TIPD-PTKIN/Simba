@@ -24,9 +24,19 @@ class LoginController extends Controller
 
             if (in_array(0, $user->access)) {
                 // admin
+                session([
+                    'is_admin' => true,
+                    'level' => 0,
+                    'profil' => $akun?->data?->data?->user?->profil
+                ]);
                 return redirect()->route('admin.dashboard');
             } else if (in_array(1, $user->access)) {
                 //verifikator
+                session([
+                    'is_verifikator' => true,
+                    'level' => 1,
+                    'profil' => $akun?->data?->data?->user?->profil
+                ]);
                 return redirect()->route('verifikator.dashboard');
             }
         } else if ($akun->data->data->user->level == 1) {
@@ -41,14 +51,18 @@ class LoginController extends Controller
             $user->username = $akun->data->data->user->kode;
             $user->email = $akun->data->data->user->kode . '@student.iainmadura.ac.id';
             $user->password = bcrypt('user' . $akun->data->data->user->kode);
-            $user->access = $akun->data->data->user->level == 2 ? 2 : 0;
+            $user->access = $akun->data->data->user->level == 2 ? 2 : null;
         } else {
             $user->name = $akun->data->data->user->profil->nama;
         }
-
         $user->save();
 
         Auth::loginUsingId($user->id);
+        session([
+            'is_pendaftar' => true,
+            'level' => 2,
+            'profil' => $akun?->data?->data?->user?->profil
+        ]);
         return redirect()->route('pendaftar.dashboard');
     }
 
@@ -85,13 +99,18 @@ class LoginController extends Controller
             $user = Auth::user();
             if (in_array(0, $user->access)) {
                 // admin
+                session([
+                    'is_admin' => true,
+                    'level' => 0
+                ]);
                 return redirect()->route('admin.dashboard');
             } else if (in_array(1, $user->access)) {
                 //verifikator
+                session([
+                    'is_verifikator' => true,
+                    'level' => 1
+                ]);
                 return redirect()->route('verifikator.dashboard');
-            } else if (in_array(2, $user->access)) {
-                //pendaftar
-                return redirect()->route('pendaftar.dashboard');
             }
         }
 

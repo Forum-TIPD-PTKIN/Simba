@@ -43,7 +43,7 @@
                         <div class="card-header">
                             <h5 class="mb-0">Jadwal Kegiatan</h5>
                         </div>
-                        <div class="card-body border-bottom py-0">
+                        <div class="card-body border-bottom p-0">
                             <ul class="list-group list-group-flush">
                                 @foreach ($beasiswa->jadwal_kegiatan ?: [] as $item)
                                     <li class="list-group-item ps-0">

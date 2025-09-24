@@ -220,10 +220,10 @@ function layout_change(layout) {
     dark_flag = true;
 
     // Update logo to white version for dark theme
-    updateLogo('.pc-sidebar .m-header .logo-lg', '../assets/images/logo-white.svg');
-    updateLogo('.navbar-brand .logo-lg', '../assets/images/logo-white.svg');
-    updateLogo('.auth-main.v1 .auth-sidefooter img', '../assets/images/logo-white.svg');
-    updateLogo('.footer-top .footer-logo', '../assets/images/logo-white.svg');
+    updateLogo('.pc-sidebar .m-header .logo-lg', '../assets/images/logo_app_beasiswa.png');
+    updateLogo('.navbar-brand .logo-lg', '../assets/images/logo_app_beasiswa.png');
+    updateLogo('.auth-main.v1 .auth-sidefooter img', '../assets/images/logo_app_beasiswa.png');
+    updateLogo('.footer-top .footer-logo', '../assets/images/logo_app_beasiswa.png');
 
     // Update active button state for dark theme
     updateActiveButton('.theme-layout .btn[data-value="false"]');

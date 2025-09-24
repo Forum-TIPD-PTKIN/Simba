@@ -4,8 +4,9 @@
         <div class="m-header">
             <a href="{{ route('admin.dashboard') }}" class="b-brand text-primary">
                 <!-- ========   Change your logo from here   ============ -->
-                <img src="{{ asset('assets/admin/images/logo-dark.svg') }}" class="img-fluid logo-lg" alt="logo">
-                <span class="badge bg-light-success rounded-pill ms-2 theme-version">v2.6.0</span>
+                <img src="{{ asset('assets/admin/images/logo_app_beasiswa.png') }}" class="img-fluid logo-lg"
+                    alt="logo">
+                <span class="badge bg-light-success rounded-pill ms-2 theme-version">v1.0.0</span>
             </a>
         </div>
         <div class="navbar-content">

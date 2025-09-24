@@ -74,7 +74,7 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function (
     ]);
 });
 
-Route::group(['prefix' => 'pendaftar', 'middleware' => []], function () {
+Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth']], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 

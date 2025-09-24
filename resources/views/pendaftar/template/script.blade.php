@@ -42,4 +42,57 @@
     });
 </script>
 
+<script>
+    $('.logout').on('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Yakin ingin logout?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Logout!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Sedang memproses...',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        $.ajax({
+                            url: $(this).attr('href'),
+                            success: function(res) {
+                                Swal.fire({
+                                    title: res.title,
+                                    text: res.message,
+                                    icon: res.icon,
+                                    timer: 1500,
+                                    timerProgressBar: true,
+                                }).then(() => {
+                                    if (res.icon === 'success') {
+                                        window.location.replace(res
+                                            .redirect);
+                                    }
+                                });
+                            },
+                            error: function(res) {
+                                Swal.fire({
+                                    title: 'Gagal',
+                                    icon: 'error',
+                                    text: 'Ada kesalahan'
+                                });
+                            }
+                        });
+                    },
+                    allowOutsideClick: false
+                });
+            }
+        });
+    });
+</script>
+
+
 @stack('script')
