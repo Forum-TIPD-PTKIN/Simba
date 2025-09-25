@@ -114,7 +114,8 @@
                 </form>
             @else
                 <div class="alert alert-success fs-4">
-                    <i class="fas fa-solid fa-thumbs-up me-2"></i> Anda berhasil mendaftar, silahkan ke step berikutnya
+                    <i class="fas fa-thumbs-up me-2 text-dark"></i> Anda berhasil mendaftar, silahkan ke step
+                    berikutnya
                 </div>
             @endif
         @endif

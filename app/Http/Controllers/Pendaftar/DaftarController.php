@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Pendaftar;
 
+use App\Helpers\FormHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
-use App\Models\JadwalKegiatan;
+use App\Models\FormData;
 use App\Models\Mahasiswa;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
@@ -55,18 +56,33 @@ class DaftarController extends Controller
         $readOnly = false;
         $step = intval(request()->get('step') ?? '1');
         if ($step > 2 && !$pendaftar) {
-            session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran anda!');
+            session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
             return redirect()->to(route('pendaftar.daftar', ['id' => $id]) . '?step=2');
         }
         if ($step < 1) $step = 1;
         else if ($step > 3) $step = 3;
         $jalur = null;
+        $generated_form = [];
 
         if ($step == 2) {
             $key_pmb = env('PMB_KEY_API');
             $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$nim}?key={$key_pmb}");
             if ($_jalur->status) {
                 $jalur = $_jalur->data;
+            }
+        } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
+            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+                ->orderBy('jenis')
+                ->orderBy('indexed')
+                ->get();
+            $jenis_form = $master_form->pluck('jenis')->unique();
+            foreach ($jenis_form as $jenis) {
+                $form = new FormHelper($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+                array_push($generated_form, [
+                    'jenis' => $jenis,
+                    'form' => $form->render()
+                ]);
             }
         }
         return view('pendaftar.daftar.index', compact(
@@ -75,7 +91,8 @@ class DaftarController extends Controller
             'mahasiswa',
             'register',
             'jalur',
-            'readOnly'
+            'readOnly',
+            'generated_form'
         ));
     }
     public function detail_daftar(string $id)
@@ -103,7 +120,6 @@ class DaftarController extends Controller
 
         $beasiswa = $pendaftar->beasiswa;
 
-
         if (!$beasiswa) {
             return view('pendaftar.no-page', [
                 'message' => 'Beasiswa yang dimaksud tidak tersedia',
@@ -118,12 +134,27 @@ class DaftarController extends Controller
         if ($step < 1) $step = 1;
         else if ($step > 3) $step = 3;
         $jalur = null;
+        $generated_form = [];
 
         if ($step == 2) {
             $key_pmb = env('PMB_KEY_API');
             $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$nim}?key={$key_pmb}");
             if ($_jalur->status) {
                 $jalur = $_jalur->data;
+            }
+        } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
+            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+                ->orderBy('jenis')
+                ->orderBy('indexed')
+                ->get();
+            $jenis_form = $master_form->pluck('jenis')->unique();
+            foreach ($jenis_form as $jenis) {
+                $form = new FormHelper($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+                array_push($generated_form, [
+                    'jenis' => $jenis,
+                    'form' => $form->render()
+                ]);
             }
         }
         if (!$tahun_kegiatan->status) {
@@ -135,7 +166,8 @@ class DaftarController extends Controller
             'mahasiswa',
             'register',
             'jalur',
-            'readOnly'
+            'readOnly',
+            'generated_form'
         ));
     }
 
@@ -185,63 +217,37 @@ class DaftarController extends Controller
             })
             ->whereUserId(Auth::id())
             ->first();
-
-        if (!$beasiswa) {
-            return response()->json('Beasiswa yang dimaksud tidak tersedia', 422);
-            // return view('pendaftar.no-page', [
-            //     'message' => 'Beasiswa yang dimaksud tidak tersedia',
-            //     'title' => 'Opz..',
-            //     'bg' => 'danger'
-            // ]);
-        }
-
-        if ($pendaftar) {
-            return response()->json('Anda telah melakukan pendaftaran pada beasiswa ini', 422);
-            // return view('pendaftar.no-page', [
-            //     'message' => 'Anda telah melakukan pendaftaran',
-            //     'title' => 'Opz..',
-            //     'bg' => 'danger'
-            // ]);
-        }
-
         $kegiatan = TahunKegiatan::whereStatus(1)->first();
-        if (!$kegiatan) {
-            return response()->json('Tahun kegiatan tidak ada yang aktif', 422);
-            // return view('pendaftar.no-page', [
-            //     'message' => 'Tahun kegiatan tidak ada yang aktif',
-            //     'title' => 'Opz..',
-            //     'bg' => 'danger'
-            // ]);
-        }
+
+        if (!$beasiswa) return response()->json('Beasiswa yang dimaksud tidak tersedia', 422);
+        if ($pendaftar) return response()->json('Anda telah melakukan pendaftaran pada beasiswa ini', 422);
+        if (!$kegiatan) return response()->json('Tahun kegiatan tidak ada yang aktif', 422);
 
         /* PROSES CEK VALIDASI PENDAFTARAN */
         $valid = true;
+        if (!$valid) {
+            /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
+            session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
+            return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2');
+        }
         if (!in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
             return response()->json('Tahun lulus tidak sesuai dengan ketentuan pendaftaran', 422);
         }
         if ($request->tahun_masuk != $config_matches['setting']['tahun_masuk'] ?? 0) {
             return response()->json('Tahun masuk tidak sesuai dengan ketentuan pendaftaran', 422);
         }
-        return response()->json('Berhasil mendaftar beasiswa', 422);
-
-        if (!$valid) {
-            /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
-            session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran anda!');
-            return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2');
-        }
-
         /* =============================== */
 
         $user = Auth::user();
 
-        $pendafar = new Pendaftar();
-        $pendafar->user_id = $user->id;
-        $pendafar->beasiswa_id = $beasiswa->id;
-        $pendafar->tahun_kegiatan_id = $kegiatan->id;
-        $pendafar->save();
+        $pendaftar = new Pendaftar();
+        $pendaftar->user_id = $user->id;
+        $pendaftar->beasiswa_id = $beasiswa->id;
+        $pendaftar->tahun_kegiatan_id = $kegiatan->id;
+        $pendaftar->save();
 
         $status = new PendaftarStatus();
-        $status->pendaftar_id = $pendafar->id;
+        $status->pendaftar_id = $pendaftar->id;
         $status->status = 'DAFTAR';
         $status->save();
 
@@ -250,14 +256,20 @@ class DaftarController extends Controller
             ->first();
 
         $mahasiswa = new Mahasiswa();
-        $mahasiswa->pendaftar_id = $pendafar->id;
+        $mahasiswa->pendaftar_id = $pendaftar->id;
         $mahasiswa->nim = $mahasiswa_api->npm;
         $mahasiswa->nama = $mahasiswa_api->nama_mahasiswa;
         $mahasiswa->fakultas = $mahasiswa_api->prodi->fakultas->id_fakultas . '|' . $mahasiswa_api->prodi->fakultas->nama_fakultas;
         $mahasiswa->prodi = $mahasiswa_api->prodi->id_prodi . '|' . $mahasiswa_api->prodi->singkatan;
         $mahasiswa->save();
 
-        return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3');
+        return response()->json([
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => "Pendaftaran beasiswa {$beasiswa->nama} berhasil",
+            'redirect' => route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3'
+        ]);
+        // return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3');
     }
 
     /**

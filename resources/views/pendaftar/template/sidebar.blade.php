@@ -79,7 +79,7 @@
 
                 @if (session()->get('MENDAFTAR'))
                     <li class="pc-item pc-caption">
-                        <label>Zona Mendaftar</label>
+                        <label>ZONA PENDAFTARAN</label>
                         <svg class="pc-icon">
                             <use xlink:href="#custom-notification-status"></use>
                         </svg>
@@ -90,7 +90,7 @@
                         <a href="{{ route('pendaftar.riwayat') }}" class="pc-link">
                             <span class="pc-micon">
                                 <svg class="pc-icon">
-                                    <use xlink:href="#custom-status-up"></use>
+                                    <use xlink:href="#custom-flag"></use>
                                 </svg>
                             </span>
                             <span class="pc-mtext">Riwayat Pendaftaran</span>
@@ -101,7 +101,7 @@
                         <a href="{{ route('pendaftar.pemberkasan') }}" class="pc-link">
                             <span class="pc-micon">
                                 <svg class="pc-icon">
-                                    <use xlink:href="#custom-status-up"></use>
+                                    <use xlink:href="#custom-document-upload"></use>
                                 </svg>
                             </span>
                             <span class="pc-mtext">Pemberkasan</span>

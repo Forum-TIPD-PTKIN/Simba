@@ -29,7 +29,7 @@
             <div class="row">
                 <div class="card">
                     <div class="card-body">
-                        <div class="h2">COMING SOON</div>
+                        @include('pendaftar.daftar.wizard-content.3', [$generated_form])
                     </div>
                 </div>
             </div>
