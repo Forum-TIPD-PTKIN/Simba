@@ -17,7 +17,10 @@ class PemberkasanController extends Controller
     public function index()
     {
         $generated_form = [];
-        $data = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan'])
+        $data = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'pendaftar_status'])
+            ->whereHas('tahun_kegiatan', function ($db) {
+                $db->whereStatus(1);
+            })
             ->whereUserId(Auth::id())
             ->first();
         $master_form = FormData::whereBeasiswaId($data?->beasiswa_id)
@@ -37,6 +40,12 @@ class PemberkasanController extends Controller
             'data' => $data,
             'generated_form' => $generated_form
         ]);
+        $berkas = FormData::whereBeasiswaId($data->beasiswa->id)
+            ->whereJenis('FORM PENDAFTARAN')
+            ->orderBy('indexed')
+            ->get();
+
+        return view('pendaftar.pemberkasan');
     }
 
     /**

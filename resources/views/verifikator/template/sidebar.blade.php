@@ -23,9 +23,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <img src="{{ session('profil')->avatar }}"
-                                onerror="this.onerror=null;this.src='https://eu.ui-avatars.com/api/?name={{ urlencode(session('profil')->nama) }}&background=random&size=256'"
-                                alt="user-img" class="user-avtar wid-45 rounded-circle" />
+                            <img src="{{ asset('assets/admin/images/user/avatar-2.jpg') }}" alt="user-image"
+                                class="user-avtar wid-45 rounded-circle" />
                         </div>
                         <div class="flex-grow-1 ms-3 me-2">
                             <h6 class="mb-0">{{ Auth::user()->name }}</h6>
@@ -79,7 +78,7 @@
 
                 @if (session()->get('MENDAFTAR'))
                     <li class="pc-item pc-caption">
-                        <label>ZONA PENDAFTARAN</label>
+                        <label>Zona Mendaftar</label>
                         <svg class="pc-icon">
                             <use xlink:href="#custom-notification-status"></use>
                         </svg>
@@ -90,7 +89,7 @@
                         <a href="{{ route('pendaftar.riwayat') }}" class="pc-link">
                             <span class="pc-micon">
                                 <svg class="pc-icon">
-                                    <use xlink:href="#custom-flag"></use>
+                                    <use xlink:href="#custom-status-up"></use>
                                 </svg>
                             </span>
                             <span class="pc-mtext">Riwayat Pendaftaran</span>
@@ -101,7 +100,7 @@
                         <a href="{{ route('pendaftar.pemberkasan') }}" class="pc-link">
                             <span class="pc-micon">
                                 <svg class="pc-icon">
-                                    <use xlink:href="#custom-document-upload"></use>
+                                    <use xlink:href="#custom-status-up"></use>
                                 </svg>
                             </span>
                             <span class="pc-mtext">Pemberkasan</span>

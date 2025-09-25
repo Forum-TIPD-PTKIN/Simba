@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\{
+    DashboardController as DashboardAdmin,
     BeasiswaController,
     FormDataController,
     JadwalKegiatanController,
@@ -13,6 +14,9 @@ use App\Http\Controllers\Pendaftar\{
     PemberkasanController,
     RiwayatController
 };
+use App\Http\Controllers\Verifikator\{
+    DashboardController as DashboardVerifikator
+};
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,11 +27,10 @@ Route::get("/login/secret", [LoginController::class, 'login_secret'])->name('log
 Route::get("/login", [LoginController::class, 'login_view'])->name('login');
 Route::post("/login", [LoginController::class, 'login'])->name('login.post');
 Route::get("/logout", [LoginController::class, 'logout'])->name('logout');
+Route::get("/akses/{access}", [LoginController::class, 'change_access'])->middleware(['auth'])->name('akses.ganti');
 
-Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function () {
-    Route::get('/', function () {
-        return view('admin.index');
-    })->name('admin.dashboard');
+Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
+    Route::get('/', [DashboardAdmin::class, 'index'])->name('admin.dashboard');
 
     Route::resource('/tahun-kegiatan', TahunKegiatanController::class, [
         'names' => [
@@ -76,7 +79,7 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function (
     ]);
 });
 
-Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 
@@ -88,4 +91,9 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth']], function () {
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
     });
+});
+
+
+Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator']], function () {
+    Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
 });

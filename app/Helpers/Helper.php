@@ -1,6 +1,8 @@
 <?php
 
 use App\Api;
+use App\Models\FormData;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 if (!function_exists('getEnumValues')) {
@@ -20,5 +22,54 @@ if (!function_exists('api')) {
     function api(): Api
     {
         return new Api();
+    }
+}
+
+
+if (!function_exists('userAccessName')) {
+    function userAccessName()
+    {
+        $access = Auth::user()->access_active;
+        switch ($access) {
+            case 0:
+                return 'Administrator';
+            case 1:
+                return 'Verifikator';
+            case 2:
+                return 'Mahasiswa';
+            default:
+                return 'Unknow';
+        }
+    }
+}
+
+if (!function_exists('formPemberkasan')) {
+    function formPemberkasan($beasiswaId)
+    {
+        static $cacheFormPendaftaran = null;
+
+        if ($cacheFormPendaftaran === null) {
+            $cacheFormPendaftaran = FormData::all()->groupBy('beasiswa_id');
+        }
+
+        $masterForm = [(object)[
+            'name' => 'ktp',
+            'label' => 'KTP',
+            'formData' => (object)[
+                'jenis' => 'FORM PENDAFTARAN',
+                'name' => 'file_ktp',
+            ]
+        ]];
+        $access = Auth::user()->access_active;
+        switch ($access) {
+            case 0:
+                return 'Administrator';
+            case 1:
+                return 'Verifikator';
+            case 2:
+                return 'Mahasiswa';
+            default:
+                return 'Unknow';
+        }
     }
 }

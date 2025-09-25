@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class IsAdmin
+class IsVerifikator
 {
     /**
      * Handle an incoming request.
@@ -15,16 +15,16 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (session()->has('level') && session()->get('level') === 0) {
+        if (session()->has('level') && session()->get('level') === 1) {
             return $next($request);
         }
 
-        if (session()->get('level') === 1) {
-            // verifikator
-            return redirect()->route('verifikator.dashboard');
-        } else if (session()->get('level') === 2) {
+        if (session()->get('level') === 2) {
             // mahasiswa
             return redirect()->route('pendaftar.dashboard');
+        } else if (session()->get('level') === 0) {
+            // admin
+            return redirect()->route('admin.dashboard');
         }
         return redirect()->route('login');
     }
