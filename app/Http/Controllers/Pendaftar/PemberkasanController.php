@@ -36,16 +36,15 @@ class PemberkasanController extends Controller
                 'form' => $form->render()
             ]);
         }
-        return view('pendaftar.pemberkasan', [
-            'data' => $data,
-            'generated_form' => $generated_form
-        ]);
         $berkas = FormData::whereBeasiswaId($data->beasiswa->id)
             ->whereJenis('FORM PENDAFTARAN')
             ->orderBy('indexed')
             ->get();
 
-        return view('pendaftar.pemberkasan');
+        return view('pendaftar.pemberkasan', [
+            'data' => $data,
+            'generated_form' => $generated_form
+        ]);
     }
 
     /**
