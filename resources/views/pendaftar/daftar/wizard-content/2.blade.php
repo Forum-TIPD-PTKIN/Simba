@@ -96,25 +96,27 @@
             </div>
         </div>
 
-        @if (!$register)
-            <div class="alert alert-warning fs-6">
-                <h4 class="alert-heading"><i class="ti ti-info-circle"></i> Perhatian!</h4>
-                Silakan konfirmasi persetujuan Anda untuk melakukan pendaftaran Beasiswa
-                {{ $beasiswa->nama }}
-            </div>
-            <form onsubmit="return confirmPendaftaran(event);" id="form-daftar"
-                action="{{ route('pendaftar.daftar.store', ['id' => $beasiswa->id]) }}" method="post">
-                @csrf
-                @method('POST')
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg fs-5"><i class="ti ti-checkbox"></i>
-                        KONFIRMASI PENDAFTARAN</button>
+        @if (!$readOnly)
+            @if (!$register)
+                <div class="alert alert-warning fs-6">
+                    <h4 class="alert-heading"><i class="ti ti-info-circle"></i> Perhatian!</h4>
+                    Silakan konfirmasi persetujuan Anda untuk melakukan pendaftaran Beasiswa
+                    {{ $beasiswa->nama }}
                 </div>
-            </form>
-        @else
-            <div class="alert alert-success fs-4">
-                <i class="fas fa-solid fa-thumbs-up me-2"></i> Anda berhasil mendaftar, silahkan ke step berikutnya
-            </div>
+                <form onsubmit="return confirmPendaftaran(event);" id="form-daftar"
+                    action="{{ route('pendaftar.daftar.store', ['id' => $beasiswa->id]) }}" method="post">
+                    @csrf
+                    @method('POST')
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg fs-5"><i class="ti ti-checkbox"></i>
+                            KONFIRMASI PENDAFTARAN</button>
+                    </div>
+                </form>
+            @else
+                <div class="alert alert-success fs-4">
+                    <i class="fas fa-solid fa-thumbs-up me-2"></i> Anda berhasil mendaftar, silahkan ke step berikutnya
+                </div>
+            @endif
         @endif
     </div>
 </div>

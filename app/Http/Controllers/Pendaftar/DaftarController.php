@@ -52,6 +52,7 @@ class DaftarController extends Controller
         }
 
         $register = $pendaftar ? true : false;
+        $readOnly = false;
         $step = intval(request()->get('step') ?? '1');
         if ($step > 2 && !$pendaftar) {
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran anda!');
@@ -73,7 +74,68 @@ class DaftarController extends Controller
             'step',
             'mahasiswa',
             'register',
-            'jalur'
+            'jalur',
+            'readOnly'
+        ));
+    }
+    public function detail_daftar(string $id)
+    {
+
+        $pendaftar = Pendaftar::with('beasiswa', 'pendaftar_status', 'mahasiswa', 'tahun_kegiatan')
+            ->whereId($id)
+            ->first();
+
+
+        if (!$pendaftar) {
+            return view('pendaftar.no-page', [
+                'message' => 'Pendaftar tidak ditemukan',
+                'title' => 'Opz..',
+                'bg' => 'danger'
+            ]);
+        }
+
+        $user = $pendaftar->user_id;
+        $nim = $pendaftar->mahasiswa->nim;
+        $mahasiswa = SiakadMahasiswa::with('prodi.fakultas')
+            ->whereNpm($nim)
+            ->first();
+        $tahun_kegiatan = $pendaftar->tahun_kegiatan;
+
+        $beasiswa = $pendaftar->beasiswa;
+
+
+        if (!$beasiswa) {
+            return view('pendaftar.no-page', [
+                'message' => 'Beasiswa yang dimaksud tidak tersedia',
+                'title' => 'Opz..',
+                'bg' => 'danger'
+            ]);
+        }
+
+        $register = true;
+        $readOnly = false;
+        $step = intval(request()->get('step') ?? '1');
+        if ($step < 1) $step = 1;
+        else if ($step > 3) $step = 3;
+        $jalur = null;
+
+        if ($step == 2) {
+            $key_pmb = env('PMB_KEY_API');
+            $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$nim}?key={$key_pmb}");
+            if ($_jalur->status) {
+                $jalur = $_jalur->data;
+            }
+        }
+        if (!$tahun_kegiatan->status) {
+            $readOnly = true;
+        }
+        return view('pendaftar.daftar.index', compact(
+            'beasiswa',
+            'step',
+            'mahasiswa',
+            'register',
+            'jalur',
+            'readOnly'
         ));
     }
 

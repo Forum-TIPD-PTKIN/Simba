@@ -11,4 +11,12 @@ class Mahasiswa extends Uuid
         'fakultas',
         'prodi',
     ];
+
+    protected $appends = ['fakultas_prodi'];
+    public function getFakultasProdiAttribute()
+    {
+        $fak = explode('|', $this->fakultas);
+        $prod = explode('|', $this->prodi);
+        return ($fak[1] . ' / ' . $prod[1]) ?? '';
+    }
 }

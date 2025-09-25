@@ -2,13 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Pendaftar;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class isMendaftar
+class ZonaPendaftar
 {
     /**
      * Handle an incoming request.
@@ -17,13 +15,8 @@ class isMendaftar
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $id = Auth::id();
-        $cek = Pendaftar::whereUserId($id)->count();
-
-        if ($cek) {
-            session()->put('MENDAFTAR', true);
-        } else {
-            session()->put('MENDAFTAR', false);
+        if (!session()->get('MENDAFTAR')) {
+            return redirect()->route('pendaftar.dashboard');
         }
         return $next($request);
     }
