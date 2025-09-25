@@ -19,7 +19,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3 me-2">
                             <h6 class="mb-0">{{ Auth::user()->name }}</h6>
-                            <small>{{ in_array(0, Auth::user()->access) ? 'Administrator' : 'Verifikator' }}</small>
+                            <small>{{ userAccessName() }}</small>
                         </div>
                         <a class="btn btn-icon btn-link-secondary avtar" data-bs-toggle="collapse"
                             href="#pc_sidebar_userlink">
