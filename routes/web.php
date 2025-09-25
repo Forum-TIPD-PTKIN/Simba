@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\{
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Pendaftar\{
     DaftarController,
-    DashboardController
+    DashboardController,
+    PemberkasanController,
+    RiwayatController
 };
 use Illuminate\Support\Facades\Route;
 
@@ -79,5 +81,11 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth']], function () {
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 
     Route::get('/daftar/{id}', [DaftarController::class, 'index'])->name('pendaftar.daftar');
+    Route::get('/daftar/detail/{id}', [DaftarController::class, 'detail_daftar'])->name('pendaftar.daftar.detail');
     Route::post('/daftar/{id}', [DaftarController::class, 'store'])->name('pendaftar.daftar.store');
+
+    Route::group(['middleware' => 'zonaPendaftar'], function () {
+        Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');
+        Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
+    });
 });

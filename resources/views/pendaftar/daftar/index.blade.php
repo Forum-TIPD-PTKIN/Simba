@@ -1,6 +1,6 @@
 @extends('pendaftar.template.master-template')
 
-@section('title', 'Dashboard')
+@section('title', 'Pendaftaran')
 
 @section('content')
     <!-- [ Main Content ] start -->
@@ -37,6 +37,13 @@
                     <div class="progress mb-4" style="height:6px;">
                         <div class="progress-bar" style="width:{{ (100 / 3) * $step }}%;"></div>
                     </div>
+
+                    @if ($readOnly)
+                        <div class="alert alert-warning">
+                            <strong>Perhatian</strong> Tidak dapat mengubah data pendaftaran ini, dikarenakan tahun kegiatan
+                            telah tidak aktif
+                        </div>
+                    @endif
 
                     @include('pendaftar.daftar.wizard-content.' . $step)
 

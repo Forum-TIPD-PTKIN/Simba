@@ -25,6 +25,7 @@ class PendaftarStatusLates implements Scope
                 ->whereColumn('pendaftar_statuses.pendaftar_id', 'pendaftars.id')
                 ->orderByDesc('pendaftar_statuses.created_at')
                 ->limit(1)
-        ]);
+        ])
+            ->orderBy('pendaftars.created_at');
     }
 }
