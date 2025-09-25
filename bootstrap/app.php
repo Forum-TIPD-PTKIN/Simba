@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Middleware\isAdmin;
-use App\Http\Middleware\isMahasiswa;
-use App\Http\Middleware\isMendaftar;
+use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsMahasiswa;
+use App\Http\Middleware\IsMendaftar;
 use App\Http\Middleware\ZonaPendaftar;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,13 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            isMendaftar::class,
+            IsMendaftar::class,
         ]);
 
         $middleware->alias([
             'zonaPendaftar' => ZonaPendaftar::class,
-            'isAdmin' => isAdmin::class,
-            'isMahasiswa' => isMahasiswa::class
+            'isAdmin' => IsAdmin::class,
+            'isMahasiswa' => IsMahasiswa::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
