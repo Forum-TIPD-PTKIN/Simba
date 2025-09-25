@@ -110,6 +110,13 @@ class DaftarController extends Controller
             })
             ->find($id);
 
+        $matches = array_filter($config, function ($c) use ($beasiswa) {
+            $configBeasiswa = $c['beasiswa'];
+            return stripos($beasiswa->nama, $configBeasiswa) !== false
+                || stripos($configBeasiswa, $beasiswa->nama) !== false;
+        });
+        $config_matches = count($matches) ? $matches[0] : null;
+
         $pendaftar = Pendaftar::whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
@@ -147,8 +154,13 @@ class DaftarController extends Controller
 
         /* PROSES CEK VALIDASI PENDAFTARAN */
         $valid = true;
-
-        return response()->json($request->all(), 422);
+        if (!in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
+            return response()->json('Tahun lulus tidak sesuai dengan ketentuan pendaftaran', 422);
+        }
+        if ($request->tahun_masuk != $config_matches['setting']['tahun_masuk'] ?? 0) {
+            return response()->json('Tahun masuk tidak sesuai dengan ketentuan pendaftaran', 422);
+        }
+        return response()->json('Berhasil mendaftar beasiswa', 422);
 
         if (!$valid) {
             /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
