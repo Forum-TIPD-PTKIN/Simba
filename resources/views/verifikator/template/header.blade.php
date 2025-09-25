@@ -161,10 +161,8 @@
                                 style="max-height: calc(100vh - 225px)">
                                 <div class="d-flex mb-1">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ session('profil')->avatar }}"
-                                            onerror="this.onerror=null;this.src='https://eu.ui-avatars.com/api/?name={{ urlencode(session('profil')->nama) }}&background=random&size=256'"
-                                            alt="user-img" class="user-avtar wid-35" />
-
+                                        <img src="{{ asset('assets/admin/images/user/avatar-2.jpg') }}"
+                                            alt="user-image" class="user-avtar wid-35" />
                                     </div>
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="mb-1">{{ Auth::user()->name }} 🖖</h6>
