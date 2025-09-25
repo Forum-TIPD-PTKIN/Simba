@@ -24,7 +24,7 @@ Route::get("/login", [LoginController::class, 'login_view'])->name('login');
 Route::post("/login", [LoginController::class, 'login'])->name('login.post');
 Route::get("/logout", [LoginController::class, 'logout'])->name('logout');
 
-Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
     Route::get('/', function () {
         return view('admin.index');
     })->name('admin.dashboard');
@@ -76,7 +76,7 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth']], function (
     ]);
 });
 
-Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 

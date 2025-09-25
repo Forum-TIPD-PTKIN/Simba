@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\isAdmin;
+use App\Http\Middleware\isMahasiswa;
 use App\Http\Middleware\isMendaftar;
 use App\Http\Middleware\ZonaPendaftar;
 use Illuminate\Foundation\Application;
@@ -18,7 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'zonaPendaftar' => ZonaPendaftar::class
+            'zonaPendaftar' => ZonaPendaftar::class,
+            'isAdmin' => isAdmin::class,
+            'isMahasiswa' => isMahasiswa::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
