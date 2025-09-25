@@ -47,10 +47,20 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = ['access_active'];
+
     public function getAccessAttribute($akses)
     {
         if (!$akses) return [0];
 
         return array_map('intval', explode(',', $akses));
+    }
+
+    public function getAccessActiveAttribute()
+    {
+        if (session()->has('level')) {
+            return session()->get('level');
+        }
+        return null;
     }
 }

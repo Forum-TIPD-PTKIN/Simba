@@ -170,46 +170,7 @@
                                     </div>
                                 </div>
                                 <hr class="border-secondary border-opacity-50" />
-                                <div class="card">
-                                    <div class="card-body py-3">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <h5 class="mb-0 d-inline-flex align-items-center"><svg
-                                                    class="pc-icon text-muted me-2">
-                                                    <use xlink:href="#custom-notification-outline"></use>
-                                                </svg>Notification</h5>
-                                            <div class="form-check form-switch form-check-reverse m-0">
-                                                <input class="form-check-input f-18" type="checkbox"
-                                                    role="switch" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-span">Manage</p>
-                                <a href="#" class="dropdown-item">
-                                    <span>
-                                        <svg class="pc-icon text-muted me-2">
-                                            <use xlink:href="#custom-setting-outline"></use>
-                                        </svg>
-                                        <span>Settings</span>
-                                    </span>
-                                </a>
-                                <a href="#" class="dropdown-item">
-                                    <span>
-                                        <svg class="pc-icon text-muted me-2">
-                                            <use xlink:href="#custom-share-bold"></use>
-                                        </svg>
-                                        <span>Share</span>
-                                    </span>
-                                </a>
-                                <a href="#" class="dropdown-item">
-                                    <span>
-                                        <svg class="pc-icon text-muted me-2">
-                                            <use xlink:href="#custom-lock-outline"></use>
-                                        </svg>
-                                        <span>Change Password</span>
-                                    </span>
-                                </a>
-                                <hr class="border-secondary border-opacity-50" />
+                                @include('access-control')
                                 <div class="d-grid mb-3">
                                     <a class="btn btn-primary logout" href="{{ route('logout') }}">
                                         <svg class="pc-icon me-2">

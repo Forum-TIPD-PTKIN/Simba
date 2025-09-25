@@ -97,7 +97,7 @@
                                 <use xlink:href="#custom-note-1"></use>
                             </svg> </span><span class="pc-mtext">Form Data</span></a>
                 </li>
-                <li class="pc-item pc-caption">
+                {{-- <li class="pc-item pc-caption">
                     <label>UI Components</label>
                     <svg class="pc-icon">
                         <use xlink:href="#custom-box-1"></use>
@@ -176,8 +176,8 @@
                                 <use xlink:href="#custom-notification-status"></use>
                             </svg>
                         </span>
-                        <span class="pc-mtext">Sample page</span></a></li>
-
+                        <span class="pc-mtext">Sample page</span></a>
+                </li> --}}
             </ul>
         </div>
     </div>

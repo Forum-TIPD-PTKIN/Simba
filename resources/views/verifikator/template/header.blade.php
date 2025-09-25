@@ -149,9 +149,8 @@
                 <li class="dropdown pc-h-item header-user-profile">
                     <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
-                        <img src="{{ session('profil')->avatar }}"
-                            onerror="this.onerror=null;this.src='https://eu.ui-avatars.com/api/?name={{ urlencode(session('profil')->nama) }}&background=random&size=256'"
-                            alt="user-img" class="user-avtar" />
+                        <img src="{{ asset('assets/admin/images/user/avatar-2.jpg') }}" alt="user-image"
+                            class="user-avtar" />
                     </a>
                     <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header d-flex align-items-center justify-content-between">

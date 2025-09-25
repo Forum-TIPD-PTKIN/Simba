@@ -136,4 +136,23 @@ class LoginController extends Controller
             ]);
         }
     }
+
+    public function change_access($access)
+    {
+        if (in_array($access, Auth::user()->access)) {
+            session()->put('level', intval($access));
+            if (session()->get('level') === 0) {
+                // admin
+                return redirect()->route('admin.dashboard');
+            } else if (session()->get('level') === 1) {
+                // verifikator
+                return redirect()->route('verifikator.dashboard');
+            } else if (session()->get('level') === 2) {
+                // mahasiswa
+                return redirect()->route('pendaftar.dashboard');
+            }
+        }
+
+        return redirect()->back();
+    }
 }
