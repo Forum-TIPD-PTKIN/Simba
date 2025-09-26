@@ -101,21 +101,21 @@
                                         <tr v-for="(item,index) in data">
                                             <td class="text-center">@{{ item.indexed + 1 }}</td>
                                             <td>
-                                                @{{ item.config.title }}
+                                                @{{ item.config_json.title }}
                                                 <div class="text-muted small">
-                                                    @{{ item.config.type }}
+                                                    @{{ item.config_json.type }}
                                                 </div>
                                             </td>
                                             <td>
-                                                @{{ item.config.name }}
+                                                @{{ item.config_json.name }}
                                                 <div class="small text-muted"
-                                                    v-if="item.config.type=='select' || item.config.type=='radio' || item.config.type=='checkbox'">
-                                                    @{{ item.config.option.length }} Option
+                                                    v-if="item.config_json.type=='select' || item.config_json.type=='radio' || item.config_json.type=='checkbox'">
+                                                    @{{ item.config_json.option.length }} Option
                                                 </div>
                                             </td>
                                             <td class="text-start">
                                                 <ul>
-                                                    <li v-for="v in formatValidator(item.config.validator)">
+                                                    <li v-for="v in formatValidator(item.config_json.validator)">
                                                         @{{ v.validator }} : @{{ v.message }}</li>
                                                 </ul>
                                             </td>
@@ -200,7 +200,7 @@
                                         <template v-for="(item,index) in data">
                                             <option v-if="form.id!==item.id && index<data.length-1"
                                                 :value="(+item.indexed) + 1">Setelah
-                                                @{{ item.config.title }}</option>
+                                                @{{ item.config_json.title }}</option>
                                         </template>
                                     </select>
                                 </div>
@@ -518,7 +518,7 @@
                 onDelete: (item) => {
                     Swal.fire({
                         title: 'Konfirmasi',
-                        html: `Anda akan menghapus form Form Data : <span class="fw-bold fst-italic text-danger"> ${item.config.title}</span>`,
+                        html: `Anda akan menghapus form Form Data : <span class="fw-bold fst-italic text-danger"> ${item.config_json.title}</span>`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Hapus!',
@@ -574,12 +574,12 @@
                 onCopyData: item => {
                     app.form.tahun_kegiatan = item.tahun_kegiatan_id;
                     app.form.beasiswa = item.beasiswa_id;
-                    app.form.nama = item.config.title;
-                    app.form.name = item.config.name;
-                    app.form.type = item.config.type;
+                    app.form.nama = item.config_json.title;
+                    app.form.name = item.config_json.name;
+                    app.form.type = item.config_json.type;
                     app.form.deskripsi = item.deskripsi;
-                    app.form.validators = app.formatValidator(item.config.validator);
-                    app.form.options = item.config.option;
+                    app.form.validators = app.formatValidator(item.config_json.validator);
+                    app.form.options = item.config_json.option;
                     app.form.indexed = item.indexed;
                 },
                 onCopy: () => {
@@ -674,12 +674,12 @@
                     app.form.id = item.id;
                     app.form.tahun_kegiatan = item.tahun_kegiatan_id;
                     app.form.beasiswa = item.beasiswa_id;
-                    app.form.nama = item.config.title;
-                    app.form.name = item.config.name;
-                    app.form.type = item.config.type;
+                    app.form.nama = item.config_json.title;
+                    app.form.name = item.config_json.name;
+                    app.form.type = item.config_json.type;
                     app.form.deskripsi = item.deskripsi;
-                    app.form.validators = app.formatValidator(item.config.validator);
-                    app.form.options = item.config.option;
+                    app.form.validators = app.formatValidator(item.config_json.validator);
+                    app.form.options = item.config_json.option;
                     app.form.indexed = item.indexed;
                 },
                 onSave: () => {
@@ -702,7 +702,7 @@
                         let url_update =
                             "{{ route('admin.form-data.update', ['ID_ITEM_PATCH']) }}";
                         url_update = url_update.replaceAll('ID_ITEM_PATCH', app.form.id);
-                        if (app.mode === 'NEW_FORM' && app.form.jenis == '') {
+                        if (app.mode === 'NEW_FORM' && !app.form.jenis) {
                             app.form.jenis = app.namajenis.toUpperCase();
                         }
 

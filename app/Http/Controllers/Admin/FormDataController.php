@@ -323,7 +323,7 @@ class FormDataController extends Controller
                 ->orderBy('indexed', 'asc')
                 ->get();
             $data = collect($data)->map(function ($item) {
-                $config = $item->config ? json_decode($item->config) : null;
+                $config = $item->config_json ?: null;
                 if (!isset($config->validator)) {
                     $config->validator = (object) [];
                 }
@@ -332,7 +332,7 @@ class FormDataController extends Controller
                     $config->option = [];
                 }
 
-                $item->config = $config;
+                $item->config_json = $config;
                 return $item;
             });
         }
