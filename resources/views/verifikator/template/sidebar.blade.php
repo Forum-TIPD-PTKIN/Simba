@@ -76,34 +76,16 @@
                     </a>
                 </li>
 
-                @if (session()->get('MENDAFTAR'))
+                @if (session('level') === 1)
                     <li class="pc-item pc-caption">
-                        <label>Zona Mendaftar</label>
-                        <svg class="pc-icon">
-                            <use xlink:href="#custom-notification-status"></use>
-                        </svg>
+                        <label>Data Pendaftar</label>
                     </li>
-
-
                     <li class="pc-item">
-                        <a href="{{ route('pendaftar.riwayat') }}" class="pc-link">
-                            <span class="pc-micon">
+                        <a href="{{ route('verifikator.seleksi-administrasi') }}" class="pc-link"><span
+                                class="pc-micon">
                                 <svg class="pc-icon">
-                                    <use xlink:href="#custom-status-up"></use>
-                                </svg>
-                            </span>
-                            <span class="pc-mtext">Riwayat Pendaftaran</span>
-                        </a>
-                    </li>
-
-                    <li class="pc-item">
-                        <a href="{{ route('pendaftar.pemberkasan') }}" class="pc-link">
-                            <span class="pc-micon">
-                                <svg class="pc-icon">
-                                    <use xlink:href="#custom-status-up"></use>
-                                </svg>
-                            </span>
-                            <span class="pc-mtext">Pemberkasan</span>
+                                    <use xlink:href="#custom-user-add"></use>
+                                </svg> </span><span class="pc-mtext">Seleksi Administrasi</span>
                         </a>
                     </li>
                 @endif

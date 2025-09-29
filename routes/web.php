@@ -15,7 +15,8 @@ use App\Http\Controllers\Pendaftar\{
     RiwayatController
 };
 use App\Http\Controllers\Verifikator\{
-    DashboardController as DashboardVerifikator
+    DashboardController as DashboardVerifikator,
+    SeleksiAdministrasiController
 };
 use Illuminate\Support\Facades\Route;
 
@@ -96,4 +97,6 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 
 Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator']], function () {
     Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
+
+    Route::get('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'index'])->name('verifikator.seleksi-administrasi');
 });
