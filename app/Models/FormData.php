@@ -2,12 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
+
 class FormData extends Uuid
 {
     protected $hidden = ['config'];
-    protected $appends = ['config_json'];
+    protected $appends = ['config_json', 'kode'];
     public function getConfigJsonAttribute()
     {
-        return json_decode($this->config);
+        $value = $this->config;
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            return $decoded ?? $value;
+        }
+
+        return $value;
+    }
+
+    public function getKodeAttribute()
+    {
+        return Str::snake(strtolower($this->jenis));
     }
 }

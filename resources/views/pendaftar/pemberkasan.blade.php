@@ -18,7 +18,8 @@
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Pemberkasan</h2>
+                                <h2 class="mb-0">Pemberkasan Beasiswa {{ $data->beasiswa->nama }}
+                                    {{ $data->tahun_kegiatan->tahun }}</h2>
                             </div>
                         </div>
                     </div>
@@ -29,10 +30,23 @@
             <div class="row">
                 <div class="card">
                     <div class="card-body">
-                        @include('pendaftar.daftar.wizard-content.3', [$generated_form])
+                        @include('pendaftar.daftar.wizard-content.3', [
+                            $generated_form,
+                            'nowizard' => true,
+                        ])
+                        <div class="d-flex justify-content-end">
+                            <button onclick="simpanFile()" class="btn btn-primary">Simpan File</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+@push('script')
+    <script>
+        function simpanFileManual() {
+            $('#form-berkas').submit()
+        }
+    </script>
+@endpush

@@ -1,6 +1,8 @@
 <?php
 
 use App\Api;
+use App\Helpers\Field;
+use App\Helpers\FormHelper;
 use App\Models\FormData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +24,13 @@ if (!function_exists('api')) {
     function api(): Api
     {
         return new Api();
+    }
+}
+
+if (!function_exists('form')) {
+    function form(string $jenis, string|Field|array|null $beasiswa = null, string|null $tahun_kegiatan = null): FormHelper
+    {
+        return new FormHelper($jenis, $beasiswa, $tahun_kegiatan);
     }
 }
 
