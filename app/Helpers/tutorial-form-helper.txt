@@ -1,0 +1,101 @@
+TUTORIAL PENGGUNAAN FORMHELPER
+
+// definisikan form
+$form = form('JENIS FORM','BEASISWA ID','TAHUN KEGIATAN ID);
+
+// melihat list name yang ada
+$form->getNames();
+
+// set value
+$form->setValue('name','data');
+
+// set label
+$form->setLabel('name','label name');
+
+// set description
+$form->setDescription('name','label name');
+
+// mengambil semua value
+$form->getValue();
+
+// menset options sekaligus
+$form->setOption('name',[
+	[
+		'text'=>'Label 1',
+		'value'=>'Value 1'
+	],[
+		'text'=>'Label 2',
+		'value'=>'Value 2'
+	]
+]);
+
+// menambah options satu-satu
+$form->addOption('name',[
+	'text'=>'Label 3',
+	'value'=>'Value 3'
+]);
+
+// mengambil value khusus
+$form->getValue('name');
+
+
+// melihat instance form
+$form->getInstance();
+
+// melihat rules validator
+$form->getValidator();
+
+// menjalankan validator
+$form->execValidator();
+
+// menjalankan validator by name
+$form->execValidator('name);
+
+// menambah rule baru pada validator
+$form->setValidator('name','validator','message_error');
+
+// membuang rule pada validator
+$form->removeValidator('name','validator');
+
+// men set disabled form
+$form->setDisabled('name')
+
+// men set read only form
+$form->setReadOnly('name')
+
+// men set type form
+$form->setType('name','type')
+
+// mengambil type form
+$form->getType()
+
+// mengambil type form by name
+$form->getType('name')
+
+// men set new name
+$form->setNewName('name','new name')
+
+// integrasi
+$form->integrateVue(true)
+
+// merender ke HTML
+$form->render();
+
+// mengecualikan form yang muncul
+$form->render($exclude = ['name1','name2']);
+
+// menyimpan file
+$form->saveFile(name, folder)
+		$obj->path;
+		$obj->size = 0;
+		$obj->extension;
+		$obj->name;
+		$obj->md5;
+
+// menyimpan multiple file
+$form->saveFile(name[], folder)
+		[$obj->path;
+		$obj->size = 0;
+		$obj->extension;
+		$obj->name;
+		$obj->md5;]

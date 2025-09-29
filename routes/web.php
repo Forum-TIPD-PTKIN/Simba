@@ -91,6 +91,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
     Route::group(['middleware' => 'zonaPendaftar'], function () {
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
+        Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
     });
 });
 

@@ -5,10 +5,75 @@ namespace App\Helpers;
 use App\Models\FormData;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use stdClass;
+
+use function PHPUnit\Framework\isArray;
+
+interface Field
+{
+    public function getName(): string;
+    public function getTitle(): ?string;
+    public function getType(): string;
+    public function getDeskripsi(): string;
+    public function getValidator(): array;
+    public function getOption(): array;
+}
+
+
+class FormField implements Field
+{
+    protected string $name;
+    protected ?string $title;
+    protected string $type;
+    protected string $deskripsi;
+    protected array $validator;
+    protected array $option;
+
+    public function __construct(
+        string $name,
+        ?string $title = null,
+        string $type = 'text',
+        string $deskripsi = '',
+        array $validator = [],
+        array $option = []
+    ) {
+        $this->name = $name;
+        $this->title = $title ?? ucfirst($name);
+        $this->type = $type;
+        $this->deskripsi = $deskripsi;
+        $this->validator = $validator;
+        $this->option = $option;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+    public function getType(): string
+    {
+        return $this->type;
+    }
+    public function getDeskripsi(): string
+    {
+        return $this->deskripsi;
+    }
+    public function getValidator(): array
+    {
+        return $this->validator;
+    }
+    public function getOption(): array
+    {
+        return $this->option;
+    }
+}
 
 class FormHelper
 {
+    private $kode = null;
     private $values = [];
     private $data   = null;
     private $rule   = null;
@@ -17,18 +82,32 @@ class FormHelper
     private $tahun_kegiatan;
     private $disabledVue = true;
 
-    public function __construct($jenis, $beasiswa, $tahun_kegiatan)
+    public function __construct(string $jenis, string|Field|array|null $beasiswa = null, string|null $tahun_kegiatan = null)
     {
+        $this->kode = Str::snake(strtolower($jenis));
         $this->jenis = $jenis;
+        $this->data = [];
+        if ($beasiswa == null || $tahun_kegiatan == null) {
+            if ($beasiswa != null) {
+                if (is_array($beasiswa)) {
+                    foreach ($$beasiswa as $key => $value) {
+                        $this->appendField($value);
+                    }
+                } else {
+                    $this->appendField($beasiswa);
+                }
+            }
+            return;
+        }
         $this->beasiswa = $beasiswa;
         $this->tahun_kegiatan = $tahun_kegiatan;
-        $this->data  = collect(
-            FormData::where('jenis', $this->jenis)
-                ->where('beasiswa_id', $this->beasiswa)
-                ->where('tahun_kegiatan_id', $this->tahun_kegiatan)
-                ->orderBy('indexed', 'asc')
-                ->get(),
-        )->map(function ($item) {
+        $dataf = FormData::where('jenis', $this->jenis)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('tahun_kegiatan_id', $this->tahun_kegiatan)
+            ->orderBy('indexed', 'asc')
+            ->get();
+
+        foreach ($dataf as $key => $item) {
             $config = $item->config ? json_decode($item->config) : null;
             if (! isset($config->validator)) {
                 $config->validator = (object) [];
@@ -39,15 +118,69 @@ class FormHelper
             }
 
             $item->config = $config;
-            return $item;
-        });
+            array_push($this->data, $item);
+        }
         $this->registerValue();
         $this->rule = $this->getValidator();
     }
 
+    public function appendField(
+        Field $field,
+        $after = null
+    ) {
+        $item = (object)[
+            'jenis' => $this->jenis,
+            'deskripsi' => $field->getDeskripsi(),
+            'config' => (object)[
+                'title' => $field->getTitle(),
+                'name' => $field->getName(),
+                'type' => $field->getType(),
+                'validator' => (object)$field->getValidator(),
+                'option' => collect($field->getOption())->map(fn($o) => (object)$o)->toArray(),
+            ],
+            'kode' => Str::snake(strtolower($field->getName()))
+        ];
+
+        $data = $this->data instanceof \Illuminate\Support\Collection
+            ? $this->data->all()
+            : (array) $this->data;
+
+        if ($after === false) {
+            // sisipkan di awal
+            array_unshift($data, $item);
+        } elseif ($after !== null) {
+            // cari field dengan name tertentu, lalu sisipkan setelahnya
+            $inserted = false;
+            foreach ($data as $index => $fieldItem) {
+                if ($this->kode . '_' . $fieldItem->config->name === $this->kode . '_' . $after) {
+                    array_splice($data, $index + 1, 0, [$item]);
+                    $inserted = true;
+                    break;
+                }
+            }
+            if (! $inserted) {
+                $data[] = $item; // fallback taruh di akhir kalau tidak ketemu
+            }
+        } else {
+            // default null → tambahkan di akhir
+            $data[] = $item;
+        }
+
+        $this->data = collect($data);
+        $this->registerValue($item->config->name);
+
+        if (isset($item->config->validator)) {
+            foreach ((array) $item->config->validator as $key1 => $value1) {
+                $this->setValidator($item->config->name, $key1, $value1);
+            }
+        }
+    }
+
+
     public function execValidator($name = null)
     {
         if ($name) {
+            $name = $this->kode . '_' . $name;
             $rules   = [];
             $message = [];
             foreach ($this->rule->rules as $key => $value) {
@@ -90,12 +223,12 @@ class FormHelper
         $rules         = [];
         $rules_message = [];
         foreach ($form as $key => $value) {
-            $rules[$value->config->name] = $mapValidator($value->config->validator);
+            $rules[$this->kode . '_' . $value->config->name] = $mapValidator($value->config->validator);
         }
         foreach ($form as $key => $value) {
             $key_validator = [];
             foreach ($value->config->validator as $key_ => $value_) {
-                $rules_message[$value->config->name . '.' . $normalizerValidator($key_)] = $value_;
+                $rules_message[$this->kode . '_' . $value->config->name . '.' . $normalizerValidator($key_)] = $value_;
             }
         }
         $rule                = new \stdClass();
@@ -106,6 +239,7 @@ class FormHelper
 
     public function setValidator($name, $validator, $message = '')
     {
+        $name = $this->kode . '_' . $name;
         $normalizerValidator = function ($key) {
             $n = explode(':', $key);
             return $n[0];
@@ -122,6 +256,7 @@ class FormHelper
 
     public function removeValidator($name, $validator)
     {
+        $name = $this->kode . '_' . $name;
         if (isset($this->rule->rules[$name])) {
             $expl             = explode('|', $this->rule->rules[$name]);
             $new_rule         = [];
@@ -141,13 +276,14 @@ class FormHelper
 
     public function setValue($name, $data)
     {
+        $name = $this->kode . '_' . $name;
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $name) {
                 $value->value = $data;
             }
         }
-        $this->values[$name] = $data;
-        session()->flash('_old_input.' . $name, $data);
+        $this->values[$this->kode . '_' . $name] = $data;
+        session()->flash('_old_input.' . $this->kode . '_' . $name, $data);
     }
 
     public function getValue($name = '')
@@ -155,7 +291,7 @@ class FormHelper
         $values = new \stdClass();
         $names  = $this->getNames();
         foreach ($names as $key => $value) {
-            $values->{$value} = isset($this->values[$value]) ? $this->values[$value] : $this->removeSpace(request()->get($value));
+            $values->{$value} = isset($this->values[$this->kode . '_' . $value]) ? $this->values[$this->kode . '_' . $value] : $this->removeSpace(request()->get($this->kode . '_' . $value));
         }
         if ($name) {
             return $values->{$name};
@@ -180,7 +316,7 @@ class FormHelper
     public function setOption($name, $options = [])
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->config->option = (object) $options;
             }
         }
@@ -189,7 +325,7 @@ class FormHelper
     public function addOption($name, $options = [])
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 array_push($value->config->option, (object) $options);
             }
         }
@@ -208,7 +344,7 @@ class FormHelper
     public function setDisabled($name)
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->config->disabled = true;
             }
         }
@@ -217,7 +353,7 @@ class FormHelper
     public function setReadOnly($name)
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->config->readonly = true;
             }
         }
@@ -226,16 +362,31 @@ class FormHelper
     public function setType($name, $type = 'text')
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->config->type = $type;
             }
         }
     }
 
+    public function getType($name = '')
+    {
+        $nametypes = new \stdClass();
+        foreach ($this->data as $key => $value) {
+            $nametypes->{$value->config->name} = $value->config->type;
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
+                if ($name) {
+                    return $value->config->type;
+                }
+            }
+        }
+        if ($name) return null;
+        return $nametypes;
+    }
+
     public function setLabel($name, $data)
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->judul = $data;
             }
         }
@@ -244,7 +395,7 @@ class FormHelper
     public function setDescription($name, $data)
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 $value->deskripsi = $data;
             }
         }
@@ -253,7 +404,7 @@ class FormHelper
     public function setNewName($name, $new_name)
     {
         foreach ($this->data as $key => $value) {
-            if ($value->config->name === $name) {
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
                 unset($value->config->{$name});
                 $value->config->name = $new_name;
             }
@@ -267,7 +418,7 @@ class FormHelper
 
     public function saveFile($name, $folder)
     {
-        $files = request()->file($name);
+        $files = request()->file($this->kode . '_' . $name);
         if (is_array($files)) {
             $results = [];
 
@@ -338,7 +489,7 @@ class FormHelper
 
                     $obj            = new \stdClass();
                     $obj->path      = $url;
-                    $obj->size      = Storage::size($url);
+                    $obj->size      = filesize(storage_path('app/' . $url));
                     $obj->extension = $extension;
                     $obj->name      = $original_name;
                     $obj->md5       = md5_file(storage_path('app/' . $url));
@@ -358,16 +509,18 @@ class FormHelper
         return null;
     }
 
-    private function registerValue()
+    private function registerValue($name = null)
     {
-        foreach ($this->data as $key => $value) {
-            if (isset($this->values[$value->config->name])) {
-                $value->value = $this->removeSpace($this->values[$value->config->name]);
-            } else {
-                $value->value = $this->removeSpace(old($value->config->name, ''));
+        foreach ($this->data as $value) {
+            $fullName = $this->kode . '_' . $value->config->name;
+
+            if ($name === null || $fullName === $this->kode . '_' . $name) {
+                $source = $this->values[$fullName] ?? old($fullName, '');
+                $value->value = $this->removeSpace($source);
             }
         }
     }
+
 
     private function getForm()
     {

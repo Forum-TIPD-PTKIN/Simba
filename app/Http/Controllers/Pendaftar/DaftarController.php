@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pendaftar;
 
+use App\Helpers\FormField;
 use App\Helpers\FormHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
@@ -78,7 +79,8 @@ class DaftarController extends Controller
                 ->get();
             $jenis_form = $master_form->pluck('jenis')->unique();
             foreach ($jenis_form as $jenis) {
-                $form = new FormHelper($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+                $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+
                 array_push($generated_form, [
                     'jenis' => $jenis,
                     'form' => $form->render()
