@@ -85,7 +85,6 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
 
     Route::get('/daftar/{id}', [DaftarController::class, 'index'])->name('pendaftar.daftar');
-    Route::get('/daftar/detail/{id}', [DaftarController::class, 'detail_daftar'])->name('pendaftar.daftar.detail');
     Route::post('/daftar/{id}', [DaftarController::class, 'store'])->name('pendaftar.daftar.store');
 
     Route::group(['middleware' => 'zonaPendaftar'], function () {

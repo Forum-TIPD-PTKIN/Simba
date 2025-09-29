@@ -153,7 +153,7 @@
                                 title: response.title,
                                 text: response.message,
                                 icon: response.icon,
-                                timer: 1500,
+                                timer: 3000,
                                 timerProgressBar: true,
                             }).then(() => {
                                 if (response.icon === 'success') {

@@ -13,12 +13,14 @@
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="javascript: void(0)">Dashboard</a></li>
                                 <li class="breadcrumb-item" aria-current="page">Pendaftaran</li>
-                                <li class="breadcrumb-item" aria-current="page">{{ $beasiswa->nama }}</li>
+                                <li class="breadcrumb-item" aria-current="page">{{ $beasiswa->nama }}
+                                    {{ $pendaftar->tahun_kegiatan->tahun }}</li>
                             </ul>
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Pendaftaran Beasiswa {{ $beasiswa->nama }}</h2>
+                                <h2 class="mb-0">Pendaftaran Beasiswa {{ $beasiswa->nama }}
+                                    {{ $pendaftar->tahun_kegiatan->tahun }}</h2>
                             </div>
                         </div>
                     </div>

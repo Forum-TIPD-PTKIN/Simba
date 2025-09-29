@@ -6,11 +6,17 @@ class Pemberkasan extends Uuid
 {
     protected $fillable = [
         'pendaftar_id',
-        'lengkap'
+        'data'
     ];
 
-    public function pemberkasan_item()
+    public function getDataAttribute($val)
     {
-        return $this->hasMany(PemberkasanItem::class);
+        $val = str_replace('[URL_ORIGIN]', url('/'), $val);
+        return json_decode($val);
     }
+
+    // public function pemberkasan_item()
+    // {
+    //     return $this->hasMany(PemberkasanItem::class);
+    // }
 }

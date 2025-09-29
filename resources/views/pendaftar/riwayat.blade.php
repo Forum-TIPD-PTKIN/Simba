@@ -59,7 +59,7 @@
                                                 <td>{{ $item->tahun_kegiatan->tahun }}</td>
                                                 <td>{{ $item->latest_status->status ?? '-' }}</td>
                                                 <td>
-                                                    <a href="{{ route('pendaftar.daftar.detail', ['id' => $item->id, 'step' => 2]) }}"
+                                                    <a href="{{ route('pendaftar.daftar', ['id' => $item->beasiswa->id, 'step' => 2]) }}"
                                                         class="btn btn-sm btn-info">Detail</a>
                                                 </td>
                                             </tr>
