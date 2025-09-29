@@ -100,4 +100,7 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
 
     Route::get('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'index'])->name('verifikator.seleksi-administrasi');
+    Route::get('/seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'data'])->name('verifikator.seleksi-administrasi.data');
+    Route::get('/seleksi-administrasi/jadwal', [SeleksiAdministrasiController::class, 'jadwal'])->name('verifikator.seleksi-administrasi.jadwal');
+    Route::get('/seleksi-administrasi/{id}', [SeleksiAdministrasiController::class, 'edit'])->name('verifikator.seleksi-administrasi.edit');
 });

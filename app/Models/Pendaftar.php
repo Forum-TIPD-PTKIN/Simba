@@ -43,6 +43,11 @@ class Pendaftar extends Uuid
         return $this->hasMany(PendaftarStatus::class)->orderByDesc('created_at');
     }
 
+    public function latestStatus()
+    {
+        return $this->hasOne(PendaftarStatus::class)->latestOfMany();
+    }
+
     public function getLatestStatusAttribute($val)
     {
         return json_decode($val);
