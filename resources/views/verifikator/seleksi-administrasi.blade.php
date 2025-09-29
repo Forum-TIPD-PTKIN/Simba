@@ -83,6 +83,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <form id="formVerifikasi">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -92,6 +114,8 @@
 @endpush
 
 @push('script')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script>
         function reloadData() {
@@ -181,13 +205,12 @@
     </script>
 
     <script>
-        function getData(id) {
+        function verifikasiData(id) {
             let url = "{{ route('verifikator.seleksi-administrasi.edit', ':id') }}";
             url = url.replace(':id', id);
 
-            return $.ajax({
+            $.ajax({
                 url: url,
-                dataType: "JSON",
                 beforeSend: () => {
                     Swal.fire({
                         title: 'Mengambil data...',
@@ -199,20 +222,12 @@
                         allowOutsideClick: false
                     });
                 },
-                complete: () => {
+                success: (res) => {
+                    $('#modalVerifikasi .modal-body').html(res);
+
+                    $('#modalVerifikasi').modal('show');
                     Swal.close();
                 }
-            });
-        }
-
-        async function verifikasiData(id) {
-            const response = await getData(id),
-                data = JSON.parse(response?.pemberkasan?.data);
-
-            Object.keys(data).forEach(item => {
-                Object.keys(data[item]).forEach(i => {
-                    console.log(data[item][i]);
-                });
             });
         }
     </script>

@@ -66,7 +66,7 @@
                 </li>
 
                 <li class="pc-item">
-                    <a href="{{ route('pendaftar.dashboard') }}" class="pc-link">
+                    <a href="{{ route('verifikator.dashboard') }}" class="pc-link">
                         <span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-status-up"></use>

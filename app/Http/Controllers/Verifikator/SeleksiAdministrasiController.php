@@ -37,7 +37,9 @@ class SeleksiAdministrasiController extends Controller
         $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
             ->find($id);
 
-        return response()->json($data);
+        return view('verifikator.modal-seleksi-administrasi', [
+            'data' => $data
+        ])->render();
     }
 
     public function data(Request $request)
