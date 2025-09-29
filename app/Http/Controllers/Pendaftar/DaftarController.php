@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\FormData;
 use App\Models\Mahasiswa;
+use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\SiakadMahasiswa;
@@ -22,6 +23,7 @@ class DaftarController extends Controller
      */
     public function index(string $id)
     {
+
         $user = Auth::user();
         $nim = $user->username;
         $mahasiswa = SiakadMahasiswa::with('prodi.fakultas')
@@ -38,7 +40,7 @@ class DaftarController extends Controller
             })
             ->find($id);
 
-        $pendaftar = Pendaftar::with('pendaftar_status')->whereBeasiswaId($id)
+        $pendaftar = Pendaftar::with('pendaftar_status', 'tahun_kegiatan')->whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
             })
@@ -78,9 +80,31 @@ class DaftarController extends Controller
                 ->orderBy('indexed')
                 ->get();
             $jenis_form = $master_form->pluck('jenis')->unique();
+
+            $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+
             foreach ($jenis_form as $jenis) {
                 $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
-
+                if ($berkas) {
+                    if (isset($berkas->data->{$form->getCode()})) {
+                        $berkasdata = $berkas->data->{$form->getCode()};
+                        foreach ($form->getType() as $name => $type) {
+                            if ($type === 'file') {
+                                $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diungga, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                                $form->removeValidator($name, 'required');
+                                $form->appendField(new FormField(
+                                    name: 'old_' . $name,
+                                    type: 'hidden'
+                                ));
+                                $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
+                            } else {
+                                if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
+                                    $form->setValue($name, $berkasdata->{$name}->value);
+                                }
+                            }
+                        }
+                    }
+                }
                 array_push($generated_form, [
                     'jenis' => $jenis,
                     'form' => $form->render()
@@ -93,81 +117,7 @@ class DaftarController extends Controller
             'mahasiswa',
             'register',
             'jalur',
-            'readOnly',
-            'generated_form'
-        ));
-    }
-    public function detail_daftar(string $id)
-    {
-
-        $pendaftar = Pendaftar::with('beasiswa', 'pendaftar_status', 'mahasiswa', 'tahun_kegiatan')
-            ->whereId($id)
-            ->first();
-
-
-        if (!$pendaftar) {
-            return view('pendaftar.no-page', [
-                'message' => 'Pendaftar tidak ditemukan',
-                'title' => 'Opz..',
-                'bg' => 'danger'
-            ]);
-        }
-
-        $user = $pendaftar->user_id;
-        $nim = $pendaftar->mahasiswa->nim;
-        $mahasiswa = SiakadMahasiswa::with('prodi.fakultas')
-            ->whereNpm($nim)
-            ->first();
-        $tahun_kegiatan = $pendaftar->tahun_kegiatan;
-
-        $beasiswa = $pendaftar->beasiswa;
-
-        if (!$beasiswa) {
-            return view('pendaftar.no-page', [
-                'message' => 'Beasiswa yang dimaksud tidak tersedia',
-                'title' => 'Opz..',
-                'bg' => 'danger'
-            ]);
-        }
-
-        $register = true;
-        $readOnly = false;
-        $step = intval(request()->get('step') ?? '1');
-        if ($step < 1) $step = 1;
-        else if ($step > 3) $step = 3;
-        $jalur = null;
-        $generated_form = [];
-
-        if ($step == 2) {
-            $key_pmb = env('PMB_KEY_API');
-            $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$nim}?key={$key_pmb}");
-            if ($_jalur->status) {
-                $jalur = $_jalur->data;
-            }
-        } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
-            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
-                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
-                ->orderBy('jenis')
-                ->orderBy('indexed')
-                ->get();
-            $jenis_form = $master_form->pluck('jenis')->unique();
-            foreach ($jenis_form as $jenis) {
-                $form = new FormHelper($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
-                array_push($generated_form, [
-                    'jenis' => $jenis,
-                    'form' => $form->render()
-                ]);
-            }
-        }
-        if (!$tahun_kegiatan->status) {
-            $readOnly = true;
-        }
-        return view('pendaftar.daftar.index', compact(
-            'beasiswa',
-            'step',
-            'mahasiswa',
-            'register',
-            'jalur',
+            'pendaftar',
             'readOnly',
             'generated_form'
         ));

@@ -89,6 +89,9 @@
                     name="{{ $item->kode . '_' . $item->config->name }}"
                     @if (!$disabledVue) v-model="{{ $item->kode . '_' . $item->config->name }}" @endif
                     @disabled(isset($item->config->disabled) && $item->config->disabled) @readonly(isset($item->config->readonly) && $item->config->readonly) value="{{ $item->value }}" />
+                @if ($item->value)
+                    {!! $item->value !!}
+                @endif
             @endif
             @if (
                 $item->config->type != 'radio' &&

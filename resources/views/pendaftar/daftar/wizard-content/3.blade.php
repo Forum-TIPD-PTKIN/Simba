@@ -7,6 +7,7 @@
             <form enctype="multipart/form-data" action="{{ route('pendaftar.pemberkasan.store') }}" id="form-berkas"
                 method="POST">
                 @csrf
+                <input type="hidden" name="beasiswa" value="{{ $beasiswa->id }}">
                 {!! $item['form'] !!}
             </form>
         @endforeach
@@ -32,9 +33,14 @@
                         processData: false,
                         contentType: false,
                         dataType: 'json',
-                        success: function(res) {
-                            Swal.close()
-                            console.log('Sukses:', res);
+                        success: function(response) {
+                            Swal.fire({
+                                title: response.title,
+                                text: response.message,
+                                icon: response.icon,
+                            }).then(() => {
+                                window.location.reload();
+                            })
                         },
                         error: function(xhr) {
                             const errors = xhr.responseJSON;

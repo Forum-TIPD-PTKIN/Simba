@@ -124,6 +124,11 @@ class FormHelper
         $this->rule = $this->getValidator();
     }
 
+    public function getCode()
+    {
+        return $this->kode;
+    }
+
     public function appendField(
         Field $field,
         $after = null
@@ -138,7 +143,7 @@ class FormHelper
                 'validator' => (object)$field->getValidator(),
                 'option' => collect($field->getOption())->map(fn($o) => (object)$o)->toArray(),
             ],
-            'kode' => Str::snake(strtolower($field->getName()))
+            'kode' => $this->kode
         ];
 
         $data = $this->data instanceof \Illuminate\Support\Collection
@@ -289,7 +294,7 @@ class FormHelper
     public function getValue($name = '')
     {
         $values = new \stdClass();
-        $names  = $this->getNames();
+        $names  = $this->getName();
         foreach ($names as $key => $value) {
             $values->{$value} = isset($this->values[$this->kode . '_' . $value]) ? $this->values[$this->kode . '_' . $value] : $this->removeSpace(request()->get($this->kode . '_' . $value));
         }
@@ -300,7 +305,22 @@ class FormHelper
         return $values;
     }
 
-    public function getNames($string = false)
+    public function getLabel($name = '')
+    {
+        $nametypes = new \stdClass();
+        foreach ($this->data as $key => $value) {
+            $nametypes->{$value->config->name} = $value->config->title;
+            if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
+                if ($name) {
+                    return $value->config->title;
+                }
+            }
+        }
+        if ($name) return null;
+        return $nametypes;
+    }
+
+    public function getName($string = false)
     {
         $names = [];
         foreach ($this->data as $key => $value) {
