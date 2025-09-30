@@ -18,6 +18,10 @@ use App\Http\Controllers\Verifikator\{
     DashboardController as DashboardVerifikator,
     SeleksiAdministrasiController
 };
+
+use App\Http\Controllers\Penguji\Kip\{
+    DashboardController as DashboardPengujiKip,
+};
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -102,4 +106,12 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::get('/seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'data'])->name('verifikator.seleksi-administrasi.data');
     Route::get('/seleksi-administrasi/jadwal', [SeleksiAdministrasiController::class, 'jadwal'])->name('verifikator.seleksi-administrasi.jadwal');
     Route::get('/seleksi-administrasi/{id}', [SeleksiAdministrasiController::class, 'edit'])->name('verifikator.seleksi-administrasi.edit');
+});
+
+// penguji
+
+Route::group(['prefix' => 'penguji', 'middleware' => ['auth']], function () {
+    Route::group(['prefix' => 'kip'], function () {
+        Route::get('/', [DashboardPengujiKip::class, 'index'])->name('penguji.kip.dashboard');
+    });
 });
