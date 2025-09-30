@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Verifikator;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
+use App\Models\Notifikasi;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
@@ -67,6 +68,17 @@ class SeleksiAdministrasiController extends Controller
                 'verifikator' => "Verifikator : " . Auth::user()->name,
             ]);
             $status_pendaftar->save();
+
+            $pendaftar = Pendaftar::with(['beasiswa', 'tahun_kegiatan'])
+                ->find($request->pendaftar_id);
+
+            Notifikasi::create([
+                'user_id' => $pendaftar?->user_id,
+                'key' => $request->status_verval === 'success' ? 'LOLOS_ADMINISTRASI' : ($request->status_verval === 'sanggah' ? 'SANGGAH_ADMINISTRASI' : 'GAGAL ADMINISTRASI'),
+                'pesan'   => 'Berdasarkan hasil verifikasi dan validasi oleh tim verifikator, Anda dinyatakan ' . ($request->status_verval === 'success' ? 'Lolos Seleksi Administrasi' : ($request->status_verval !== 'sanggah' ? 'Tidak Lolos Seleksi Administrasi' : 'Tidak Lolos Seleksi Administrasi, tapi Anda berhak untuk menyanggah hasil seleksi.')),
+                'dibaca' => 0,
+                'referensi' => 'pendaftar/riwayat'
+            ]);
 
             $data = array(
                 'icon' => 'success',

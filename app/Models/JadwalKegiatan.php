@@ -26,8 +26,8 @@ class JadwalKegiatan extends Uuid
 
     public function scopeIs_Active($query)
     {
-        return $query->where('tanggal_mulai', '<=', now())
-            ->where('tanggal_selesai', '>=', now());
+        return $query->where('tanggal_mulai', '<=', Carbon::now('Asia/Jakarta'))
+            ->where('tanggal_selesai', '>=', Carbon::now('Asia/Jakarta'));
     }
 
     public function tahun_kegiatan()
