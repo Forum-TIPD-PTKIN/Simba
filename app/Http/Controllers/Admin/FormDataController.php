@@ -322,19 +322,19 @@ class FormDataController extends Controller
                 ->where('beasiswa_id', $data->beasiswa)
                 ->orderBy('indexed', 'asc')
                 ->get();
-            $data = collect($data)->map(function ($item) {
-                $config = $item->config_json ?: null;
-                if (!isset($config->validator)) {
-                    $config->validator = (object) [];
-                }
+            // $data = collect($data)->map(function ($item) {
+            //     $config = $item->config_json ?: null;
+            //     if (!isset($config->validator)) {
+            //         $config->validator = (object) [];
+            //     }
 
-                if (!isset($config->option)) {
-                    $config->option = [];
-                }
+            //     if (!isset($config->option)) {
+            //         $config->option = [];
+            //     }
 
-                $item->config_json = $config;
-                return $item;
-            });
+            //     $item->config_json = $config;
+            //     return $item;
+            // });
         }
         return $data;
     }

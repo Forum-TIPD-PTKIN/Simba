@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
 use App\Models\Pendaftar;
+use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -40,6 +42,45 @@ class SeleksiAdministrasiController extends Controller
         return view('verifikator.modal-seleksi-administrasi', [
             'data' => $data
         ])->render();
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'status_verval' => 'required'
+        ], [
+            'status_verval.required' => 'Status verifikasi dan validasi belum dipilih'
+        ]);
+
+        $is_valid_form = [];
+        foreach ($request->verifikasi as $key => $value) {
+            array_push($is_valid_form, [$key => $value == 1 ? 'Valid' : 'Invalid']);
+        }
+
+        try {
+            $status_pendaftar = new PendaftarStatus();
+            $status_pendaftar->pendaftar_id = trim(strip_tags($request->pendaftar_id));
+            $status_pendaftar->status = trim(strip_tags($request->status_verval)) === 'success' ? 'LOLOS ADMINISTRASI' : (trim(strip_tags($request->status_verval)) === 'sanggah' ? 'SANGGAH ADMINISTRASI' : 'GAGAL ADMINISTRASI');
+            $status_pendaftar->deskripsi = json_encode([
+                'valid_form' => $is_valid_form,
+                'catatan' => $request->catatan,
+                'verifikator' => "Verifikator : " . Auth::user()->name,
+            ]);
+            $status_pendaftar->save();
+
+            $data = array(
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => 'Berhasil verifikasi dan validasi pendaftar'
+            );
+
+            return response()->json($data);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            $data['message'] = $error[2] ?: 'Ada kesalahan saat menyimpan data';
+
+            return response()->json($data, 422);
+        }
     }
 
     public function data(Request $request)

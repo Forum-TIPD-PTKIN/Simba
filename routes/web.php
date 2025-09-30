@@ -30,6 +30,8 @@ Route::post("/login", [LoginController::class, 'login'])->name('login.post');
 Route::get("/logout", [LoginController::class, 'logout'])->name('logout');
 Route::get("/akses/{access}", [LoginController::class, 'change_access'])->middleware(['auth'])->name('akses.ganti');
 
+Route::post("/view-control", [LoginController::class, 'view_control'])->name('view.control');
+
 Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
     Route::get('/', [DashboardAdmin::class, 'index'])->name('admin.dashboard');
 
@@ -102,4 +104,5 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::get('/seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'data'])->name('verifikator.seleksi-administrasi.data');
     Route::get('/seleksi-administrasi/jadwal', [SeleksiAdministrasiController::class, 'jadwal'])->name('verifikator.seleksi-administrasi.jadwal');
     Route::get('/seleksi-administrasi/{id}', [SeleksiAdministrasiController::class, 'edit'])->name('verifikator.seleksi-administrasi.edit');
+    Route::post('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'store'])->name('verifikator.seleksi-administrasi.store');
 });

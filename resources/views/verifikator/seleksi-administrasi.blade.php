@@ -2,6 +2,21 @@
 
 @section('title', 'Seleksi Administrasi')
 
+@push('head')
+    <style>
+        .error {
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
+        }
+
+        .swal2-container {
+            z-index: 2000 !important;
+        }
+    </style>
+@endpush
+
 @section('content')
     <!-- [ Main Content ] start -->
     <div class="pc-container">
@@ -88,7 +103,8 @@
             <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-lg">
-                    <form id="formVerifikasi">
+                    <form id="formVerifikasi" class="needs-validation">
+                        @csrf
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
@@ -114,6 +130,7 @@
 @endpush
 
 @push('script')
+    <script src="{{ asset('assets/admin/plugins/tinymce/tinymce.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
@@ -227,8 +244,180 @@
 
                     $('#modalVerifikasi').modal('show');
                     Swal.close();
+
+                    const oldEditor = tinymce.get('catatan');
+                    if (oldEditor && typeof oldEditor.remove === 'function') {
+                        oldEditor.remove();
+                    }
+
+                    // Prevent Bootstrap dialog from blocking focusin
+                    document.addEventListener('focusin', (e) => {
+                        if (e.target.closest(
+                                ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+                            e.stopImmediatePropagation();
+                        }
+                    });
+
+
+                    tinymce.init({
+                        selector: '#catatan',
+                        branding: false,
+                        menubar: 'edit insert view format help',
+                        toolbar: "undo redo |link | bold italic underline strikethrough | align | bullist numlist",
+                        toolbar_mode: 'sliding',
+                        plugins: [
+                            "advlist", "anchor", "autolink", "charmap", "code", "fullscreen",
+                            "help", "link", "lists", "preview", "searchreplace", "visualblocks",
+                            "autoresize", "directionality", "emoticons", "visualchars", "wordcount"
+                        ],
+                        setup: function(editor) {
+                            editor.on('blur', function() {
+                                tinymce
+                                    .triggerSave(); // Sinkronkan TinyMCE ke textarea setiap kali editor kehilangan fokus
+                            });
+                        }
+                    });
                 }
             });
         }
+
+        function viewControl(e) {
+            let container = document.getElementById('berkas-control');
+            let links = container.querySelectorAll('.base-berkas');
+            let urls = []
+            links.forEach(link => {
+                let url = link.getAttribute('data-url');
+                let type = link.getAttribute('data-type');
+                let extension = link.getAttribute('data-extension');
+                urls.push({
+                    url,
+                    type,
+                    extension
+                })
+            });
+            const data = {
+                active: {
+                    url: e.getAttribute('data-url'),
+                    type: e.getAttribute('data-type'),
+                    extension: e.getAttribute('data-extension')
+                },
+                data: urls.sort((a, b) => a.type.localeCompare(b.type))
+            }
+            $.ajax({
+                type: 'post',
+                url: "{{ route('view.control') }}",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: data
+                },
+                dataType: 'HTML',
+                success: function(data) {
+                    const winUrl = URL.createObjectURL(
+                        new Blob([data], {
+                            type: "text/html"
+                        })
+                    );
+
+                    const margin = 100; // Jarak tepi agar tidak full full banget
+                    const width = window.screen.availWidth - margin * 8;
+                    const height = window.screen.availHeight - margin * 2;
+                    const left = (window.screen.availWidth - width) / 2;
+                    const top = (window.screen.availHeight - height) / 2;
+
+                    const win = window.open(
+                        winUrl,
+                        "win",
+                        `width=${width},height=${height},top=${top},left=${left}`
+                    );
+                }
+            });
+        }
+    </script>
+
+    <script>
+        const validForm = $("form.needs-validation").validate({
+            ignore: "",
+            rules: {
+                status_verval: {
+                    required: true
+                }
+            },
+            messages: {
+                status_verval: {
+                    required: 'Status verifikasi dan validasi harus dipilih'
+                }
+            },
+            errorPlacement: function(error, element) {
+                // Cek apakah elemen adalah TinyMCE (textarea yang diubah menjadi TinyMCE)
+                if (element.siblings().hasClass('tox-tinymce')) {
+                    const editorContainer = tinymce.activeEditor.getContainer();
+                    // Tempatkan error di bawah editor TinyMCE
+                    error.insertAfter(editorContainer).addClass('invalid-feedback');
+                } else if (element.attr("type") === "radio") {
+                    // Untuk radio buttons, tempatkan error setelah .form-check
+                    error.insertAfter(element.closest('.form-check'));
+                } else {
+                    // Untuk input biasa, tempatkan error setelah input
+                    error.addClass('invalid-feedback');
+                    error.insertAfter(element);
+                }
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass('is-invalid').removeClass('is-valid');
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            },
+            submitHandler: function(form, e) {
+                tinymce.triggerSave();
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span role="status">Loading...</span>`;
+
+                // Serialize form
+                const formData = new URLSearchParams(new FormData(form)).toString();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('verifikator.seleksi-administrasi.store') }}",
+                    data: formData,
+                    success: function(data) {
+                        form.reset();
+                        $('#modalVerifikasi').modal('hide');
+                        dataTable.ajax.reload(null, false);
+
+                        const msg = JSON.parse(JSON.stringify(data));
+                        Swal.fire({
+                            icon: msg.icon,
+                            title: msg.title,
+                            text: msg.message,
+                            timer: 1500,
+                            timerProgressBar: true,
+                            customClass: {
+                                timerProgressBar: 'bg-success bg-opacity-50'
+                            }
+                        });
+                    },
+                    error: function(data) {
+                        const msg = JSON.parse(JSON.stringify(data));
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Gagal",
+                            text: msg.responseJSON.message
+                        });
+                    },
+                    complete: function() {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Simpan';
+                    }
+                });
+                return false;
+            }
+        });
     </script>
 @endpush
