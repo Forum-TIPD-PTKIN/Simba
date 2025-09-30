@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            IsMendaftar::class,
+            // IsMendaftar::class,
         ]);
 
         $middleware->alias([
