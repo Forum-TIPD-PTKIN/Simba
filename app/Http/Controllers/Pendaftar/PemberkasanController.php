@@ -11,22 +11,48 @@ use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PemberkasanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $beasiswa = Beasiswa::select('beasiswas.id', 'beasiswas.nama')
+            ->whereExists(function ($db) {
+                $db->select(DB::raw('1'))
+                    ->from('pendaftars as p')
+                    ->whereColumn('p.beasiswa_id', 'beasiswas.id')
+                    ->where('p.user_id', Auth::id())
+                    ->whereExists(function ($db) {
+                        $db->select(DB::raw('1'))
+                            ->from('tahun_kegiatans as tk')
+                            ->whereColumn('tk.id', 'p.tahun_kegiatan_id')
+                            ->where('tk.status', 1);
+                    });
+            })
+            ->get();
+
+        if (!count($beasiswa)) {
+            return view('pendaftar.no-page', [
+                'message' => 'Tidak ada beasiswa yang aktif untuk pengisian berkas',
+                'title' => 'Opz..',
+                'bg' => 'danger'
+            ]);
+        }
+
+        $beasiswa_select = $request->get('beasiswa') ?? $beasiswa[0]->id;
+        $request->mergeIfMissing(['beasiswa' => $beasiswa_select]);
         $generated_form = [];
         $data = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'pendaftar_status'])
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
             })
-            // ->whereHas('beasiswa', function ($db) {
-            //     $db->is_active(1);
-            // })
+            ->whereHas('beasiswa', function ($db) use ($beasiswa_select) {
+                $db->whereId($beasiswa_select);
+            })
             ->whereUserId(Auth::id())
             ->first();
         $master_form = FormData::whereBeasiswaId($data?->beasiswa_id)
@@ -35,8 +61,31 @@ class PemberkasanController extends Controller
             ->orderBy('indexed')
             ->get();
         $jenis_form = $master_form->pluck('jenis')->unique();
+
+        $berkas = Pemberkasan::wherePendaftarId($data->id)->first();
+
         foreach ($jenis_form as $jenis) {
             $form = form($jenis, $data?->beasiswa_id, $data?->tahun_kegiatan_id);
+            if ($berkas) {
+                if (isset($berkas->data->{$form->getCode()})) {
+                    $berkasdata = $berkas->data->{$form->getCode()};
+                    foreach ($form->getType() as $name => $type) {
+                        if ($type === 'file') {
+                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diungga, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                            $form->removeValidator($name, 'required');
+                            $form->appendField(new FormField(
+                                name: 'old_' . $name,
+                                type: 'hidden'
+                            ));
+                            $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
+                        } else {
+                            if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
+                                $form->setValue($name, $berkasdata->{$name}->value);
+                            }
+                        }
+                    }
+                }
+            }
             array_push($generated_form, [
                 'jenis' => $jenis,
                 'form' => $form->render()
@@ -45,6 +94,7 @@ class PemberkasanController extends Controller
 
         return view('pendaftar.pemberkasan', [
             'data' => $data,
+            'filter_beasiswa' => $beasiswa,
             'beasiswa' => $data->beasiswa,
             'generated_form' => $generated_form
         ]);

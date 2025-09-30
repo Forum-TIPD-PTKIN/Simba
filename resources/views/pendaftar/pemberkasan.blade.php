@@ -30,6 +30,18 @@
             <div class="row">
                 <div class="card">
                     <div class="card-body">
+                        <div class="d-flex gap-2 justify-content-end align-items-center mb-3">
+                            <div style="max-width: 400px; width:100%">
+                                <label for="filterForm" class="form-label mb-0">Filter Beasiswa</label>
+                                <select class="form-select" id="filterForm" aria-label="Filter Form"
+                                    onchange="filterBeasiswa(this)">
+                                    @foreach ($filter_beasiswa as $item)
+                                        <option value="{{ $item->id }}" @selected(request()->get('beasiswa') == $item->id)>
+                                            {{ $item->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         @include('pendaftar.daftar.wizard-content.3', [
                             $generated_form,
                             'nowizard' => true,
@@ -47,6 +59,14 @@
     <script>
         function simpanFileManual() {
             $('#form-berkas').submit()
+        }
+    </script>
+
+    <script>
+        function filterBeasiswa(selectElement) {
+            const beasiswaId = selectElement.value;
+            const url = `{{ route('pendaftar.pemberkasan') }}?beasiswa=${beasiswaId}`;
+            window.location.href = url;
         }
     </script>
 @endpush

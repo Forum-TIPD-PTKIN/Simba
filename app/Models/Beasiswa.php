@@ -15,6 +15,12 @@ class Beasiswa extends Uuid
         return Crypt::encryptString($this->id);
     }
 
+    public function scopeDescriptId($query, $enc)
+    {
+        $id = Crypt::decryptString($enc);
+        $query->whereId($id);
+    }
+
     public function jadwal_kegiatan()
     {
         return $this->hasMany(JadwalKegiatan::class);
