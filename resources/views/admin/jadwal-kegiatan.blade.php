@@ -622,7 +622,8 @@
                                     Swal.fire({
                                         title: 'Gagal',
                                         icon: 'error',
-                                        text: res.message
+                                        text: res.responseJSON.message ??
+                                            'Ada kesalahan'
                                     });
                                 },
                                 complete: () => {
