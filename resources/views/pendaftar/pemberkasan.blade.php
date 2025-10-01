@@ -42,13 +42,20 @@
                                 </select>
                             </div>
                         </div>
-                        @include('pendaftar.daftar.wizard-content.3', [
-                            $generated_form,
-                            'nowizard' => true,
-                        ])
-                        <div class="d-flex justify-content-end">
-                            <button onclick="simpanFile()" class="btn btn-primary">Simpan File</button>
-                        </div>
+                        @if ($is_jadwal_daftar)
+                            @include('pendaftar.daftar.wizard-content.3', [
+                                $generated_form,
+                                'nowizard' => true,
+                            ])
+                            <div class="d-flex justify-content-end">
+                                <button onclick="simpanFile()" class="btn btn-primary">Simpan File</button>
+                            </div>
+                        @else
+                            <div class="alert alert-danger">
+                                <h5><i class="ti ti-urgent"></i> Perhatian!</h5>
+                                <p class="mb-0">Pendaftaran sudah ditutup</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

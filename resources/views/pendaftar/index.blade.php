@@ -27,23 +27,32 @@
             <!-- [ breadcrumb ] end -->
             <!-- [ Main Content ] start -->
             <div class="row">
-                @foreach ($beasiswa as $item)
-                    <div class="col-lg-3">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">{{ $item->nama }}</h5>
-                            </div>
-                            <div class="card-body">
-                                {!! Str::words(strip_tags($item->deskripsi), 25, '...') !!}
-                                <div class="d-grid mt-3">
-                                    <button
-                                        class="btn btn-primary d-flex align-items-center justify-content-center btnDetail"
-                                        data-id="{{ $item->id }}"><i class="ti ti-eye"></i> Lebih Detail</button>
+                @if (count($beasiswa))
+                    @foreach ($beasiswa as $item)
+                        <div class="col-lg-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{{ $item->nama }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    {!! Str::words(strip_tags($item->deskripsi), 25, '...') !!}
+                                    <div class="d-grid mt-3">
+                                        <button
+                                            class="btn btn-primary d-flex align-items-center justify-content-center btnDetail"
+                                            data-id="{{ $item->id }}"><i class="ti ti-eye"></i> Lebih Detail</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    @endforeach
+                @else
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <h4><i class="ti ti-alert-triangle"></i> Perhatian!</h4>
+                            <p class="mb-0">Saat ini tidak ada pendaftaran beasiswa yang dibuka</p>
+                        </div>
                     </div>
-                @endforeach
+                @endif
             </div>
             <!-- [ Main Content ] end -->
         </div>

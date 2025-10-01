@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\{
     TahunKegiatanController,
 };
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\Pendaftar\{
     DaftarController,
     DashboardController,
@@ -84,6 +85,9 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
             'destroy' => 'admin.form-data.destroy'
         ]
     ]);
+
+    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('admin.notifikasi.show');
+    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
 });
 
 Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']], function () {
@@ -98,6 +102,9 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
         Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
     });
+
+    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('pendaftar.notifikasi.show');
+    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('pendaftar.notifikasi.destroy');
 });
 
 
@@ -109,6 +116,9 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::get('/seleksi-administrasi/jadwal', [SeleksiAdministrasiController::class, 'jadwal'])->name('verifikator.seleksi-administrasi.jadwal');
     Route::get('/seleksi-administrasi/{id}', [SeleksiAdministrasiController::class, 'edit'])->name('verifikator.seleksi-administrasi.edit');
     Route::post('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'store'])->name('verifikator.seleksi-administrasi.store');
+
+    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('verifikator.notifikasi.show');
+    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('verifikator.notifikasi.destroy');
 });
 
 // penguji

@@ -7,6 +7,7 @@ use App\Helpers\FormHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\FormData;
+use App\Models\JadwalKegiatan;
 use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use Illuminate\Http\Request;
@@ -55,6 +56,7 @@ class PemberkasanController extends Controller
             })
             ->whereUserId(Auth::id())
             ->first();
+        $is_jadwal_daftar = cek_jadwal($data->tahun_kegiatan_id, $data->beasiswa_id, 'PENDAFTARAN', is_active: true); // return true atau false
         $master_form = FormData::whereBeasiswaId($data?->beasiswa_id)
             ->whereTahunKegiatanId($data?->tahun_kegiatan_id)
             ->orderBy('jenis')
@@ -71,7 +73,7 @@ class PemberkasanController extends Controller
                     $berkasdata = $berkas->data->{$form->getCode()};
                     foreach ($form->getType() as $name => $type) {
                         if ($type === 'file') {
-                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diungga, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
                             $form->removeValidator($name, 'required');
                             $form->appendField(new FormField(
                                 name: 'old_' . $name,
@@ -96,7 +98,8 @@ class PemberkasanController extends Controller
             'data' => $data,
             'filter_beasiswa' => $beasiswa,
             'beasiswa' => $data->beasiswa,
-            'generated_form' => $generated_form
+            'generated_form' => $generated_form,
+            'is_jadwal_daftar' => $is_jadwal_daftar
         ]);
     }
 

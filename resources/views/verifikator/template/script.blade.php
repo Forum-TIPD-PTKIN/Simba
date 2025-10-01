@@ -94,5 +94,75 @@
     });
 </script>
 
+<script>
+    $('.notification-item').on('click', function() {
+        const id = $(this).data('id');
+        let url = "{{ route('verifikator.notifikasi.show', ':id') }}";
+        url = url.replace(':id', id);
+
+        $.ajax({
+            url: url,
+            beforeSend: () => {
+                Swal.fire({
+                    title: 'Mengambil data...',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    allowOutsideClick: false
+                });
+            },
+            success: (res) => {
+                let badgeNotif = $(this).closest('li.dropdown').find('span.pc-h-badge'),
+                    notifContent = $(this).parent(),
+                    counterNotif = parseInt(badgeNotif.text()) - 1;
+
+                $(this).hide();
+                badgeNotif.text(counterNotif);
+                if (counterNotif === 0) {
+                    notifContent.append(`<div class="alert alert-info">Tidak ada notifikasi</div>`);
+                    $('.mark-all-read, .clear-notification').hide();
+                }
+                $('#modalNotifikasi .modal-content').html(res);
+
+                $('#modalNotifikasi').modal('show');
+                Swal.close();
+            }
+        });
+    });
+
+    $('.mark-all-read, .clear-notification').on('click', function() {
+        $.ajax({
+            url: "{{ route('verifikator.notifikasi.destroy') }}",
+            type: "DELETE",
+            data: {
+                "_token": "{{ csrf_token() }}"
+            },
+            beforeSend: () => {
+                Swal.fire({
+                    title: 'Sedang memproses...',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    allowOutsideClick: false
+                });
+            },
+            success: (res) => {
+                let notifEl = $(this).closest('li.dropdown'),
+                    badgeNotif = notifEl.find('span.pc-h-badge'),
+                    notifContent = notifEl.find('div.simplebar-content');
+
+                badgeNotif.text(0);
+                notifContent.empty().append(
+                    `<div class="alert alert-info">Tidak ada notifikasi</div>`);
+                $('.mark-all-read, .clear-notification').hide();
+                Swal.close();
+            }
+        });
+    });
+</script>
 
 @stack('script')

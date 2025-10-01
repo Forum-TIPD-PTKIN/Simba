@@ -65,6 +65,7 @@ class Notifikasi extends Uuid
     public function getReferensiAttribute($val)
     {
         $url = url($val);
+        if (!filter_var($url, FILTER_VALIDATE_URL)) return;
         if (parse_url($url, PHP_URL_QUERY)) {
             return $url . '&id=' . $this->id;
         } else {

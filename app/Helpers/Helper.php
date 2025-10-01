@@ -5,6 +5,7 @@ use App\Helpers\Field;
 use App\Helpers\FormHelper;
 use App\Models\FormData;
 use App\Models\JadwalKegiatan;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -54,12 +55,14 @@ if (!function_exists('userAccessName')) {
 }
 
 if (!function_exists('cek_jadwal')) {
-    function cek_jadwal(string $tahun_kegiatan, string $beasiswa, string $role, bool $is_active = false)
+    function cek_jadwal(string $tahun_kegiatan, string $beasiswa, string $role, bool $is_active = true, bool $is_start = false)
     {
         $jadwal = JadwalKegiatan::when($is_active, function ($q) {
             $q->is_active();
         })
-            ->with(['tahun_kegiatan', 'beasiswa'])
+            ->when($is_start, function ($q) {
+                $q->where('tanggal_mulai', '<=', Carbon::now('Asia/Jakarta'));
+            })
             ->where('tahun_kegiatan_id', trim(strip_tags($tahun_kegiatan)))
             ->where('beasiswa_id', trim(strip_tags($beasiswa)))
             ->where('role', $role)

@@ -8,11 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\FormData;
 use App\Models\Mahasiswa;
+use App\Models\Notifikasi;
 use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -90,7 +92,7 @@ class DaftarController extends Controller
                         $berkasdata = $berkas->data->{$form->getCode()};
                         foreach ($form->getType() as $name => $type) {
                             if ($type === 'file') {
-                                $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diungga, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                                $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
                                 $form->removeValidator($name, 'required');
                                 $form->appendField(new FormField(
                                     name: 'old_' . $name,
@@ -182,23 +184,29 @@ class DaftarController extends Controller
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
             return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2');
         }
-        if (!in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
+        if ($config_matches && !in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
             return response()->json('Tahun lulus tidak sesuai dengan ketentuan pendaftaran', 422);
         }
-        if ($request->tahun_masuk != $config_matches['setting']['tahun_masuk'] ?? 0) {
+        if ($config_matches && ($request->tahun_masuk != $config_matches['setting']['tahun_masuk'] ?? 0)) {
             return response()->json('Tahun masuk tidak sesuai dengan ketentuan pendaftaran', 422);
         }
         /* =============================== */
 
         $user = Auth::user();
 
-        $pendaftar = new Pendaftar();
+        $pendaftar = Pendaftar::where('user_id', $user->id)
+            ->where('beasiswa_id', $beasiswa->id)
+            ->where('tahun_kegiatan_id', $kegiatan->id)
+            ->first();
+
+        if (!$pendaftar) $pendaftar = new Pendaftar();
         $pendaftar->user_id = $user->id;
         $pendaftar->beasiswa_id = $beasiswa->id;
         $pendaftar->tahun_kegiatan_id = $kegiatan->id;
         $pendaftar->save();
 
-        $status = new PendaftarStatus();
+        $status = PendaftarStatus::where('pendaftar_id', $pendaftar->id)->first();
+        if (!$status) $status = new PendaftarStatus();
         $status->pendaftar_id = $pendaftar->id;
         $status->status = 'DAFTAR';
         $status->save();
@@ -207,13 +215,25 @@ class DaftarController extends Controller
             ->whereNpm($user->username)
             ->first();
 
-        $mahasiswa = new Mahasiswa();
+        $mahasiswa = Mahasiswa::where('pendaftar_id', $pendaftar->id)->first();
+        if (!$mahasiswa) $mahasiswa = new Mahasiswa();
         $mahasiswa->pendaftar_id = $pendaftar->id;
         $mahasiswa->nim = $mahasiswa_api->npm;
         $mahasiswa->nama = $mahasiswa_api->nama_mahasiswa;
         $mahasiswa->fakultas = $mahasiswa_api->prodi->fakultas->id_fakultas . '|' . $mahasiswa_api->prodi->fakultas->nama_fakultas;
         $mahasiswa->prodi = $mahasiswa_api->prodi->id_prodi . '|' . $mahasiswa_api->prodi->singkatan;
         $mahasiswa->save();
+
+        $users = User::whereRaw("FIND_IN_SET(1, access)")->get();
+        foreach ($users as $key => $value) {
+            Notifikasi::create([
+                'key' => 'PENDAFTARAN',
+                'user_id' => $value->id,
+                'pesan' => "{$mahasiswa->nama} ({$mahasiswa->nim}) berhasil mendaftar beasiswa {$beasiswa->nama} tahun {$kegiatan->tahun}",
+                'referensi' => NULL,
+                'dibaca' => 0
+            ]);
+        }
 
         return response()->json([
             'icon' => 'success',

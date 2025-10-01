@@ -97,19 +97,19 @@
                                 <use xlink:href="#custom-note-1"></use>
                             </svg> </span><span class="pc-mtext">Form Data</span></a>
                 </li>
-                {{-- <li class="pc-item pc-caption">
-                    <label>UI Components</label>
+                <li class="pc-item pc-caption">
+                    <label>Laporan</label>
                     <svg class="pc-icon">
                         <use xlink:href="#custom-box-1"></use>
                     </svg>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link"><span class="pc-micon">
+                    <a href="/verifikasi" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
-                                <use xlink:href="#custom-text-block"></use>
-                            </svg> </span><span class="pc-mtext">Typography</span></a>
+                                <use xlink:href="#custom-document"></use>
+                            </svg> </span><span class="pc-mtext">Verifikasi</span></a>
                 </li>
-                <li class="pc-item">
+                {{-- <li class="pc-item">
                     <a href="../elements/bc_color.html" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-clipboard"></use>

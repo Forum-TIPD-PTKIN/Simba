@@ -25,6 +25,14 @@
 
     @include('admin.template.script')
 
+    <!-- Modal Notifikasi -->
+    <div class="modal fade" id="modalNotifikasi" tabindex="-1" aria-labelledby="modalNotifikasiLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
 </body>
 <!-- [Body] end -->
 
