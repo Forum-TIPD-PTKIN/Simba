@@ -72,6 +72,38 @@ if (!function_exists('cek_jadwal')) {
     }
 }
 
+if (!function_exists('textInitials')) {
+    function textInitials(string $name): string
+    {
+        $words = preg_split('/\s+/', trim($name));
+        $count = count($words);
+
+        if ($count === 0) {
+            return '';
+        }
+
+        if ($count === 1) {
+            // Hanya 1 kata → huruf pertama
+            return strtoupper(mb_substr($words[0], 0, 1));
+        }
+
+        if ($count === 2) {
+            // 2 kata → huruf pertama kata1 + huruf pertama kata2
+            return strtoupper(
+                mb_substr($words[0], 0, 1) .
+                    mb_substr($words[1], 0, 1)
+            );
+        }
+
+        // 3 kata atau lebih → huruf pertama kata1 + huruf pertama kata3
+        return strtoupper(
+            mb_substr($words[0], 0, 1) .
+                mb_substr($words[2], 0, 1)
+        );
+    }
+}
+
+
 if (!function_exists('formPemberkasan')) {
     function formPemberkasan($beasiswaId)
     {

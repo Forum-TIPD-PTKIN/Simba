@@ -52,9 +52,13 @@ class DashboardController extends Controller
             $query->orderBy('tanggal_mulai', 'asc');
         }])
             ->findOrFail($id);
+        $tahun_kegiatan_id = count($beasiswa->jadwal_kegiatan) ? $beasiswa->jadwal_kegiatan[0]->tahun_kegiatan_id : null;
+        $beasiswa_id = count($beasiswa->jadwal_kegiatan) ? $beasiswa->jadwal_kegiatan[0]->beasiswa_id : null;
+        $is_jadwal_daftar = cek_jadwal($tahun_kegiatan_id, $beasiswa_id, 'PENDAFTARAN', true);
 
         return view('pendaftar.detail-beasiswa', [
-            'beasiswa' => $beasiswa
+            'beasiswa' => $beasiswa,
+            'is_jadwal_daftar' => $is_jadwal_daftar
         ]);
     }
 
@@ -80,5 +84,35 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function beasiswa(string $status)
+    {
+        $beasiswa = Beasiswa::where('status', 1)
+            ->whereHas('jadwal_kegiatan', function ($query) use ($status) {
+                if ($status === 'all') {
+                    return $query->where('role', 'PENDAFTARAN')
+                        ->whereHas('tahun_kegiatan', function ($q) {
+                            $q->where('status', 1);
+                        });
+                } else if ($status === 'open') {
+                    return $query->is_active()
+                        ->where('role', 'PENDAFTARAN')
+                        ->whereHas('tahun_kegiatan', function ($q) {
+                            $q->where('status', 1);
+                        });
+                } else if ($status === 'close') {
+                    return $query->is_notActive()
+                        ->where('role', 'PENDAFTARAN')
+                        ->whereHas('tahun_kegiatan', function ($q) {
+                            $q->where('status', 1);
+                        });
+                }
+            })
+            ->get();
+
+        return view('pendaftar.list-beasiswa', [
+            'beasiswa' => $beasiswa
+        ]);
     }
 }

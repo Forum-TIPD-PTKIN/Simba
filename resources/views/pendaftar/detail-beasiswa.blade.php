@@ -68,14 +68,18 @@
                         </div>
                         <div class="card-footer">
                             <div class="row g-2 justify-content-center">
-                                <div class="col-md-6">
-                                    <div class="d-grid">
-                                        <a class="btn btn-primary d-grid"
-                                            href="{{ route('pendaftar.daftar', [$beasiswa->id]) }}"><span
-                                                class="text-truncate w-100">Daftar
-                                                Beasiswa</span></a>
+                                @if ($is_jadwal_daftar)
+                                    <div class="col-md-6">
+                                        <div class="d-grid">
+                                            <a class="btn btn-primary d-grid"
+                                                href="{{ route('pendaftar.daftar', [$beasiswa->id]) }}"><span
+                                                    class="text-truncate w-100">Daftar
+                                                    Beasiswa</span></a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="alert alert-danger fw-bold text-center">Pendaftaran Ditutup</div>
+                                @endif
                             </div>
                         </div>
                     </div>
