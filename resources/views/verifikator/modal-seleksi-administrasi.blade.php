@@ -37,7 +37,7 @@
                                     onclick="window.open('{{ $value->value?->url }}?type=pdf', '_blank'
                                     , 'location=yes,height=570,width=520,scrollbars=yes,status=yes' );">{{ $value->value?->name }}</a> --}}
                             @else
-                                {{ var_dump($value) }}
+                                {{ $value->valOption }}
                             @endif
                         </td>
                         <td class="text-center align-middle">

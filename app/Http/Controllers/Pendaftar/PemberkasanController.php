@@ -189,13 +189,18 @@ class PemberkasanController extends Controller
                         $val->url = '[URL_ORIGIN]/' . $val->path;
                     }
                 } else {
-                    return $form->getOption();
                     $val = $form->getValue($name);
+                    $valOption =  collect($form->getOption($name))->filter(function ($i) use ($val) {
+                        return $i->value === $val;
+                    })->map(function ($i) {
+                        return $i->text;
+                    })->first();
                 }
                 $berkasGroup->{$form->getCode()}->{$name} = [
                     'text' => $form->getLabel($name),
                     'type' => $form->getType($name),
-                    'value' => $val
+                    'value' => $val,
+                    'valOption' => $type !== 'file' ? $valOption : null
                 ];
             }
         }
