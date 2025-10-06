@@ -10,6 +10,9 @@
                 <input type="hidden" name="beasiswa" value="{{ $beasiswa->id }}">
                 {!! $item['form'] !!}
             </form>
+            <div class="d-flex justify-content-end">
+                <button onclick="simpanFile()" class="btn btn-success">Unggah & Simpan</button>
+            </div>
         @endforeach
     </div>
 </div>

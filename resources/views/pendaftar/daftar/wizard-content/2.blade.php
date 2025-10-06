@@ -181,14 +181,4 @@
             return false;
         }
     </script>
-
-    @if (session()->has('error_register'))
-        <script>
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "{{ session()->get('error_register') }}",
-            });
-        </script>
-    @endif
 @endpush

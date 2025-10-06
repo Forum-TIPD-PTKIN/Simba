@@ -126,55 +126,10 @@ class DaftarController extends Controller
                 ]);
             }
         } else if ($step == 4 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
-            $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
-            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
-                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
-                ->orderBy('jenis')
-                ->orderBy('indexed')
-                ->get();
-            $jenis_form = $master_form->pluck('jenis')->unique();
-
-            $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
-
-            $masterTemplate = [
-                'file_surat_pernyataan_1' => url('file/template/surat_pernyataan_1.docx'),
-                'file_surat_pernyataan_2' => url('file/template/surat_pernyataan_2.docx'),
-                'file_pakta_integritas' => url('file/template/pakta_integritas.docx'),
-            ];
-
-            foreach ($jenis_form as $jenis) {
-                $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
-                // if ($berkas) {
-                //     if (isset($berkas->data->{$form->getCode()})) {
-                //         $berkasdata = $berkas->data->{$form->getCode()};
-                //         foreach ($form->getType() as $name => $type) {
-                //             if ($type === 'file') {
-                //                 $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
-                //                 $extension = $berkasdata->{$name}->value->extension;
-                //                 $url = $berkasdata->{$name}->value->url;
-                //                 $text = $berkasdata->{$name}->text;
-                //                 if ($url_temp) {
-                //                     $form->setLabel($name, "$text (<a href='$url_temp' target='_blank'>Download Template</a>)");
-                //                 }
-                //                 $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
-                //                 $form->removeValidator($name, 'required');
-                //                 $form->appendField(new FormField(
-                //                     name: 'old_' . $name,
-                //                     type: 'hidden'
-                //                 ));
-                //                 $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
-                //             } else {
-                //                 if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
-                //                     $form->setValue($name, $berkasdata->{$name}->value);
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
-                array_push($generated_form, [
-                    'jenis' => $jenis,
-                    'form' => $form->render()
-                ]);
+            $isi = $this->validateFinalisasiBerkas($pendaftar);
+            if (!$isi->status) {
+                session()->flash('error_register', $isi->message);
+                return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=3');
             }
         }
         return view('pendaftar.daftar.index', compact(
@@ -187,6 +142,51 @@ class DaftarController extends Controller
             'readOnly',
             'generated_form'
         ));
+    }
+
+    private function validateFinalisasiBerkas($pendaftar)
+    {
+        $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+        $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+            ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+            ->orderBy('jenis')
+            ->orderBy('indexed')
+            ->get();
+        $jenis_form = $master_form->pluck('jenis')->unique();
+
+        $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+
+        if (!$berkas) {
+            return (object)[
+                'status' => false,
+                'message' => 'Pemberkasan harus dilengkapi!'
+            ];
+        }
+
+        foreach ($jenis_form as $jenis) {
+            $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+
+            $validators = $form->getValidator();
+            $berkasdata = $berkas->data->{$form->getCode()} ?? null;
+
+            foreach ($form->getType() as $name => $type) {
+                $validator = $validators->rules[$form->getCode() . '_' . $name];
+                $_valids = explode('|', $validator);
+                if (in_array('required', collect($_valids)->map(function ($v) {
+                    return strtolower(trim($v));
+                })->toArray())) {
+                    if (!$berkasdata) {
+                        return (object)[
+                            'status' => false,
+                            'message' => "{$form->getLabel($name)} harus diisi!"
+                        ];
+                    }
+                }
+            }
+        }
+        return (object)[
+            'status' => true
+        ];
     }
 
     /**
@@ -288,17 +288,6 @@ class DaftarController extends Controller
         $mahasiswa->prodi = $mahasiswa_api->prodi->id_prodi . '|' . $mahasiswa_api->prodi->singkatan;
         $mahasiswa->save();
 
-        $users = User::whereRaw("FIND_IN_SET(1, access)")->get();
-        foreach ($users as $key => $value) {
-            Notifikasi::create([
-                'key' => 'PENDAFTARAN',
-                'user_id' => $value->id,
-                'pesan' => "{$mahasiswa->nama} ({$mahasiswa->nim}) berhasil mendaftar beasiswa {$beasiswa->nama} tahun {$kegiatan->tahun}",
-                'referensi' => NULL,
-                'dibaca' => 0
-            ]);
-        }
-
         return response()->json([
             'icon' => 'success',
             'title' => 'Berhasil',
@@ -307,6 +296,54 @@ class DaftarController extends Controller
         ]);
     }
 
+    public function finalisasi(Request $request, $id)
+    {
+        $beasiswa = Beasiswa::where('status', 1)
+            ->whereHas('jadwal_kegiatan', function ($query) {
+                $query->is_active()
+                    ->where('role', 'PENDAFTARAN')
+                    ->whereHas('tahun_kegiatan', function ($q) {
+                        $q->where('status', 1);
+                    });
+            })
+            ->find($id);
+
+        $pendaftar = Pendaftar::with('pendaftar_status', 'tahun_kegiatan', 'mahasiswa')->whereBeasiswaId($id)
+            ->whereHas('tahun_kegiatan', function ($db) {
+                $db->whereStatus(1);
+            })
+            ->whereUserId(Auth::id())
+            ->first();
+
+        if (!$beasiswa) {
+            session()->flash('error_register', 'Beasiswa yang dimaksud tidak tersedia');
+            return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=4');
+        }
+
+        $cek = $this->validateFinalisasiBerkas($pendaftar);
+        if (!$cek->status) {
+            session()->flash('error_register', $cek->message);
+            return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=4');
+        }
+
+        if ($pendaftar->latest_status?->status !== 'FINALISASI') {
+            PendaftarStatus::create([
+                'pendaftar_id' => $pendaftar->id,
+                'status' => 'FINALISASI'
+            ]);
+        }
+
+        $users = User::whereRaw("FIND_IN_SET(1, access)")->get();
+        foreach ($users as $key => $value) {
+            Notifikasi::create([
+                'key' => 'PENDAFTARAN',
+                'user_id' => $value->id,
+                'pesan' => "{$pendaftar->mahasiswa->nama} ({$pendaftar->mahasiswa->nim}) berhasil memfinalisasi pendaftaran beasiswa {$beasiswa->nama} tahun {$pendaftar->tahun_kegiatan->tahun}",
+                'referensi' => NULL,
+                'dibaca' => 0
+            ]);
+        }
+    }
     /**
      * Display the specified resource.
      */
