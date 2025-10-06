@@ -70,11 +70,32 @@
                 <li class="pc-item pc-caption">
                     <label>Data Master</label>
                 </li>
-                <li class="pc-item">
-                    <a href="{{ route('admin.tahun-kegiatan') }}" class="pc-link"><span class="pc-micon">
+                <li class="pc-item pc-hasmenu">
+                    <a href="#!" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
-                                <use xlink:href="#custom-story"></use>
-                            </svg> </span><span class="pc-mtext">Tahun Kegiatan</span>
+                                <use xlink:href="#custom-setting-2"></use>
+                            </svg> </span><span class="pc-mtext">Data Master</span><span class="pc-arrow"><i
+                                data-feather="chevron-right"></i></span></a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item">
+                            <a href="{{ route('admin.tahun-kegiatan') }}" class="pc-link">Tahun Kegiatan</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.beasiswa') }}" class="pc-link">Beasiswa</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.jadwal-kegiatan') }}" class="pc-link">Jadwal Kegiatan</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.form-data') }}" class="pc-link">Form Data</a>
+                        </li>
+                    </ul>
+                </li>
+                {{-- <li class="pc-item">
+                    <a href="{{ route('admin.tahun-kegiatan') }}" class="pc-link"><span class="pc-micon">
+                        <svg class="pc-icon">
+                            <use xlink:href="#custom-story"></use>
+                        </svg> </span><span class="pc-mtext">Tahun Kegiatan</span>
                     </a>
                 </li>
                 <li class="pc-item">
@@ -96,7 +117,7 @@
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-note-1"></use>
                             </svg> </span><span class="pc-mtext">Form Data</span></a>
-                </li>
+                </li> --}}
                 <li class="pc-item pc-caption">
                     <label>Laporan</label>
                     <svg class="pc-icon">

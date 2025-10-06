@@ -135,6 +135,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script>
+        // Reload data
         function reloadData() {
             $.ajax({
                 url: "{{ route('verifikator.seleksi-administrasi.jadwal') }}",
@@ -164,6 +165,7 @@
             dataTable.ajax.reload(null, false);
         }
 
+        // Datatable
         const dataTable = $("#dataTable").DataTable({
             processing: true,
             serverSide: true,
@@ -222,6 +224,7 @@
     </script>
 
     <script>
+        // Verifikasi data
         function verifikasiData(id) {
             let url = "{{ route('verifikator.seleksi-administrasi.edit', ':id') }}";
             url = url.replace(':id', id);

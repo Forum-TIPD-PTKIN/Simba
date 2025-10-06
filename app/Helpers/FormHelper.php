@@ -279,6 +279,17 @@ class FormHelper
         }
     }
 
+    public function getOption($name)
+    {
+        foreach ($this->data as $field) {
+            if ($field->config->name === $name) {
+                return $field->config->option ?? [];
+            }
+        }
+        return [];
+    }
+
+
     public function setValue($name, $data)
     {
         $name = $this->kode . '_' . $name;
@@ -540,7 +551,6 @@ class FormHelper
             }
         }
     }
-
 
     private function getForm()
     {

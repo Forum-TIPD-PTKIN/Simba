@@ -190,11 +190,17 @@ class PemberkasanController extends Controller
                     }
                 } else {
                     $val = $form->getValue($name);
+                    $valOption =  collect($form->getOption($name))->filter(function ($i) use ($val) {
+                        return $i->value === $val;
+                    })->map(function ($i) {
+                        return $i->text;
+                    })->first();
                 }
                 $berkasGroup->{$form->getCode()}->{$name} = [
                     'text' => $form->getLabel($name),
                     'type' => $form->getType($name),
-                    'value' => $val
+                    'value' => $val,
+                    'valOption' => $type !== 'file' ? $valOption : null
                 ];
             }
         }
