@@ -23,7 +23,11 @@ use App\Http\Controllers\Verifikator\{
 use App\Http\Controllers\Penguji\Kip\{
     DashboardController as DashboardPengujiKip,
 };
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+use function Livewire\store;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -128,4 +132,12 @@ Route::group(['prefix' => 'penguji', 'middleware' => ['auth']], function () {
     Route::group(['prefix' => 'kip'], function () {
         Route::get('/', [DashboardPengujiKip::class, 'index'])->name('penguji.kip.dashboard');
     });
+});
+
+Route::get('file/{root}/{berkas}/{filename}', function ($root, $berkas, $filename) {
+    $path = "$root/$berkas/" . $filename;
+    if (!file_exists(storage_path('app/' . $path))) {
+        abort(404, 'File not found');
+    }
+    return response()->file(storage_path('app/' . $path));
 });

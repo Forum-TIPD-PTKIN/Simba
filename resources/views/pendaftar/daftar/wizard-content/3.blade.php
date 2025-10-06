@@ -17,6 +17,59 @@
 
 @push('script')
     <script>
+        function viewControl(e) {
+            let container = document.getElementById('form-berkas');
+            let links = container.querySelectorAll('.base-berkas');
+            let urls = []
+            links.forEach(link => {
+                let url = link.getAttribute('data-url');
+                let type = link.getAttribute('data-type');
+                let extension = link.getAttribute('data-extension');
+                urls.push({
+                    url,
+                    type,
+                    extension
+                })
+            });
+            const data = {
+                active: {
+                    url: e.getAttribute('data-url'),
+                    type: e.getAttribute('data-type'),
+                    extension: e.getAttribute('data-extension')
+                },
+                data: urls.sort((a, b) => a.type.localeCompare(b.type))
+            }
+            $.ajax({
+                type: 'post',
+                url: "{{ route('view.control') }}",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: data
+                },
+                dataType: 'HTML',
+                success: function(data) {
+                    console.log(data)
+                    const winUrl = URL.createObjectURL(
+                        new Blob([data], {
+                            type: "text/html"
+                        })
+                    );
+
+                    const margin = 100; // Jarak tepi agar tidak full full banget
+                    const width = window.screen.availWidth - margin * 8;
+                    const height = window.screen.availHeight - margin * 2;
+                    const left = (window.screen.availWidth - width) / 2;
+                    const top = (window.screen.availHeight - height) / 2;
+
+                    const win = window.open(
+                        winUrl,
+                        "win",
+                        `width=${width},height=${height},top=${top},left=${left}`
+                    );
+                }
+            });
+        }
+
         function simpanFile() {
             Swal.fire({
                 title: "Tunggu!",

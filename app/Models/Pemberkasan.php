@@ -11,7 +11,7 @@ class Pemberkasan extends Uuid
 
     public function getDataAttribute($val)
     {
-        $val = str_replace('[URL_ORIGIN]', url('/'), $val);
+        $val = str_replace('[URL_ORIGIN]', url('file/'), $val);
         return json_decode($val);
     }
 
