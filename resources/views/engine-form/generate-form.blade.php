@@ -2,7 +2,7 @@
     @if (!in_array($item->kode . '_' . $item->config->name, $exclude))
         <div class="form-group @if ($item->config->type == 'hidden') d-none @endif"
             id="form-group-{{ $item->kode . '_' . $item->config->name }}">
-            <label for="id_{{ $item->kode . '_' . $item->config->name }}">{{ $item->config?->title }}</label>
+            <label for="id_{{ $item->kode . '_' . $item->config->name }}">{!! $item->config?->title !!}</label>
             @if (in_array($item->config->type, ['text', 'hidden', 'password', 'email', 'number', 'date']))
                 @if ($item->config->type == 'date')
                     <div class="input-group">

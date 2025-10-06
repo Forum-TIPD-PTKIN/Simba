@@ -407,7 +407,7 @@ class FormHelper
     {
         foreach ($this->data as $key => $value) {
             if ($this->kode . '_' . $value->config->name === $this->kode . '_' . $name) {
-                $value->judul = $data;
+                $value->config->title = $data;
             }
         }
     }

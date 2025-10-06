@@ -15,10 +15,17 @@
             <div class="xsmall">Biodata Mahasiswa</div>
         </a>
     </div>
-    <div class="wizard-step @if ($step == 3) active @endif">
+    <div
+        class="wizard-step @if ($step == 3) active @elseif ($step > 3) completed @endif">
         <a href="?step=3" class="text-dark">
             <div class="step-circle">3</div>
             <div class="xsmall">Pemberkasan</div>
+        </a>
+    </div>
+    <div class="wizard-step @if ($step == 4) active @endif">
+        <a href="?step=4" class="text-dark">
+            <div class="step-circle">4</div>
+            <div class="xsmall">Finalisasi</div>
         </a>
     </div>
 </div>
