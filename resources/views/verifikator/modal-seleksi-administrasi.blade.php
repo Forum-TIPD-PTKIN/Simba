@@ -22,12 +22,12 @@
                 <th>Valid?</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="berkas-control">
             @foreach ($data->pemberkasan?->data as $item)
                 @foreach (collect($item) as $value)
                     <tr>
                         <td class="text-start w-25">{{ $value->text }}</td>
-                        <td id="berkas-control">
+                        <td>
                             @if ($value->type === 'file')
                                 <a href="javascript:void(0);" data-extension="{{ $value->value?->extension }}"
                                     data-url="{{ $value->value?->url }}" data-type="{{ $value->text }}"
@@ -37,7 +37,7 @@
                                     onclick="window.open('{{ $value->value?->url }}?type=pdf', '_blank'
                                     , 'location=yes,height=570,width=520,scrollbars=yes,status=yes' );">{{ $value->value?->name }}</a> --}}
                             @else
-                                {{ $value->value }}
+                                {{ var_dump($value) }}
                             @endif
                         </td>
                         <td class="text-center align-middle">

@@ -189,6 +189,7 @@ class PemberkasanController extends Controller
                         $val->url = '[URL_ORIGIN]/' . $val->path;
                     }
                 } else {
+                    return $form->getOption();
                     $val = $form->getValue($name);
                 }
                 $berkasGroup->{$form->getCode()}->{$name} = [
