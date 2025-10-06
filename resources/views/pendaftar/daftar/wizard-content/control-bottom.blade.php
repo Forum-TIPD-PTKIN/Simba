@@ -6,8 +6,8 @@
         <a href="{{ route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=' . ($step - 1) }}"
             class="btn btn-outline-secondary">Prev</a>
     @endif
-    @if ($step >= 3)
-        <button onclick="simpanFile()" class="btn btn-primary">Simpan File</button>
+    @if ($step >= 4)
+        <button onclick="simpanFile()" class="btn btn-primary">Finalisasi</button>
     @else
         <a href="{{ route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=' . ($step + 1) }}"
             class="btn btn-primary">Next</a>

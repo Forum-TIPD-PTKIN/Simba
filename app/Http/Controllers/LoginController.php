@@ -158,6 +158,7 @@ class LoginController extends Controller
 
     public function view_control(Request $request)
     {
+
         $html = view('view-controller.content', ['data' => $request->data['data'], 'active' => $request->data['active']])->render();
         return $html;
     }

@@ -35,7 +35,7 @@
 
                     <!-- Progress bar -->
                     <div class="progress mb-4" style="height:6px;">
-                        <div class="progress-bar" style="width:{{ (100 / 3) * $step }}%;"></div>
+                        <div class="progress-bar" style="width:{{ (100 / 4) * $step }}%;"></div>
                     </div>
 
                     @if ($readOnly)

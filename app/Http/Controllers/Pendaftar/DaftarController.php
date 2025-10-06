@@ -65,7 +65,7 @@ class DaftarController extends Controller
             return redirect()->to(route('pendaftar.daftar', ['id' => $id]) . '?step=2');
         }
         if ($step < 1) $step = 1;
-        else if ($step > 3) $step = 3;
+        else if ($step > 4) $step = 4;
         $jalur = null;
         $generated_form = [];
 
@@ -85,6 +85,12 @@ class DaftarController extends Controller
 
             $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
 
+            $masterTemplate = [
+                'file_surat_pernyataan_1' => url('file/template/surat_pernyataan_1.docx'),
+                'file_surat_pernyataan_2' => url('file/template/surat_pernyataan_2.docx'),
+                'file_pakta_integritas' => url('file/template/pakta_integritas.docx'),
+            ];
+
             foreach ($jenis_form as $jenis) {
                 $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
                 if ($berkas) {
@@ -92,11 +98,14 @@ class DaftarController extends Controller
                         $berkasdata = $berkas->data->{$form->getCode()};
                         foreach ($form->getType() as $name => $type) {
                             if ($type === 'file') {
-                                // dd($berkasdata);
+                                $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
                                 $extension = $berkasdata->{$name}->value->extension;
                                 $url = $berkasdata->{$name}->value->url;
                                 $text = $berkasdata->{$name}->text;
-                                $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                                if ($url_temp) {
+                                    $form->setLabel($name, "$text (<a href='$url_temp' target='_blank'>Download Template</a>)");
+                                }
+                                $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
                                 $form->removeValidator($name, 'required');
                                 $form->appendField(new FormField(
                                     name: 'old_' . $name,
@@ -111,6 +120,57 @@ class DaftarController extends Controller
                         }
                     }
                 }
+                array_push($generated_form, [
+                    'jenis' => $jenis,
+                    'form' => $form->render()
+                ]);
+            }
+        } else if ($step == 4 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
+            $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+                ->orderBy('jenis')
+                ->orderBy('indexed')
+                ->get();
+            $jenis_form = $master_form->pluck('jenis')->unique();
+
+            $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+
+            $masterTemplate = [
+                'file_surat_pernyataan_1' => url('file/template/surat_pernyataan_1.docx'),
+                'file_surat_pernyataan_2' => url('file/template/surat_pernyataan_2.docx'),
+                'file_pakta_integritas' => url('file/template/pakta_integritas.docx'),
+            ];
+
+            foreach ($jenis_form as $jenis) {
+                $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+                // if ($berkas) {
+                //     if (isset($berkas->data->{$form->getCode()})) {
+                //         $berkasdata = $berkas->data->{$form->getCode()};
+                //         foreach ($form->getType() as $name => $type) {
+                //             if ($type === 'file') {
+                //                 $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
+                //                 $extension = $berkasdata->{$name}->value->extension;
+                //                 $url = $berkasdata->{$name}->value->url;
+                //                 $text = $berkasdata->{$name}->text;
+                //                 if ($url_temp) {
+                //                     $form->setLabel($name, "$text (<a href='$url_temp' target='_blank'>Download Template</a>)");
+                //                 }
+                //                 $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                //                 $form->removeValidator($name, 'required');
+                //                 $form->appendField(new FormField(
+                //                     name: 'old_' . $name,
+                //                     type: 'hidden'
+                //                 ));
+                //                 $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
+                //             } else {
+                //                 if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
+                //                     $form->setValue($name, $berkasdata->{$name}->value);
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
                 array_push($generated_form, [
                     'jenis' => $jenis,
                     'form' => $form->render()
@@ -245,7 +305,6 @@ class DaftarController extends Controller
             'message' => "Pendaftaran beasiswa {$beasiswa->nama} berhasil",
             'redirect' => route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3'
         ]);
-        // return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3');
     }
 
     /**

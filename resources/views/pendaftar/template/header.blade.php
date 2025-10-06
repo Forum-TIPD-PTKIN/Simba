@@ -39,7 +39,9 @@
                         <svg class="pc-icon">
                             <use xlink:href="#custom-notification"></use>
                         </svg>
-                        <span class="badge bg-success pc-h-badge">{{ $notifikasi_counter }}</span>
+                        @if ($notifikasi_counter > 0)
+                            <span class="badge bg-success pc-h-badge">{{ $notifikasi_counter }}</span>
+                        @endif
                     </a>
                     <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header d-flex align-items-center justify-content-between">
