@@ -9,8 +9,6 @@
 <script src="{{ asset('assets/admin/js/script.js') }}"></script>
 <script src="{{ asset('assets/admin/js/theme.js') }}"></script>
 <script src="{{ asset('assets/admin/js/plugins/feather.min.js') }}"></script>
-<!-- Buy Now Link Script -->
-<script defer src="https://fomo.codedthemes.com/pixel/CDkpF1sQ8Tt5wpMZgqRvKpQiUhpWE3bc"></script>
 
 <!-- SweetAlert2 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.8/sweetalert2.all.min.js"
