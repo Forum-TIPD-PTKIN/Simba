@@ -22,7 +22,6 @@ class DaftarController extends Controller
      */
     public function index(string $id)
     {
-
         $user = Auth::user();
         $nim = $user->username;
         $mahasiswa = SiakadMahasiswa::with('prodi.fakultas')
@@ -45,6 +44,8 @@ class DaftarController extends Controller
             })
             ->whereUserId($user->id)
             ->first();
+
+        if ($pendaftar && in_array($pendaftar->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'])) return redirect()->to(route('pendaftar.seleksi-administrasi'));
 
         if (!$beasiswa) {
             return view('pendaftar.no-page', [

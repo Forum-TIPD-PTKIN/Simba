@@ -24,6 +24,11 @@ class JadwalKegiatan extends Uuid
         return Carbon::parse($this->tanggal_selesai)->translatedFormat('d-m-Y H:i');
     }
 
+    public function formatTanggal($kolom, $format = 'd/m/Y')
+    {
+        return $this->{$kolom} ? Carbon::parse($this->{$kolom})->translatedFormat($format) : null;
+    }
+
     public function scopeIs_Active($query)
     {
         return $query->where('tanggal_mulai', '<=', Carbon::now('Asia/Jakarta'))

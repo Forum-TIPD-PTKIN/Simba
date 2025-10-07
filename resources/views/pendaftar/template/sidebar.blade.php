@@ -108,6 +108,17 @@
                             <span class="pc-mtext">Pemberkasan</span>
                         </a>
                     </li>
+
+                    <li class="pc-item">
+                        <a href="{{ route('pendaftar.seleksi-administrasi') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-document-filter"></use>
+                                </svg>
+                            </span>
+                            <span class="pc-mtext">Seleksi Administrasi</span>
+                        </a>
+                    </li>
                 @endif
 
             </ul>

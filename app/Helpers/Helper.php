@@ -49,7 +49,7 @@ if (!function_exists('userAccessName')) {
             case 2:
                 return 'Mahasiswa';
             default:
-                return 'Unknow';
+                return 'Unknown';
         }
     }
 }
@@ -130,7 +130,7 @@ if (!function_exists('formPemberkasan')) {
             case 2:
                 return 'Mahasiswa';
             default:
-                return 'Unknow';
+                return 'Unknown';
         }
     }
 }
