@@ -197,6 +197,7 @@ class PemberkasanController extends Controller
                     })->first();
                 }
                 $berkasGroup->{$form->getCode()}->{$name} = [
+                    'index' => $form->getIndex($name),
                     'text' => $form->getLabel($name),
                     'type' => $form->getType($name),
                     'value' => $val,

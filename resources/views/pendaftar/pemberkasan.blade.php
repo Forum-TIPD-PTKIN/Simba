@@ -43,13 +43,21 @@
                             </div>
                         </div>
                         @if ($is_jadwal_daftar)
-                            @include('pendaftar.daftar.wizard-content.3', [
-                                $generated_form,
-                                'nowizard' => true,
-                            ])
-                            <div class="d-flex justify-content-end">
+                            @if ($data->latest_status?->status !== 'PENGAJUAN')
+                                @include('pendaftar.daftar.wizard-content.3', [
+                                    $generated_form,
+                                    'nowizard' => true,
+                                ])
+                                {{-- <div class="d-flex justify-content-end">
                                 <button onclick="simpanFile()" class="btn btn-primary">Simpan File</button>
-                            </div>
+                            </div> --}}
+                            @else
+                                <div class="alert alert-danger">
+                                    <h5><i class="ti ti-urgent"></i> Perhatian!</h5>
+                                    <p class="mb-0">Pendaftaran Anda telah berhasil diselesaikan
+                                        dan sedang dalam proses peninjauan. Anda tidak dapat mengubah data lagi.</p>
+                                </div>
+                            @endif
                         @else
                             <div class="alert alert-danger">
                                 <h5><i class="ti ti-urgent"></i> Perhatian!</h5>

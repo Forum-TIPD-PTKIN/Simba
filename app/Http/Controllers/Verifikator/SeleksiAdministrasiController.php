@@ -8,6 +8,7 @@ use App\Models\JadwalKegiatan;
 use App\Models\Notifikasi;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
+use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,8 +41,13 @@ class SeleksiAdministrasiController extends Controller
         $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
             ->find($id);
 
+        $key_pmb = env('PMB_KEY_API');
+        $req_pmb = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$data->mahasiswa?->nim}?key={$key_pmb}");
+        if ($req_pmb->status) $data_pmb = $req_pmb->data;
+
         return view('verifikator.modal-seleksi-administrasi', [
-            'data' => $data
+            'data' => $data,
+            'data_pmb' => $data_pmb ?? null
         ])->render();
     }
 
@@ -61,24 +67,13 @@ class SeleksiAdministrasiController extends Controller
         try {
             $status_pendaftar = new PendaftarStatus();
             $status_pendaftar->pendaftar_id = trim(strip_tags($request->pendaftar_id));
-            $status_pendaftar->status = trim(strip_tags($request->status_verval)) === 'success' ? 'LOLOS ADMINISTRASI' : (trim(strip_tags($request->status_verval)) === 'sanggah' ? 'SANGGAH ADMINISTRASI' : 'GAGAL ADMINISTRASI');
+            $status_pendaftar->status = trim(strip_tags($request->status_verval)) === 'success' ? 'LOLOS ADMINISTRASI' : 'GAGAL ADMINISTRASI';
             $status_pendaftar->deskripsi = json_encode([
                 'valid_form' => $is_valid_form,
                 'catatan' => $request->catatan,
                 'verifikator' => "Verifikator : " . Auth::user()->name,
             ]);
             $status_pendaftar->save();
-
-            $pendaftar = Pendaftar::with(['beasiswa', 'tahun_kegiatan'])
-                ->find($request->pendaftar_id);
-
-            Notifikasi::create([
-                'user_id' => $pendaftar?->user_id,
-                'key' => $request->status_verval === 'success' ? 'LOLOS_ADMINISTRASI' : ($request->status_verval === 'sanggah' ? 'SANGGAH_ADMINISTRASI' : 'GAGAL ADMINISTRASI'),
-                'pesan'   => 'Berdasarkan hasil verifikasi dan validasi oleh tim verifikator, Anda dinyatakan ' . ($request->status_verval === 'success' ? 'Lolos Seleksi Administrasi' : ($request->status_verval !== 'sanggah' ? 'Tidak Lolos Seleksi Administrasi' : 'Tidak Lolos Seleksi Administrasi, tapi Anda berhak untuk menyanggah hasil seleksi.')),
-                'dibaca' => 0,
-                'referensi' => 'pendaftar/riwayat'
-            ]);
 
             $data = array(
                 'icon' => 'success',
@@ -108,7 +103,7 @@ class SeleksiAdministrasiController extends Controller
                 ->whereHas('pemberkasan')
                 ->whereHas(
                     'latestStatus',
-                    fn($q) => $q->where('status', 'DAFTAR')
+                    fn($q) => $q->where('status', 'PENGAJUAN')
                 )
                 ->get();
 

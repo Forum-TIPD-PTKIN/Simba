@@ -289,6 +289,15 @@ class FormHelper
         return [];
     }
 
+    public function getIndex($name)
+    {
+        foreach ($this->data as $field) {
+            if ($field->config->name === $name) {
+                return $field->indexed ?? null;
+            }
+        }
+        return null;
+    }
 
     public function setValue($name, $data)
     {
