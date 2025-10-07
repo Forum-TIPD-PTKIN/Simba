@@ -102,8 +102,6 @@ class DaftarController extends Controller
                 }
             }
 
-            // return $berkas;
-
             return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuna_seleksi', 'berkas'));
         }
 
