@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         @if ($is_jadwal_daftar)
-                            @if ($data->latest_status?->status !== 'PENGAJUAN')
+                            @if ($data->latest_status?->status === 'DAFTAR')
                                 @include('pendaftar.daftar.wizard-content.3', [
                                     $generated_form,
                                     'nowizard' => true,

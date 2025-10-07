@@ -13,7 +13,8 @@ use App\Http\Controllers\Pendaftar\{
     DaftarController,
     DashboardController,
     PemberkasanController,
-    RiwayatController
+    RiwayatController,
+    SeleksiAdministrasiController as PendaftarSeleksiAdministrasiController
 };
 use App\Http\Controllers\Verifikator\{
     DashboardController as DashboardVerifikator,
@@ -107,6 +108,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
         Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
+        Route::get('/seleksi-administrasi', [PendaftarSeleksiAdministrasiController::class, 'index'])->name('pendaftar.seleksi-administrasi');
     });
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('pendaftar.notifikasi.show');

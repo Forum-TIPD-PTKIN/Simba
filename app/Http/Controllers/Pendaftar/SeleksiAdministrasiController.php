@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Controllers\Pendaftar;
+
+use App\Http\Controllers\Controller;
+use App\Models\Beasiswa;
+use App\Models\JadwalKegiatan;
+use App\Models\Pendaftar;
+use App\Models\TahunKegiatan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class SeleksiAdministrasiController extends Controller
+{
+    public function index(Request $request)
+    {
+        $master_beasiswa = Beasiswa::where('status', 1)->orderBy('created_at')->get();
+        $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')->get();
+        $pendaftar = Pendaftar::where('user_id', Auth::user()->id)
+            ->where(function ($query) use ($request, $master_tahun) {
+                if ($request->flt_tahun) return $query->where('tahun_kegiatan_id', $request->flt_tahun);
+
+                return $query->where('tahun_kegiatan_id', count($master_tahun) ? $master_tahun[0]->id : null);
+            })
+            ->where(function ($query) use ($request, $master_beasiswa) {
+                if ($request->flt_beasiswa) return $query->where('beasiswa_id', $request->flt_beasiswa);
+
+                return $query->where('beasiswa_id', count($master_beasiswa) ? $master_beasiswa[0]->id : null);
+            })
+            ->first();
+
+        if (!$pendaftar) return view('pendaftar.no-page', [
+            'message' => 'Data pendaftar tidak ditemukan',
+            'title' => 'Opz..',
+            'bg' => 'danger'
+        ]);
+        $is_pengumuman_seleksi_administrasi = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true);
+        $jadwal_pengumuman_seleksi_admnistrasi = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
+            ->whereBeasiswaId($pendaftar->beasiswa_id)
+            ->whereRole('PENGUMUMAN_SELEKSI_ADMINISTRASI')
+            ->is_active()
+            ->first();
+
+        return view('pendaftar.seleksi-administrasi', [
+            'master_beasiswa' => $master_beasiswa,
+            'master_tahun' => $master_tahun,
+            'pendaftar' => $pendaftar,
+            'is_pengumuman_seleksi_administrasi' => $is_pengumuman_seleksi_administrasi,
+            'jadwal_pengumuman_seleksi_administrasi' => $jadwal_pengumuman_seleksi_admnistrasi
+        ]);
+    }
+}

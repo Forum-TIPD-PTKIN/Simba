@@ -57,7 +57,7 @@
     <script>
         $(document).ready(function() {
             $('#checkedFinalisasi').on('change', function() {
-                console.log(this.checked)
+                // console.log(this.checked)
                 if (this.checked) {
                     $('#finalisas-proses').prop('disabled', false);
                 } else {
