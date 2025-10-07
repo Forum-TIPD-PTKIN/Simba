@@ -134,3 +134,38 @@ if (!function_exists('formPemberkasan')) {
         }
     }
 }
+
+if (!function_exists('iconFiles')) {
+    function iconFiles($extension)
+    {
+        switch ($extension) {
+            case 'pdf':
+                return 'pdf.png';
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+                return 'image.png';
+            case 'txt':
+                return 'txt.png';
+            case 'zip':
+            case 'rar':
+                return 'zip.png';
+            case 'doc':
+                return 'doc.png';
+            case 'docx':
+                return 'docx.png';
+            case 'xls':
+                return 'xls.png';
+            case 'xlsx':
+                return 'xlsx.png';
+            case 'csv':
+                return 'csv.png';
+            case 'ppt':
+                return 'ppt.png';
+            case 'pptx':
+                return 'pptx.png';
+        }
+        return 'unknow.png';
+    }
+}

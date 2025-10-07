@@ -106,30 +106,29 @@
                         </div>
                         <div class="col-lg-4">
                             <h5 class="mb-3">Informasi Berkas</h5>
-                            <table class="table table-borderless table-sm infodata">
-                                <tbody>
-                                    <tr>
-                                        <td class="fw-bold" style="width: 150px;">NIM</td>
-                                        <td>: {{ $pendaftar?->mahasiswa->nim }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold">Nama</td>
-                                        <td>: {{ $pendaftar?->mahasiswa->nama }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold">Fakultas/Prodi</td>
-                                        <td>: {{ $pendaftar?->mahasiswa->fakultas_prodi }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold">Beasiswa</td>
-                                        <td>: {{ $pendaftar?->beasiswa->nama }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold">Tahun Kegiatan</td>
-                                        <td>: {{ $pendaftar?->tahun_kegiatan->tahun }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="base-file" id="form-berkas">
+                                @foreach ($berkas as $item)
+                                    @if ($item->url)
+                                        <div class="file">
+                                            <div class="icon">
+                                                <img src="{{ asset('assets/icons/' . iconFiles($item->extension)) }}"
+                                                    alt="">
+                                            </div>
+                                            <div class="name">
+                                                <a data-extension="{{ $item->extension }}" data-url="{{ $item->url }}"
+                                                    data-type="{{ $item->text }}" href="javascript:void(0)"
+                                                    class="base-berkas btn btn-link p-0"
+                                                    onclick="viewControl(this)">{{ $item->text }}</a>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="nonfile">
+                                            <div class="label text-muted">{{ $item->text }}</div>
+                                            <div class="name fw-bold">{{ $item->value }}</div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -142,5 +141,100 @@
         .infodata tr {
             white-space: nowrap !important;
         }
+
+        .base-file {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .base-file .file,
+        .nonfile {
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #d8d8d8;
+            padding-bottom: 4px;
+            flex: 1 1 100%;
+        }
+
+        .nonfile {
+            flex-direction: column;
+            justify-content: start !important;
+            align-items: start !important
+        }
+
+        .base-file .file .icon {
+            overflow: hidden;
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 2px;
+        }
+
+        .base-file .file .icon img {
+            width: 100%;
+        }
     </style>
+@endpush
+
+@push('script')
+    <script>
+        function viewControl(e) {
+            let container = document.getElementById('form-berkas');
+            let links = container.querySelectorAll('.base-berkas');
+            let urls = []
+            links.forEach(link => {
+                let url = link.getAttribute('data-url');
+                let type = link.getAttribute('data-type');
+                let extension = link.getAttribute('data-extension');
+                urls.push({
+                    url,
+                    type,
+                    extension
+                })
+            });
+            const data = {
+                active: {
+                    url: e.getAttribute('data-url'),
+                    type: e.getAttribute('data-type'),
+                    extension: e.getAttribute('data-extension')
+                },
+                data: urls.sort((a, b) => a.type.localeCompare(b.type))
+            }
+            $.ajax({
+                type: 'post',
+                url: "{{ route('view.control') }}",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: data
+                },
+                dataType: 'HTML',
+                success: function(data) {
+                    console.log(data)
+                    const winUrl = URL.createObjectURL(
+                        new Blob([data], {
+                            type: "text/html"
+                        })
+                    );
+
+                    const margin = 100; // Jarak tepi agar tidak full full banget
+                    const width = window.screen.availWidth - margin * 8;
+                    const height = window.screen.availHeight - margin * 2;
+                    const left = (window.screen.availWidth - width) / 2;
+                    const top = (window.screen.availHeight - height) / 2;
+
+                    const win = window.open(
+                        winUrl,
+                        "win",
+                        `width=${width},height=${height},top=${top},left=${left}`
+                    );
+                }
+            });
+        }
+    </script>
 @endpush

@@ -75,14 +75,35 @@ class DaftarController extends Controller
                 return view('pendaftar.no-page', [
                     'message' => '',
                     'title' => 'Opz..',
-                    'bg' => 'danger'
+                    'bg' => 'danger',
                 ]);
             }
             $pengumuna_seleksi = Carbon::parse($kegiatan->tanggal_mulai)
                 ->locale('id')
                 ->translatedFormat('l, j F Y H:i');
 
-            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuna_seleksi'));
+            $berkasdata = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
+
+            $berkas = [];
+
+            if ($berkasdata) {
+                foreach ($berkasdata->data as $key => $value) {
+                    foreach ($value as $a => $b) {
+                        $isFile = $b->type == 'file' ? true : false;
+                        $isSelect = $b->type == 'select' ? true : false;
+                        array_push($berkas, (object)[
+                            'text' => $b->text,
+                            'url' => $isFile ? $b->value->url : null,
+                            'value' => $isFile ? null : ($isSelect ? $b->valOption : $b->value),
+                            'extension' => $isFile ? $b->value->extension : null
+                        ]);
+                    }
+                }
+            }
+
+            // return $berkas;
+
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuna_seleksi', 'berkas'));
         }
 
         $register = $pendaftar ? true : false;
