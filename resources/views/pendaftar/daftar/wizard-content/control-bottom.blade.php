@@ -9,7 +9,7 @@
     @if ($step >= 4)
         <form action="{{ route('pendaftar.daftar.finalisasi', ['id' => $beasiswa->id]) }}" method="post">
             @csrf
-            <button id="finalisas-proses" disabled type="submit" class="btn btn-primary">Finalisasi Sekarang</button>
+            <button id="finalisas-proses" disabled type="submit" class="btn btn-primary">Finalisasi & Ajukan</button>
         </form>
     @else
         <a href="{{ route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=' . ($step + 1) }}"

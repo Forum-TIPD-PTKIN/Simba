@@ -3,18 +3,15 @@
 namespace App\Http\Controllers\Pendaftar;
 
 use App\Helpers\FormField;
-use App\Helpers\FormHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\FormData;
 use App\Models\Mahasiswa;
-use App\Models\Notifikasi;
 use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,8 +53,17 @@ class DaftarController extends Controller
                 'bg' => 'danger'
             ]);
         }
-        if ($pendaftar->latest_status?->status === 'PENGAJUAN') {
-            return view('pendaftar.daftar.finalisasi', compact('pendaftar'));
+        if (in_array($pendaftar->latest_status?->status, [
+            'PENGAJUAN'
+        ])) {
+            $key_pmb = env('PMB_KEY_API');
+            $_pendaftar = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
+            $jalur = null;
+            if ($_pendaftar->status) {
+                $jalur = $_pendaftar->data->jalur_masuk;
+                $akunpmb = $_pendaftar->data->biodata->kode;
+            }
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb'));
         }
 
         $register = $pendaftar ? true : false;
@@ -71,12 +77,14 @@ class DaftarController extends Controller
         else if ($step > 4) $step = 4;
         $jalur = null;
         $generated_form = [];
+        $akunpmb = null;
 
         if ($step == 2) {
             $key_pmb = env('PMB_KEY_API');
-            $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$nim}?key={$key_pmb}");
+            $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             if ($_jalur->status) {
-                $jalur = $_jalur->data;
+                $jalur = $_jalur->data->jalur_masuk;
+                $akunpmb = $_jalur->data->biodata->kode;
             }
         } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
             $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
@@ -143,7 +151,8 @@ class DaftarController extends Controller
             'jalur',
             'pendaftar',
             'readOnly',
-            'generated_form'
+            'generated_form',
+            'akunpmb'
         ));
     }
 
@@ -329,7 +338,9 @@ class DaftarController extends Controller
             return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=4');
         }
 
-        if ($pendaftar->latest_status?->status !== 'PENGAJUAN') {
+        if (in_array($pendaftar->latest_status?->status, [
+            'DAFTAR'
+        ])) {
             PendaftarStatus::create([
                 'pendaftar_id' => $pendaftar->id,
                 'status' => 'PENGAJUAN'

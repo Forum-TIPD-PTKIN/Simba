@@ -1,5 +1,5 @@
 <!-- Step Content (contoh isi step 2) -->
-<h5 class="mb-3">Step 4: Finalisai</h5>
+<h5 class="mb-3">Step 4: Finalisasi & Pengajuan</h5>
 <div class="row">
     <div class="col-12">
         <div class="alert alert-info py-3">
@@ -15,6 +15,36 @@
                 </p>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <h5 class="mb-3">Informasi Pendaftar</h5>
+                <table class="table table-borderless table-sm infodata">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold" style="width: 150px;">NIM</td>
+                            <td>: {{ $pendaftar?->mahasiswa->nim }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Nama</td>
+                            <td>: {{ $pendaftar?->mahasiswa->nama }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Fakultas/Prodi</td>
+                            <td>: {{ $pendaftar?->mahasiswa->fakultas_prodi }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Beasiswa</td>
+                            <td>: {{ $pendaftar?->beasiswa->nama }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Tahun Kegiatan</td>
+                            <td>: {{ $pendaftar?->tahun_kegiatan->tahun }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <hr>
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value="" id="checkedFinalisasi">
             <label class="form-check-label" for="checkedFinalisasi">
