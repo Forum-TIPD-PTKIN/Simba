@@ -101,7 +101,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 
     Route::get('/daftar/{id}', [DaftarController::class, 'index'])->name('pendaftar.daftar');
     Route::post('/daftar/{id}', [DaftarController::class, 'store'])->name('pendaftar.daftar.store');
-    Route::post('/daftar/finalisasi{id}', [DaftarController::class, 'finalisasi'])->name('pendaftar.daftar.finalisasi');
+    Route::post('/daftar/finalisasi/{id}', [DaftarController::class, 'finalisasi'])->name('pendaftar.daftar.finalisasi');
 
     Route::group(['middleware' => 'zonaPendaftar'], function () {
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');

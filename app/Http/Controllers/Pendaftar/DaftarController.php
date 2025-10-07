@@ -42,7 +42,7 @@ class DaftarController extends Controller
             })
             ->find($id);
 
-        $pendaftar = Pendaftar::with('pendaftar_status', 'tahun_kegiatan')->whereBeasiswaId($id)
+        $pendaftar = Pendaftar::with('pendaftar_status', 'tahun_kegiatan', 'beasiswa')->whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
                 $db->whereStatus(1);
             })
@@ -56,9 +56,12 @@ class DaftarController extends Controller
                 'bg' => 'danger'
             ]);
         }
+        if ($pendaftar->latest_status?->status === 'FINALISASI') {
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar'));
+        }
 
         $register = $pendaftar ? true : false;
-        $readOnly = false;
+        $readOnly =  false;
         $step = intval(request()->get('step') ?? '1');
         if ($step > 2 && !$pendaftar) {
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
@@ -333,16 +336,7 @@ class DaftarController extends Controller
             ]);
         }
 
-        $users = User::whereRaw("FIND_IN_SET(1, access)")->get();
-        foreach ($users as $key => $value) {
-            Notifikasi::create([
-                'key' => 'PENDAFTARAN',
-                'user_id' => $value->id,
-                'pesan' => "{$pendaftar->mahasiswa->nama} ({$pendaftar->mahasiswa->nim}) berhasil memfinalisasi pendaftaran beasiswa {$beasiswa->nama} tahun {$pendaftar->tahun_kegiatan->tahun}",
-                'referensi' => NULL,
-                'dibaca' => 0
-            ]);
-        }
+        return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]));
     }
     /**
      * Display the specified resource.
