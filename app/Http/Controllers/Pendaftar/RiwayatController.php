@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pendaftar;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pendaftar;
+use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,6 +17,9 @@ class RiwayatController extends Controller
     {
         $riwayat = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan'])
             ->whereUserId(Auth::id())
+            ->whereHas('tahun_kegiatan', function ($query) {
+                $query->where('status', 1);
+            })
             ->get();
         return view('pendaftar.riwayat', compact('riwayat'));
     }

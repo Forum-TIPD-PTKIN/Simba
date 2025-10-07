@@ -14,4 +14,9 @@ class TahunKegiatan extends Uuid
     {
         return Crypt::encryptString($this->id);
     }
+
+    public function pendaftar()
+    {
+        return $this->hasMany(Pendaftar::class);
+    }
 }

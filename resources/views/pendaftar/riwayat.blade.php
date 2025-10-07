@@ -57,7 +57,17 @@
                                                 <td>{{ $item->mahasiswa->fakultas_prodi }}</td>
                                                 <td>{{ $item->beasiswa->nama }}</td>
                                                 <td>{{ $item->tahun_kegiatan->tahun }}</td>
-                                                <td>{{ $item->latest_status->status ?? '-' }}</td>
+                                                <td>
+                                                    @switch($item->latest_status?->status)
+                                                        @case(in_array($item->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+                                                        @case(cek_jadwal($item->tahun_kegiatan?->id, $item->beasiswa?->id, false, true))
+                                                            -
+                                                        @break
+
+                                                        @default
+                                                            {{ $item->latest_status?->status }}
+                                                    @endswitch
+                                                </td>
                                                 <td>
                                                     <a href="{{ route('pendaftar.daftar', ['id' => $item->beasiswa->id, 'step' => 2]) }}"
                                                         class="btn btn-sm btn-info">Detail</a>
