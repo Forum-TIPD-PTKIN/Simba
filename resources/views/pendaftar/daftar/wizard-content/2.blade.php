@@ -66,9 +66,18 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-12 col-md-8 mb-3">
-                        <label for="jalur" class="form-label">Jalur Masuk PMB</label>
-                        <input type="text" disabled class="form-control" id="jalur"
-                            value="{{ $jalur->nama ?? 'NOT FOUND' }}">
+                        <div class="row">
+                            <div class="col-5">
+                                <label for="jalur" class="form-label">Kode Akun PMB</label>
+                                <input type="text" disabled class="form-control" id="jalur"
+                                    value="{{ $akunpmb ?? 'NOT FOUND' }}">
+                            </div>
+                            <div class="col-7">
+                                <label for="jalur" class="form-label">Jalur Masuk PMB</label>
+                                <input type="text" disabled class="form-control" id="jalur"
+                                    value="{{ $jalur->nama ?? 'NOT FOUND' }}">
+                            </div>
+                        </div>
                     </div>
                     <div class="col-12 col-md-4 mb-3">
                         <label for="tahun_masuk" class="form-label">Tahun Masuk</label>

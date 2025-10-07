@@ -3,6 +3,9 @@ Pengambilan berdasarkan NIM
 
 ===================================================
 
+Mengambil informasi pendaftar
+/api/info/pendaftar/[nim]?key=[key]
+
 Mengambil informasi jalur masuk Mahasiswa
 /api/info/jalur/[nim]?key=[key]
 
