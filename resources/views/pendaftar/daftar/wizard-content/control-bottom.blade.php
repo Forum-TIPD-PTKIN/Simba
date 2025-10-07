@@ -7,7 +7,10 @@
             class="btn btn-outline-secondary">Prev</a>
     @endif
     @if ($step >= 4)
-        <button onclick="simpanFile()" class="btn btn-primary">Finalisasi</button>
+        <form action="{{ route('pendaftar.daftar.finalisasi', ['id' => $beasiswa->id]) }}" method="post">
+            @csrf
+            <button id="finalisas-proses" disabled type="submit" class="btn btn-primary">Finalisasi Sekarang</button>
+        </form>
     @else
         <a href="{{ route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=' . ($step + 1) }}"
             class="btn btn-primary">Next</a>
