@@ -18,7 +18,7 @@
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value="" id="checkedFinalisasi">
             <label class="form-check-label" for="checkedFinalisasi">
-                Saya telah memahami dan telah menyetuji untuk difinalisasi
+                Saya telah memahami dan telah menyetujui untuk difinalisasi
             </label>
         </div>
     </div>

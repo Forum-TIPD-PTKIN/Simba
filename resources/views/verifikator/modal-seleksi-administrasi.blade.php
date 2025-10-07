@@ -1,17 +1,30 @@
 <input type="text" class="d-none" name="pendaftar_id" value="{{ $data->id }}">
-<dl class="row">
-    <dt class="col-sm-3">Nama</dt>
-    <dd class="col-sm-9">{{ $data->mahasiswa?->nama }}</dd>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <dl class="row">
+            <dt class="col-sm-6">Nama</dt>
+            <dd class="col-sm-6">{{ $data->mahasiswa?->nama }}</dd>
 
-    <dt class="col-sm-3">NIM</dt>
-    <dd class="col-sm-9">{{ $data->mahasiswa?->nim }}</dd>
+            <dt class="col-sm-6">NIM</dt>
+            <dd class="col-sm-6">{{ $data->mahasiswa?->nim }}</dd>
 
-    <dt class="col-sm-3">Fakultas/Prodi</dt>
-    <dd class="col-sm-9">{{ $data->mahasiswa?->fakultas_prodi }}</dd>
+            <dt class="col-sm-6">Fakultas/Prodi</dt>
+            <dd class="col-sm-6">{{ $data->mahasiswa?->fakultas_prodi }}</dd>
 
-    <dt class="col-sm-3 text-truncate">Beasiswa/Tahun</dt>
-    <dd class="col-sm-9">{{ $data->beasiswa?->nama }}/{{ $data->tahun_kegiatan?->tahun }}</dd>
-</dl>
+            <dt class="col-sm-6 text-truncate">Beasiswa/Tahun</dt>
+            <dd class="col-sm-6">{{ $data->beasiswa?->nama }}/{{ $data->tahun_kegiatan?->tahun }}</dd>
+        </dl>
+    </div>
+    <div class="col-12 col-md-6">
+        <dl class="row">
+            <dt class="col-sm-9">Tahun Masuk Kuliah</dt>
+            <dd class="col-sm-3">{{ $data_pmb->tahun_masuk }}</dd>
+
+            <dt class="col-sm-9">Tahun Lulus Jenjang SMA/sederajat</dt>
+            <dd class="col-sm-3">{{ $data_pmb->sekolah_asal?->tahun_lulus }}</dd>
+        </dl>
+    </div>
+</div>
 
 <div class="table-responsive">
     <table class="table table-bordered text-center align-middle">
@@ -59,10 +72,6 @@
 
     <div class="mb-3 text-center">
         <div class="form-check">
-            <input type="radio" class="btn-check" name="status_verval" id="sanggah-status" value="sanggah"
-                autocomplete="off">
-            <label class="btn btn-outline-warning" for="sanggah-status"><i class="ti ti-file-alert"></i> Sanggah</label>
-
             <input type="radio" class="btn-check" name="status_verval" id="success-status" value="success"
                 autocomplete="off">
             <label class="btn btn-outline-success" for="success-status"><i class="ti ti-file-check"></i> Lolos</label>
