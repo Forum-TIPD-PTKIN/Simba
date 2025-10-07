@@ -58,6 +58,9 @@ class LoginController extends Controller
         $user->save();
 
         Auth::loginUsingId($user->id);
+        if (isset($akun?->data?->data?->user?->profil->avatar)) {
+            $akun->data->data->user->profil->avatar = 'https://be.iainmadura.ac.id/api/v1/external/mahasiswa/foto?nim=' . $akun?->data?->data?->user?->kode . '&key=6321afccabf95b9ec00ac8d193479f4f6a849d46ffbe50fc7e14a74011554fc1';
+        }
         session([
             'is_pendaftar' => true,
             'level' => 2,

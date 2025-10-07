@@ -56,7 +56,7 @@ class DaftarController extends Controller
                 'bg' => 'danger'
             ]);
         }
-        if ($pendaftar->latest_status?->status === 'FINALISASI') {
+        if ($pendaftar->latest_status?->status === 'PENGAJUAN') {
             return view('pendaftar.daftar.finalisasi', compact('pendaftar'));
         }
 
@@ -329,10 +329,10 @@ class DaftarController extends Controller
             return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=4');
         }
 
-        if ($pendaftar->latest_status?->status !== 'FINALISASI') {
+        if ($pendaftar->latest_status?->status !== 'PENGAJUAN') {
             PendaftarStatus::create([
                 'pendaftar_id' => $pendaftar->id,
-                'status' => 'FINALISASI'
+                'status' => 'PENGAJUAN'
             ]);
         }
 
