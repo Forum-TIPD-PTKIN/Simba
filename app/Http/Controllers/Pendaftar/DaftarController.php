@@ -6,12 +6,14 @@ use App\Helpers\FormField;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\FormData;
+use App\Models\JadwalKegiatan;
 use App\Models\Mahasiswa;
 use App\Models\Pemberkasan;
 use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,7 +65,24 @@ class DaftarController extends Controller
                 $jalur = $_pendaftar->data->jalur_masuk;
                 $akunpmb = $_pendaftar->data->biodata->kode;
             }
-            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb'));
+
+            $kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', $pendaftar?->tahun_kegiatan_id)
+                ->where('beasiswa_id', $pendaftar?->beasiswa_id)
+                ->where('role', 'PENGUMUMAN_SELEKSI_ADMINISTRASI')
+                ->first();
+
+            if (!$kegiatan) {
+                return view('pendaftar.no-page', [
+                    'message' => '',
+                    'title' => 'Opz..',
+                    'bg' => 'danger'
+                ]);
+            }
+            $pengumuna_seleksi = Carbon::parse($kegiatan->tanggal_mulai)
+                ->locale('id')
+                ->translatedFormat('l, j F Y H:i');
+
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuna_seleksi'));
         }
 
         $register = $pendaftar ? true : false;
@@ -341,6 +360,15 @@ class DaftarController extends Controller
         if (in_array($pendaftar->latest_status?->status, [
             'DAFTAR'
         ])) {
+            $kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', $pendaftar?->tahun_kegiatan_id)
+                ->where('beasiswa_id', $pendaftar?->beasiswa_id)
+                ->where('role', 'PENGUMUMAN_SELEKSI_ADMINISTRASI')
+                ->first();
+
+            if (!$kegiatan) {
+                session()->flash('error_register', 'Tanggal pengumuman seleksi administrasi belum ditentukan oleh admin');
+                return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=4');
+            }
             PendaftarStatus::create([
                 'pendaftar_id' => $pendaftar->id,
                 'status' => 'PENGAJUAN'

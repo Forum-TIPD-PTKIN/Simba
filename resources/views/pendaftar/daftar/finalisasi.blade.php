@@ -42,7 +42,7 @@
                                 </p>
                                 <p class="mb-0">
                                     <strong class="text-danger">Pengumuman kelulusan (Administrasi) akan diumumkan pada
-                                        tanggal 12 Maret 2025 17:00 WIB.</strong>
+                                        hari {{ $pengumuna_seleksi }}.</strong>
                                 </p>
                             </div>
                         </div>
