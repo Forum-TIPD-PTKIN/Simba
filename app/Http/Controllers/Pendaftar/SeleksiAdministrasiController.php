@@ -14,8 +14,19 @@ class SeleksiAdministrasiController extends Controller
 {
     public function index(Request $request)
     {
-        $master_beasiswa = Beasiswa::where('status', 1)->orderBy('created_at')->get();
-        $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')->get();
+        $master_beasiswa = Beasiswa::select('beasiswas.id', 'beasiswas.nama')
+            ->whereHas('pendaftar', function ($query) {
+                $query->where('user_id', Auth::id())
+                    ->whereHas('tahun_kegiatan', function ($q) {
+                        $q->where('status', 1);
+                    });
+            })
+            ->get();
+        $master_tahun = TahunKegiatan::whereHas('pendaftar', function ($query) {
+            $query->where('status', 1);
+        })
+            ->orderBy('tahun', 'desc')
+            ->get();
         $pendaftar = Pendaftar::where('user_id', Auth::user()->id)
             ->where(function ($query) use ($request, $master_tahun) {
                 if ($request->flt_tahun) return $query->where('tahun_kegiatan_id', $request->flt_tahun);
@@ -34,19 +45,25 @@ class SeleksiAdministrasiController extends Controller
             'title' => 'Opz..',
             'bg' => 'danger'
         ]);
+
         $is_pengumuman_seleksi_administrasi = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true);
         $jadwal_pengumuman_seleksi_admnistrasi = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
             ->whereBeasiswaId($pendaftar->beasiswa_id)
             ->whereRole('PENGUMUMAN_SELEKSI_ADMINISTRASI')
-            ->is_active()
             ->first();
+
+        $hasil_seleksi = view('pendaftar.hasil-seleksi-administrasi', [
+            'pendaftar' => $pendaftar,
+            'is_pengumuman_seleksi_administrasi' => $is_pengumuman_seleksi_administrasi,
+            'jadwal_pengumuman_seleksi_administrasi' => $jadwal_pengumuman_seleksi_admnistrasi
+        ])->render();
+
+        if ($request->ajax()) return $hasil_seleksi;
 
         return view('pendaftar.seleksi-administrasi', [
             'master_beasiswa' => $master_beasiswa,
             'master_tahun' => $master_tahun,
-            'pendaftar' => $pendaftar,
-            'is_pengumuman_seleksi_administrasi' => $is_pengumuman_seleksi_administrasi,
-            'jadwal_pengumuman_seleksi_administrasi' => $jadwal_pengumuman_seleksi_admnistrasi
+            'hasil_seleksi' => $hasil_seleksi
         ]);
     }
 }

@@ -48,29 +48,8 @@
                                 <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            @if (
-                                $is_pengumuman_seleksi_administrasi &&
-                                    in_array($pendaftar->latest_status?->status, ['GAGAL ADMINISTRASI', 'LOLOS ADMINISTRASI']))
-                                @if ($pendaftar->latest_status?->status === 'LOLOS ADMINISTRASI')
-                                    <div class="alert alert-success">
-                                        <h4><i class="ti ti-mood-smile"></i> Selamat!</h4>
-                                        <p class="mb-0">Anda dinyatakan <span class="fw-bold fs-5">LOLOS SELEKSI
-                                                ADMINISTRASI</span>, silakan lihat jadwal kegiatan selanjutnya.</p>
-                                    </div>
-                                @else
-                                    <div class="alert alert-danger">
-                                        <h4><i class="ti ti-mood-sad"></i> Sayang Sekali!</h4>
-                                        <p class="mb-0">Setelah dilakukan verifikasi dan validasi
-                                            berkas pendaftaran, Anda
-                                            dinyatakan <span class="fw-bold fs-5">TIDAK LOLOS SELEKSI ADMINISTRASI</span>.
-                                        </p>
-                                        <p>Jika ada pertanyaan lebih lanjut, hubungi panitia seleksi.</p>
-                                    </div>
-                                @endif
-                            @else
-                                {{ $jadwal_pengumuman_seleksi_administrasi?->formatTanggal('tanggal_mulai', 'l, d F Y H:i') }}
-                            @endif
+                        <div class="card-body hasil-seleksi-container">
+                            {!! $hasil_seleksi !!}
                         </div>
                     </div>
                 </div>
@@ -93,21 +72,7 @@
                     flt_beasiswa: $('#flt_beasiswa').val()
                 },
                 success: (res) => {
-                    const alert_jadwal = $('.container-alert-jadwal'),
-                        text = res && Object.keys(res).length > 0 ?
-                        `Seleksi administrasi untuk beasiswa ${res.beasiswa?.nama} tahun ${res.tahun_kegiatan?.tahun} dimulai dari ${res.tanggal_mulai} s.d. ${res.tanggal_selesai}` :
-                        `Jadwal kegiatan belum dibuat oleh Administrator`;
-
-                    alert_jadwal
-                        .removeClass(function(index, className) {
-                            return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
-                        })
-                        .addClass((res && Object.keys(res).length > 0) ? 'alert-warning' : 'alert-danger')
-                        .html('')
-                        .append(`
-                        <h5><i class="ti ti-calendar-event"></i> Jadwal Kegiatan</h5>
-                        ${text}
-                    `);
+                    $('.hasil-seleksi-container').html(res);
                 }
             });
         }

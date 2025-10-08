@@ -25,4 +25,9 @@ class Beasiswa extends Uuid
     {
         return $this->hasMany(JadwalKegiatan::class);
     }
+
+    public function pendaftar()
+    {
+        return $this->hasMany(Pendaftar::class);
+    }
 }
