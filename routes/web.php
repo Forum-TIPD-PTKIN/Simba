@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\{
     FormDataController,
     JadwalKegiatanController,
     LaporanController,
+    PenggunaController,
+    RekapController,
     TahunKegiatanController,
 };
 use App\Http\Controllers\LoginController;
@@ -43,6 +45,7 @@ Route::get("/akses/{access}", [LoginController::class, 'change_access'])->middle
 
 Route::post("/view-control", [LoginController::class, 'view_control'])->name('view.control');
 
+// administrator
 Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
     Route::get('/', [DashboardAdmin::class, 'index'])->name('admin.dashboard');
 
@@ -92,21 +95,37 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
         ]
     ]);
 
+    Route::resource('/pengguna', PenggunaController::class, [
+        'names' => [
+            'index' => 'admin.pengguna',
+            'store' => 'admin.pengguna.store',
+            'create' => 'admin.pengguna.create',
+            'edit' => 'admin.pengguna.edit',
+            'update' => 'admin.pengguna.update',
+            'destroy' => 'admin.pengguna.destroy'
+        ]
+    ]);
+
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('admin.notifikasi.show');
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
+        Route::get('/rekap', [RekapController::class, 'index'])->name('admin.laporan.rekap');
+        Route::post('/rekap/data', [RekapController::class, 'data'])->name('admin.laporan.rekap.data');
+
         Route::get('/verifikasi', [LaporanController::class, 'verifikasi'])->name('admin.laporan.verifikasi');
         Route::get('/verifikasi/data', [LaporanController::class, 'data'])->name('admin.laporan.verifikasi.data');
         Route::get('/verifikasi/jadwal', [LaporanController::class, 'jadwal'])->name('admin.laporan.verifikasi.jadwal');
     });
 });
 
+// Pendaftar
 Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('pendaftar.dashboard');
     Route::get('/beasiswa/{id}/detail', [DashboardController::class, 'show'])->name('pendaftar.detail-beasiswa');
     Route::get('/beasiswa/{status}', [DashboardController::class, 'beasiswa'])->name('pendaftar.beasiswa.status');
+    Route::get('/jadwal-kegiatan', [DashboardController::class, 'jadwal'])->name('pendaftar.jadwal-kegiatan');
 
     Route::get('/daftar/{id}', [DaftarController::class, 'index'])->name('pendaftar.daftar');
     Route::post('/daftar/{id}', [DaftarController::class, 'store'])->name('pendaftar.daftar.store');
@@ -123,7 +142,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('pendaftar.notifikasi.destroy');
 });
 
-
+// Verifikator
 Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator']], function () {
     Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
 
@@ -138,7 +157,6 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
 });
 
 // penguji
-
 Route::group(['prefix' => 'penguji', 'middleware' => ['auth']], function () {
     Route::group(['prefix' => 'kip'], function () {
         Route::get('/', [DashboardPengujiKip::class, 'index'])->name('penguji.kip.dashboard');

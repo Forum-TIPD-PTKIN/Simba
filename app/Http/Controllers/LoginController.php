@@ -13,9 +13,9 @@ class LoginController extends Controller
         $key = $request->key;
         $akun = api()->get('https://api.iainmadura.ac.id/api/onhand/detect?key=' . $key);
         if (!$akun->status) {
-            return response()->json('Token autentikasi gagal divefirikasi!');
+            abort(403, 'Token autentikasi gagal divefirikasi!');
         } else if (!$akun->data->status) {
-            return response()->json('Token autentikasi gagal divefirikasi!');
+            abort(403, 'Token autentikasi gagal divefirikasi!');
         }
 
         $user = User::whereUsername($akun->data->data->user->kode)->first();
@@ -40,7 +40,7 @@ class LoginController extends Controller
                 return redirect()->route('verifikator.dashboard');
             }
         } else if ($akun->data->data->user->level == 1) {
-            return response()->json('Anda tidak memiliki akses pada sistem ini!');
+            abort(403, 'Anda tidak memiliki akses pada sistem ini!');
         }
 
         $profil = $akun->data->data->user->profil;
@@ -50,7 +50,6 @@ class LoginController extends Controller
             $user->name = $profil->nama;
             $user->username = $akun->data->data->user->kode;
             $user->email = $akun->data->data->user->kode . '@student.iainmadura.ac.id';
-            $user->password = bcrypt('user' . $akun->data->data->user->kode);
             $user->access = $akun->data->data->user->level == 2 ? 2 : null;
         } else {
             $user->name = $akun->data->data->user->profil->nama;
@@ -161,7 +160,6 @@ class LoginController extends Controller
 
     public function view_control(Request $request)
     {
-
         $html = view('view-controller.content', ['data' => $request->data['data'], 'active' => $request->data['active']])->render();
         return $html;
     }

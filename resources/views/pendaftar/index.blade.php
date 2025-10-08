@@ -123,21 +123,21 @@
                 let target = $(e.target).data("bs-target"); // ex: #beasiswa-tab-2-pane
 
                 // Cek kalau tab-pane masih kosong, baru load via AJAX
-                if ($(target).is(':empty') || $(target).find('.loader').length > 0) {
-                    $(target).html('<div class="loader">Loading...</div>');
+                // if ($(target).is(':empty') || $(target).find('.loader').length > 0) {
+                $(target).html('<div class="loader">Loading...</div>');
 
-                    // Contoh URL berbeda per tab
-                    let urlTemplate = "{{ route('pendaftar.beasiswa.status', ['status' => ':status']) }}";
-                    let urlMap = {
-                        "#beasiswa-tab-1-pane": urlTemplate.replace(':status', 'all'),
-                        "#beasiswa-tab-2-pane": urlTemplate.replace(':status', 'open'),
-                        "#beasiswa-tab-3-pane": urlTemplate.replace(':status', 'close'),
-                    };
+                // Contoh URL berbeda per tab
+                let urlTemplate = "{{ route('pendaftar.beasiswa.status', ['status' => ':status']) }}";
+                let urlMap = {
+                    "#beasiswa-tab-1-pane": urlTemplate.replace(':status', 'all'),
+                    "#beasiswa-tab-2-pane": urlTemplate.replace(':status', 'open'),
+                    "#beasiswa-tab-3-pane": urlTemplate.replace(':status', 'close'),
+                };
 
-                    $.get(urlMap[target], function(data) {
-                        $(target).html(data); // isi tab-pane dengan response
-                    });
-                }
+                $.get(urlMap[target], function(data) {
+                    $(target).html(data); // isi tab-pane dengan response
+                });
+                // }
             });
 
             // Trigger load pertama kali untuk tab yang aktif default

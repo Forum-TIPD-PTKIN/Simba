@@ -85,6 +85,9 @@
                         <li class="pc-item">
                             <a href="{{ route('admin.form-data') }}" class="pc-link">Form Data</a>
                         </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.pengguna') }}" class="pc-link">Pengguna</a>
+                        </li>
                     </ul>
                 </li>
                 {{-- <li class="pc-item">
@@ -121,10 +124,22 @@
                     </svg>
                 </li>
                 <li class="pc-item">
-                    <a href="{{ route('admin.laporan.verifikasi') }}" class="pc-link"><span class="pc-micon">
+                    <a href="{{ route('admin.laporan.verifikasi') }}" class="pc-link">
+                        <span class="pc-micon">
                             <svg class="pc-icon">
-                                <use xlink:href="#custom-document"></use>
-                            </svg> </span><span class="pc-mtext">Verfk. Administrasi</span></a>
+                                <use xlink:href="#custom-user-add"></use>
+                            </svg> </span><span class="pc-mtext">Seleksi Administrasi
+                        </span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a href="{{ route('admin.laporan.rekap') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-document-text"></use>
+                            </svg> </span><span class="pc-mtext">Rekapitulasi
+                        </span>
+                    </a>
                 </li>
                 {{-- <li class="pc-item">
                     <a href="../elements/bc_color.html" class="pc-link"><span class="pc-micon">

@@ -55,9 +55,18 @@
                                         alt="img" class="w-50"></a>
                             </div>
                             <h4 class="text-center f-w-500 mb-3 mt-5">Halaman Login</h4>
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                             <div class="form-group mb-3">
                                 <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Username" autocomplete="off" required>
+                                    placeholder="Username" value="{{ old('username') }}" autocomplete="off" required>
                             </div>
                             <div class="form-group mb-3">
                                 <input type="password" class="form-control" id="password" name="password"

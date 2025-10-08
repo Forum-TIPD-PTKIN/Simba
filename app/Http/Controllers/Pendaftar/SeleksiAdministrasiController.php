@@ -23,7 +23,7 @@ class SeleksiAdministrasiController extends Controller
             })
             ->get();
         $master_tahun = TahunKegiatan::whereHas('pendaftar', function ($query) {
-            $query->where('status', 1);
+            $query->where('user_id', Auth::id());
         })
             ->orderBy('tahun', 'desc')
             ->get();

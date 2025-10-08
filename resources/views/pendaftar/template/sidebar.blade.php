@@ -77,6 +77,13 @@
                         <span class="pc-mtext">Dashboard</span>
                     </a>
                 </li>
+                <li class="pc-item">
+                    <a href="{{ route('pendaftar.jadwal-kegiatan') }}" class="pc-link"><span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-calendar-1"></use>
+                            </svg> </span><span class="pc-mtext">Jadwal Kegiatan</span>
+                    </a>
+                </li>
 
                 @if (session()->get('MENDAFTAR'))
                     <li class="pc-item pc-caption">

@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Pendaftar;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
+use App\Models\JadwalKegiatan;
+use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class DashboardController extends Controller
 {
@@ -113,6 +118,58 @@ class DashboardController extends Controller
 
         return view('pendaftar.list-beasiswa', [
             'beasiswa' => $beasiswa
+        ]);
+    }
+
+    public function jadwal(Request $request)
+    {
+        $master_tahun = TahunKegiatan::whereHas('pendaftar', function ($query) {
+            $query->where('user_id', Auth::id());
+        })->orderBy('tahun', 'desc')
+            ->get();
+        $master_beasiswa = Beasiswa::whereHas('pendaftar', function ($query) {
+            $query->where('user_id', Auth::id())
+                ->whereHas('tahun_kegiatan', function ($q) {
+                    $q->where('status', 1);
+                });
+        })->get();
+        $jadwal = JadwalKegiatan::where('tahun_kegiatan_id', count($master_tahun) ? $master_tahun[0]->id : null)
+            ->where('beasiswa_id', count($master_beasiswa) ? $master_beasiswa[0]->id : null)
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        if ($request->ajax()) {
+            return DataTables::of($jadwal)
+                ->editColumn('beasiswa', function ($data) {
+                    return "
+                        <div class='flex-grow-1'>
+                          <div class='row g-1'>
+                            <div class='col-12'>
+                              <h6 class='mb-0'>{$data->beasiswa?->nama}</h6>
+                              <p class='text-muted mb-0'><small>{$data->tahun_kegiatan?->tahun}</small></p>
+                            </div>
+                          </div>
+                        </div>";
+                })
+                ->editColumn('tanggal_mulai', function ($data) {
+                    if ($data->role === 'SURVEI_LOKASI') return 'Kondisional';
+                    return $data->formatTanggal('tanggal_mulai', 'd-m-Y H:i');
+                })
+                ->editColumn('tanggal_selesai', function ($data) {
+                    if ($data->role === 'SURVEI_LOKASI') return 'Kondisional';
+                    return $data->formatTanggal('tanggal_selesai', 'd-m-Y H:i');
+                })
+                ->editColumn('deskripsi', function ($data) {
+                    return '<p>' . Str::words(strip_tags($data->deskripsi), 10, '...') . '</p>';
+                })
+                ->rawColumns(['beasiswa', 'deskripsi'])
+                ->make(true);
+        }
+
+        return view('pendaftar.jadwal-kegiatan', [
+            'master_tahun' => $master_tahun,
+            'master_beasiswa' => $master_beasiswa,
+            'jadwal' => $jadwal
         ]);
     }
 }
