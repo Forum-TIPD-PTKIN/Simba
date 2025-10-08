@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\{
     BeasiswaController,
     FormDataController,
     JadwalKegiatanController,
+    LaporanController,
     TahunKegiatanController,
 };
 use App\Http\Controllers\LoginController;
@@ -93,6 +94,13 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('admin.notifikasi.show');
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
+
+    /* Laporan */
+    Route::group(['prefix' => 'laporan'], function () {
+        Route::get('/verifikasi', [LaporanController::class, 'verifikasi'])->name('admin.laporan.verifikasi');
+        Route::get('/verifikasi/data', [LaporanController::class, 'data'])->name('admin.laporan.verifikasi.data');
+        Route::get('/verifikasi/jadwal', [LaporanController::class, 'jadwal'])->name('admin.laporan.verifikasi.jadwal');
+    });
 });
 
 Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']], function () {

@@ -66,10 +66,6 @@
                         <span class="pc-mtext">Dashboard</span>
                     </a>
                 </li>
-
-                <li class="pc-item pc-caption">
-                    <label>Data Master</label>
-                </li>
                 <li class="pc-item pc-hasmenu">
                     <a href="#!" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
@@ -125,10 +121,10 @@
                     </svg>
                 </li>
                 <li class="pc-item">
-                    <a href="/verifikasi" class="pc-link"><span class="pc-micon">
+                    <a href="{{ route('admin.laporan.verifikasi') }}" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-document"></use>
-                            </svg> </span><span class="pc-mtext">Verifikasi</span></a>
+                            </svg> </span><span class="pc-mtext">Verfk. Administrasi</span></a>
                 </li>
                 {{-- <li class="pc-item">
                     <a href="../elements/bc_color.html" class="pc-link"><span class="pc-micon">

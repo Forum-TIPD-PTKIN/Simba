@@ -67,6 +67,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            {{ $data->links('vendor.bootstrap-5') }}
                         </div>
                     </div>
                 </div>
