@@ -9,4 +9,19 @@ class PendaftarStatus extends Uuid
         'status',
         'deskripsi'
     ];
+
+    protected $appends = ['deskripsi_json'];
+
+    public function getDeskripsiJsonAttribute()
+    {
+        $value = $this->deskripsi;
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            return $decoded ?? $value;
+        }
+
+        return $value;
+    }
 }

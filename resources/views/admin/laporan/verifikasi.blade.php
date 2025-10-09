@@ -87,6 +87,7 @@
                                             <th scope="col">Fakultas/Prodi</th>
                                             <th scope="col">Beasiswa</th>
                                             <th scope="col">Status</th>
+                                            <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -98,6 +99,28 @@
                 </div>
             </div>
 
+            <!-- Modal -->
+            <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <form id="formVerifikasi" class="needs-validation">
+                        @csrf
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -107,9 +130,6 @@
 @endpush
 
 @push('script')
-    <script src="{{ asset('assets/admin/plugins/tinymce/tinymce.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script>
         // Reload data
@@ -176,6 +196,12 @@
                 {
                     data: 'status'
                 },
+                {
+                    data: 'action',
+                    nama: 'action',
+                    orderable: false,
+                    searchable: false
+                }
             ],
             responsive: true,
             autoWidth: true,
@@ -192,6 +218,68 @@
                 "className": "dt-head-center dt-body-center cell-border",
             }],
         });
+    </script>
+
+    <script>
+        // Verifikasi data
+        function verifikasiData(id) {
+            let url = "{{ route('admin.laporan.verifikasi.edit', ':id') }}";
+            url = url.replace(':id', id);
+
+            $.ajax({
+                url: url,
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    $('#modalVerifikasi .modal-body').html(res);
+
+                    $('#modalVerifikasi').modal('show');
+                    Swal.close();
+
+                    const oldEditor = tinymce.get('catatan');
+                    if (oldEditor && typeof oldEditor.remove === 'function') {
+                        oldEditor.remove();
+                    }
+
+                    // Prevent Bootstrap dialog from blocking focusin
+                    document.addEventListener('focusin', (e) => {
+                        if (e.target.closest(
+                                ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+                            e.stopImmediatePropagation();
+                        }
+                    });
+
+
+                    tinymce.init({
+                        selector: '#catatan',
+                        branding: false,
+                        menubar: 'edit insert view format help',
+                        toolbar: "undo redo |link | bold italic underline strikethrough | align | bullist numlist",
+                        toolbar_mode: 'sliding',
+                        plugins: [
+                            "advlist", "anchor", "autolink", "charmap", "code", "fullscreen",
+                            "help", "link", "lists", "preview", "searchreplace", "visualblocks",
+                            "autoresize", "directionality", "emoticons", "visualchars", "wordcount"
+                        ],
+                        setup: function(editor) {
+                            editor.on('blur', function() {
+                                tinymce
+                                    .triggerSave(); // Sinkronkan TinyMCE ke textarea setiap kali editor kehilangan fokus
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 
     <script>

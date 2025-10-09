@@ -98,7 +98,10 @@
                                         </tr>
                                     </thead>
                                     <tbody class="table-group-divider">
-                                        <tr v-for="(item,index) in data">
+                                        <tr v-if="data.length === 0">
+                                            <td colspan="6" class="text-center text-muted">Tidak ada data</td>
+                                        </tr>
+                                        <tr v-else v-for="(item,index) in data" :key="index">
                                             <td class="text-center">@{{ item.indexed + 1 }}</td>
                                             <td>
                                                 @{{ item.config_json.title }}

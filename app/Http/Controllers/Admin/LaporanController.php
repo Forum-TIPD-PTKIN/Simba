@@ -43,11 +43,11 @@ class LaporanController extends Controller
                 ->whereHas('pemberkasan')
                 ->whereHas(
                     'latestStatus',
-                    fn($q) => $q->where('status', 'PENGAJUAN')
+                    fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
                 )
                 ->get();
 
-            $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+            // $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
 
             return DataTables::of($dt_pendaftar)
                 ->editColumn('beasiswa', function ($data) {
@@ -64,9 +64,39 @@ class LaporanController extends Controller
                 ->editColumn('status', function ($data) {
                     return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
                 })
-                ->rawColumns(['beasiswa', 'status'])
+                ->addColumn('action', function ($data) {
+                    return view('admin.template._action_button_table', [
+                        'data' => $data,
+                        'title' => 'Status Seleksi',
+                        'buttons' => [
+                            'verifikasi' => [
+                                'title' => 'Lihat',
+                                'icon' => 'ti ti-eye',
+                                'btn-class' => 'btn btn-primary',
+                                'encrypted_id' => $data->id
+                            ]
+                        ]
+                    ])
+                        ->render();
+                })
+                ->rawColumns(['beasiswa', 'status', 'action'])
                 ->make(true);
         }
+    }
+
+    public function edit(string $id)
+    {
+        $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
+            ->find($id);
+
+        $key_pmb = env('PMB_KEY_API');
+        $req_pmb = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$data->mahasiswa?->nim}?key={$key_pmb}");
+        if ($req_pmb->status) $data_pmb = $req_pmb->data;
+
+        return view('admin.laporan.modal-verifikasi', [
+            'data' => $data,
+            'data_pmb' => $data_pmb ?? null
+        ])->render();
     }
 
     public function jadwal(Request $request)

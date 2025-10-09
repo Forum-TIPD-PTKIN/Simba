@@ -71,7 +71,7 @@ class SeleksiAdministrasiController extends Controller
             $status_pendaftar->deskripsi = json_encode([
                 'valid_form' => $is_valid_form,
                 'catatan' => $request->catatan,
-                'verifikator' => "Verifikator : " . Auth::user()->name,
+                'verifikator' => Auth::user()->name,
             ]);
             $status_pendaftar->save();
 
