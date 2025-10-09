@@ -34,6 +34,7 @@ class PenggunaController extends Controller
                 ['code' => 3, 'access' => 'Surveyor']
             ];
             $data = User::whereNull('access')
+                ->where('id', '!=', 1)
                 ->orWhereNotLike('access', '%2%')
                 ->get();
 
@@ -60,11 +61,13 @@ class PenggunaController extends Controller
                                 'title' => 'Sunting',
                                 'icon' => 'ti ti-edit-circle',
                                 'btn-class' => 'btn btn-primary',
+                                'encrypted_id' => $data->id,
                             ],
                             'delete' => [
                                 'title' => 'Hapus',
                                 'icon' => 'ti ti-trash',
                                 'btn-class' => 'btn btn-danger',
+                                'encrypted_id' => $data->id,
                             ]
                         ]
                     ])
@@ -80,7 +83,36 @@ class PenggunaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'pegawai' => 'required',
+            'akses'   => 'required|array|min:1',
+            'akses.*' => 'in:0,1,3'
+        ], [
+            'pegawai.required' => 'Pegawai belum dipilih',
+            'akses.required' => 'Pilih minimal 1 akses',
+            'akses.*.in' => 'Akses yang dipilih tidak valid'
+        ]);
+
+        try {
+            $dt_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
+
+            $pengguna = new User();
+            $pengguna->name = $dt_pegawai?->nama;
+            $pengguna->username = $dt_pegawai?->kode;
+            $pengguna->access = implode(',', $request->akses);
+            $pengguna->save();
+
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => "{$dt_pegawai?->nama} berhasil ditambahkan"
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            $data['message'] = $error[2] ?: 'Ada kesalahan saat menyimpan data';
+
+            return response()->json($data, 422);
+        }
     }
 
     /**
@@ -96,7 +128,9 @@ class PenggunaController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $pengguna = User::findOrFail($id);
+
+        return response()->json($pengguna);
     }
 
     /**
@@ -104,7 +138,36 @@ class PenggunaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'pegawai' => 'required',
+            'akses'   => 'required|array|min:1',
+            'akses.*' => 'in:0,1,3'
+        ], [
+            'pegawai.required' => 'Pegawai belum dipilih',
+            'akses.required' => 'Pilih minimal 1 akses',
+            'akses.*.in' => 'Akses yang dipilih tidak valid'
+        ]);
+
+        try {
+            $dt_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
+
+            $pengguna = User::findOrFail($id);
+            $pengguna->name = $dt_pegawai?->nama;
+            $pengguna->username = $dt_pegawai?->kode;
+            $pengguna->access = implode(',', $request->akses);
+            $pengguna->update();
+
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => "{$dt_pegawai?->nama} berhasil disunting"
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            $data['message'] = $error[2] ?: 'Ada kesalahan saat menyimpan data';
+
+            return response()->json($data, 422);
+        }
     }
 
     /**
@@ -112,6 +175,23 @@ class PenggunaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $pengguna = User::findOrFail($id);
+
+        $data = array();
+        try {
+            $proc = $pengguna->delete();
+            if ($proc) {
+                $data['icon'] = 'success';
+                $data['title'] = 'Berhasil';
+                $data['message'] = 'Pengguna berhasil dihapus';
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            $data['message'] = str_contains($error[2], 'constraint') ? 'Data tidak dapat dihapus, masih digunakan' : 'Ada Kesalahan saat menghapus data';
+
+            return response()->json($data, 422);
+        }
+
+        return response()->json($data);
     }
 }

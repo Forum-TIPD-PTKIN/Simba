@@ -4,9 +4,20 @@
 
 @push('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
+
     <style>
         .swal2-container {
             z-index: 2000 !important;
+        }
+
+        .error {
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
         }
     </style>
 @endpush
@@ -86,8 +97,9 @@
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label for="pegawai" class="form-label">Pegawai</label>
-                                    <input type="text" class="form-control" id="pegawai" name="pegawai"
-                                        autocomplete="off" autofocus required>
+                                    <select class="form-select select2" aria-label="Pegawai" id="pegawai" name="pegawai"
+                                        required>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check ps-0">
@@ -119,6 +131,40 @@
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#pegawai').select2({
+                dropdownParent: $('#modalPengguna'),
+                placeholder: 'Pilih pegawai',
+                allowClear: true,
+                theme: 'bootstrap-5',
+                minimumInputLength: 1,
+                ajax: {
+                    url: 'https://api.iainmadura.ac.id/api/pegawai', // route di Laravel
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            qi: params
+                                .term, // kirim search term ke API, karena select2 memakai parameter term=? Kalau di API tidak menerima parameter itu, maka pencarian tidak bisa dilakukan
+                            limit: 50 // jumlah maksimum response
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data?.data.map(item => ({
+                                id: item.kode,
+                                text: item.nama
+                            }))
+                        };
+                    },
+                    cache: true
+                },
+            });
+        });
+    </script>
 
     <script>
         const validForm = $("form.needs-validation").validate({
@@ -127,16 +173,16 @@
                 pegawai: {
                     required: true
                 },
-                akses: {
+                "akses[]": {
                     required: true
                 }
             },
             messages: {
                 pegawai: {
-                    required: 'Nama pengguna harus diisi'
+                    required: 'Pegawai belum dipilih'
                 },
-                akses: {
-                    required: 'Deskripsi pengguna harus diisi'
+                "akses[]": {
+                    required: 'Pilih minimal 1 akses'
                 }
             },
             errorPlacement: function(error, element) {
@@ -145,7 +191,10 @@
                     const editorContainer = tinymce.activeEditor.getContainer();
                     // Tempatkan error di bawah editor TinyMCE
                     error.insertAfter(editorContainer).addClass('invalid-feedback');
-                } else if (element.attr("type") === "radio") {
+                } else if (element.hasClass('select2-hidden-accessible')) {
+                    // Taruh pesan error DI BAWAH tampilan Select2
+                    error.insertAfter(element.next('.select2'));
+                } else if (element.attr("type") === "radio" || element.attr("type") === "checkbox") {
                     // Untuk radio buttons, tempatkan error setelah .form-check
                     error.insertAfter(element.closest('.form-check'));
                 } else {
@@ -161,7 +210,6 @@
                 $(element).removeClass('is-invalid').addClass('is-valid');
             },
             submitHandler: function(form, e) {
-                tinymce.triggerSave();
                 e.preventDefault();
 
                 const submitBtn = form.querySelector('button[type="submit"]');
@@ -317,15 +365,14 @@
         async function editData(id) {
             const response = await getData(id);
 
-            $('#pengguna_id').val(response.encrypted_id);
-            $('#nama').val(response.nama);
-            tinymce.activeEditor.setProgressState(true)
-            tinymce.activeEditor.setProgressState(false, 1000)
-            setTimeout(() => {
-                tinymce.activeEditor.setContent(response.deskripsi);
-                tinymce.triggerSave();
-            }, 500);
-            $(`input[name="status"][value="${response.status === 1 ? 'on' : 'off'}"]`).prop('checked', true);
+            $('#pengguna_id').val(response?.id);
+            // Buat option baru jika belum ada
+            let option = new Option(response?.name, response?.username, true, true);
+            $('#pegawai').append(option).trigger('change'); // set value
+            // Uncheck semua dulu
+            $('input[name="akses[]"]').prop('checked', false);
+            response?.access.forEach(item => $(`input[name="akses[]"][value="${item}"]`)
+                .prop('checked', true));
             $('#modalPengguna').modal('show');
         }
 
@@ -334,7 +381,7 @@
 
             Swal.fire({
                 title: 'Apa Anda Yakin?',
-                html: `Anda akan menghapus data pengguna : <span class="fw-bold fst-italic">"${response.nama}"</span>`,
+                html: `Anda akan menghapus data pengguna : <span class="fw-bold fst-italic">"${response.name}"</span>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus!',
