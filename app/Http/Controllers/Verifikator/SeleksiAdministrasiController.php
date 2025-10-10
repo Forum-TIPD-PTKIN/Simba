@@ -135,7 +135,7 @@ class SeleksiAdministrasiController extends Controller
                             </div>";
                 })
                 ->editColumn('status', function ($data) {
-                    return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
+                    return "<div id='status_{$data->id}'><span class='badge bg-primary'>{$data->latest_status?->status}</span></div>";
                 })
                 ->addColumn('action', function ($data) use ($is_jadwal_verifikasi, $is_jadwal_sanggah) {
                     return view('verifikator.template._action_button_table', [

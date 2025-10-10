@@ -32,7 +32,11 @@
             <tr>
                 <th>Label</th>
                 <th>Isian</th>
-                <th>Valid?</th>
+                <th>
+                    <div class="d-flex justify-content-center align-items-center gap-1">
+                        <span>Valid?</span>
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody id="berkas-control">
@@ -66,6 +70,21 @@
                         </td>
                     </tr>
                 @endforeach
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="text-center align-middle">
+                        <div class="d-flex gap-2 justify-content-center align-items-center">
+                            <button type="button" title="Semua benar" class="btn btn-sm btn-outline-primary"
+                                onclick="benarSemua(true)">
+                                <i class="ti ti-check"></i>
+                            </button>
+                            <button type="button" title="Semua salah" class="btn btn-sm btn-outline-danger"
+                                onclick="benarSemua(false)">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             @endforeach
         </tbody>
     </table>
@@ -87,3 +106,13 @@
         <textarea class="form-control" id="catatan" name="catatan" rows="3"></textarea>
     </div>
 </div>
+
+<script>
+    function benarSemua(status = true) {
+        const isChecked = status;
+        const checkboxes = document.querySelectorAll('#berkas-control .form-check-input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    }
+</script>

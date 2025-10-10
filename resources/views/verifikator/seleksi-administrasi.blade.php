@@ -134,6 +134,75 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="{{ env('SERVER_NODEJS') }}/socket.io/socket.io.js"></script>
+
+    <script>
+        let statusLama = {}
+        const user = @json(auth()->user());
+        const socket = io('{{ env('SERVER_NODEJS') }}', {
+            transports: ["websocket"],
+            auth: {
+                user: user,
+            }
+        });
+
+        socket.on('verifikator:preview:opened', (data) => {
+            for (item of data) {
+                const el = document.getElementById(`status_${item.id}`);
+                if (el) {
+                    pendaftarIdPreview.push(item.id);
+                    statusLama[item.id] = el.innerHTML;
+                    el.innerHTML = `<span class='badge bg-warning'>Preview ${item.user.name}</span>`
+                }
+            }
+        })
+
+
+        socket.on('verifikator:preview:finish', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    pendaftarIdPreview.push(data.pendaftarId);
+                    const oldSpan = document.createElement('span');
+                    oldSpan.className = 'badge bg-info';
+                    oldSpan.innerHTML = 'Selesai Diperiksa';
+                    el.replaceWith(oldSpan);
+                    el.innerHTML = `<span class='badge bg-success'>Selesai Diperiksa</span>`
+
+                    const elbtn = document.getElementById(`verifikasiBtnAction${data.pendaftarId}`);
+                    if (elbtn) {
+                        elbtn.disabled = true;
+                        elbtn.innerHTML = 'Selesai Diperiksa';
+                    }
+                }
+            }
+        });
+
+        socket.on('verifikator:preview', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    pendaftarIdPreview.push(data.pendaftarId);
+                    statusLama[data.pendaftarId] = el.innerHTML;
+                    el.innerHTML = `<span class='badge bg-warning'>Preview ${data.user.name}</span>`
+                }
+            }
+        });
+
+        socket.on('verifikator:preview:close', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    const index = pendaftarIdPreview.indexOf(data.pendaftarId)
+                    if (index !== -1) {
+                        pendaftarIdPreview.splice(index, 1);
+                        el.innerHTML = statusLama[data.pendaftarId];
+                        delete statusLama[data.pendaftarId];
+                    }
+                }
+            }
+        });
+    </script>
     <script>
         // Reload data
         function reloadData() {
@@ -159,6 +228,7 @@
                         <h5><i class="ti ti-calendar-event"></i> Jadwal Kegiatan</h5>
                         ${text}
                     `);
+
                 }
             });
 
@@ -176,7 +246,10 @@
                     data._token = "{{ csrf_token() }}";
                     data.flt_tahun = $('#flt_tahun').val();
                     data.flt_beasiswa = $('#flt_beasiswa').val();
-                }
+                },
+            },
+            drawCallback: function(settings) {
+                socket.emit('verifikator:preview:opened');
             },
             columns: [{
                     data: null,
@@ -225,7 +298,22 @@
 
     <script>
         // Verifikasi data
+        let pendaftarId = null;
+        let pendaftarIdPreview = [];
+
         function verifikasiData(id) {
+            if (pendaftarIdPreview.indexOf(id) !== -1) {
+                Swal.fire({
+                    title: "Gagal Membuka Preview",
+                    text: "Pendaftar sedang preview oleh verifikator lain!",
+                    icon: 'warning'
+                });
+                return;
+            }
+            pendaftarId = id;
+            socket.emit('verifikator:preview', {
+                id: id
+            });
             let url = "{{ route('verifikator.seleksi-administrasi.edit', ':id') }}";
             url = url.replace(':id', id);
 
@@ -335,6 +423,15 @@
                 }
             });
         }
+
+
+        $('#modalVerifikasi').on('hidden.bs.modal', function(e) {
+            // Kirim event bahwa preview sudah ditutup
+            socket.emit('verifikator:preview:close', {
+                id: pendaftarId
+            });
+            pendaftarId = null;
+        });
     </script>
 
     <script>
@@ -390,6 +487,9 @@
                     url: "{{ route('verifikator.seleksi-administrasi.store') }}",
                     data: formData,
                     success: function(data) {
+                        socket.emit('verifikator:preview:finish', {
+                            id: pendaftarId,
+                        });
                         form.reset();
                         $('#modalVerifikasi').modal('hide');
                         dataTable.ajax.reload(null, false);
