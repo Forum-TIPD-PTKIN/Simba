@@ -53,15 +53,6 @@
                                     alt="img" class="w-50"></a>
                         </div>
                         <h4 class="text-center f-w-500 mb-3 mt-5">Halaman Login</h4>
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
                         <div class="d-grid mt-4">
                             <a href="https://sate.iainmadura.ac.id" class="btn btn-primary">Login</a>
                         </div>
@@ -80,35 +71,31 @@
     <script src="{{ asset('assets/admin/js/theme.js') }}"></script>
     <script src="{{ asset('assets/admin/js/plugins/feather.min.js') }}"></script>
 
-
-
-
-
-
-
-
-
-
     <script>
         change_box_container('false');
     </script>
-
 
     <script>
         layout_caption_change('true');
     </script>
 
-
-
-
     <script>
         layout_rtl_change('false');
     </script>
 
-
     <script>
         preset_change("preset-1");
     </script>
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}"
+            });
+        </script>
+    @endif
 
 </body>
 <!-- [Body] end -->
