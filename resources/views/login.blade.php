@@ -70,6 +70,10 @@
     <script src="{{ asset('assets/admin/js/script.js') }}"></script>
     <script src="{{ asset('assets/admin/js/theme.js') }}"></script>
     <script src="{{ asset('assets/admin/js/plugins/feather.min.js') }}"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.8/sweetalert2.all.min.js"
+        integrity="sha512-ziDG00v9lDjgmzxhvyX5iztPHpSryN/Ct/TAMPmMmS2O3T1hFPRdrzVCSvwnbPbFNie7Yg5mF7NUSSp5smu7RA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
         change_box_container('false');
