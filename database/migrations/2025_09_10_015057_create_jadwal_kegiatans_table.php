@@ -26,6 +26,7 @@ return new class extends Migration
                 'SANGGAH_SELEKSI_ADMINISTRASI',
                 'PENGUMUMAN_PASCA_SANGGAH_SELEKSI_ADMINISTRASI',
                 'TES_POTENSI_AKADEMIK',
+                'PENGUMUMAN_TES_POTENSI_AKADEMIK',
                 'SURVEI_LOKASI',
                 'PENGUMUMAN_AKHIR'
             ]);

@@ -136,25 +136,32 @@ class DaftarController extends Controller
             $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
 
             $masterTemplate = [
-                'file_surat_pernyataan_1' => url('file/template/surat_pernyataan_1.docx'),
-                'file_surat_pernyataan_2' => url('file/template/surat_pernyataan_2.docx'),
-                'file_pakta_integritas' => url('file/template/pakta_integritas.docx'),
+                'file_pendukung' => url('file/template/kip/Surat_Pernyataan_Penghasilan_Orang_Tua_KIP_Kuliah.docx'),
+                'file_pakta_integritas' => url('file/template/kip/Pakta_Integritas_KIP_Kuliah.docx'),
             ];
 
             foreach ($jenis_form as $jenis) {
                 $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+                foreach ($form->getType() as $name => $type) {
+                    if ($type === 'file') {
+                        $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
+                        if ($url_temp) {
+                            if ($name === 'file_pendukung') {
+                                $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(Jika menggunakan SKTM, <a href='$url_temp' target='_blank'>Download Template</a>)</span>");
+                            } else {
+                                $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(<a href='$url_temp' target='_blank'>Download Template</a>)</small>");
+                            }
+                        }
+                    }
+                }
                 if ($berkas) {
                     if (isset($berkas->data->{$form->getCode()})) {
                         $berkasdata = $berkas->data->{$form->getCode()};
                         foreach ($form->getType() as $name => $type) {
                             if ($type === 'file') {
-                                $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
                                 $extension = $berkasdata->{$name}->value->extension;
                                 $url = $berkasdata->{$name}->value->url;
                                 $text = $berkasdata->{$name}->text;
-                                if ($url_temp) {
-                                    $form->setLabel($name, "$text (<a href='$url_temp' target='_blank'>Download Template</a>)");
-                                }
                                 $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
                                 $form->removeValidator($name, 'required');
                                 $form->appendField(new FormField(
