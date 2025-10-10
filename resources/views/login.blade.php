@@ -53,6 +53,15 @@
                                     alt="img" class="w-50"></a>
                         </div>
                         <h4 class="text-center f-w-500 mb-3 mt-5">Halaman Login</h4>
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="d-grid mt-4">
                             <a href="https://sate.iainmadura.ac.id" class="btn btn-primary">Login</a>
                         </div>

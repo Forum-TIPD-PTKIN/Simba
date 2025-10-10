@@ -10,6 +10,10 @@ class LoginController extends Controller
 {
     public function login_sso(Request $request)
     {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         $key = $request->key;
         $akun = api()->get('https://api.iainmadura.ac.id/api/onhand/detect?key=' . $key);
         if (!$akun->status) {
