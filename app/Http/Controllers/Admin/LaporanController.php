@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
 use App\Models\Pendaftar;
+use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -47,8 +48,6 @@ class LaporanController extends Controller
                 )
                 ->get();
 
-            // $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
-
             return DataTables::of($dt_pendaftar)
                 ->editColumn('beasiswa', function ($data) {
                     return "
@@ -86,8 +85,11 @@ class LaporanController extends Controller
 
     public function edit(string $id)
     {
-        $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
+        $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status', 'latestStatus'])
             ->find($id);
+
+        $is_jadwal_verifikasi = cek_jadwal($data->tahun_kegiatan_id, $data->beasiswa_id, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+        $is_jadwal_sanggah = cek_jadwal($data->tahun_kegiatan_id, $data->beasiswa_id, 'SANGGAH_SELEKSI_ADMINISTRASI', true);
 
         $key_pmb = env('PMB_KEY_API');
         $req_pmb = api()->get("https://pmb.uinmadura.ac.id/api/info/jalur/{$data->mahasiswa?->nim}?key={$key_pmb}");
@@ -95,8 +97,34 @@ class LaporanController extends Controller
 
         return view('admin.laporan.modal-verifikasi', [
             'data' => $data,
-            'data_pmb' => $data_pmb ?? null
+            'data_pmb' => $data_pmb ?? null,
+            'is_jadwal_verifikasi' => $is_jadwal_verifikasi,
+            'is_jadwal_sanggah' => $is_jadwal_sanggah
         ])->render();
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $curr_status = PendaftarStatus::find($id);
+
+        $data = array();
+        try {
+            $status = new PendaftarStatus();
+            $status->pendaftar_id = $curr_status->pendaftar_id;
+            $status->status = 'PENGAJUAN';
+            $status->save();
+
+            $data['icon'] = 'success';
+            $data['title'] = 'Berhasil';
+            $data['message'] = 'Status seleksi pendaftar berhasil dibatalkan';
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            $data['message'] = str_contains($error[2], 'constraint') ? 'Data tidak dapat dihapus, masih digunakan' : 'Ada Kesalahan saat menghapus data';
+
+            return response()->json($data, 422);
+        }
+
+        return response()->json($data);
     }
 
     public function jadwal(Request $request)

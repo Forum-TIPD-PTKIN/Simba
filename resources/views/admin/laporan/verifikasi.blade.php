@@ -103,22 +103,17 @@
             <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-lg">
-                    <form id="formVerifikasi" class="needs-validation">
-                        @csrf
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                            </div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    </form>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,7 +216,7 @@
     </script>
 
     <script>
-        // Verifikasi data
+        // Lihat Verifikasi data
         function verifikasiData(id) {
             let url = "{{ route('admin.laporan.verifikasi.edit', ':id') }}";
             url = url.replace(':id', id);
@@ -244,42 +239,60 @@
 
                     $('#modalVerifikasi').modal('show');
                     Swal.close();
+                }
+            });
+        }
 
-                    const oldEditor = tinymce.get('catatan');
-                    if (oldEditor && typeof oldEditor.remove === 'function') {
-                        oldEditor.remove();
-                    }
+        // Batal Verifikasi Data
+        $(document).on('click', '.btn-unverified', function() {
+            let url = "{{ route('admin.laporan.verifikasi.update', ':id') }}";
+            url = url.replace(':id', $(this).data('id'));
+            const pendaftar = $(this).data('pendaftar');
 
-                    // Prevent Bootstrap dialog from blocking focusin
-                    document.addEventListener('focusin', (e) => {
-                        if (e.target.closest(
-                                ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
-                            e.stopImmediatePropagation();
-                        }
-                    });
+            Swal.fire({
+                title: 'Apa Anda Yakin?',
+                html: `Status Seleksi Administrasi a.n. ${pendaftar?.mahasiswa?.nama} akan dibatalkan`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Lanjut!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "PUT",
+                        url: url,
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(data) {
+                            $('#modalVerifikasi').modal('hide');
+                            dataTable.ajax.reload(null, false);
 
-
-                    tinymce.init({
-                        selector: '#catatan',
-                        branding: false,
-                        menubar: 'edit insert view format help',
-                        toolbar: "undo redo |link | bold italic underline strikethrough | align | bullist numlist",
-                        toolbar_mode: 'sliding',
-                        plugins: [
-                            "advlist", "anchor", "autolink", "charmap", "code", "fullscreen",
-                            "help", "link", "lists", "preview", "searchreplace", "visualblocks",
-                            "autoresize", "directionality", "emoticons", "visualchars", "wordcount"
-                        ],
-                        setup: function(editor) {
-                            editor.on('blur', function() {
-                                tinymce
-                                    .triggerSave(); // Sinkronkan TinyMCE ke textarea setiap kali editor kehilangan fokus
+                            const msg = JSON.parse(JSON.stringify(data));
+                            Swal.fire({
+                                icon: msg.icon,
+                                title: msg.title,
+                                text: msg.message,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                customClass: {
+                                    timerProgressBar: 'bg-success bg-opacity-50'
+                                }
+                            });
+                        },
+                        error: function(data) {
+                            const msg = JSON.parse(JSON.stringify(data));
+                            Swal.fire({
+                                icon: 'error',
+                                title: "Gagal",
+                                text: msg.responseJSON.message
                             });
                         }
                     });
                 }
             });
-        }
+        });
     </script>
 
     <script>

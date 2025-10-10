@@ -1,4 +1,6 @@
-<input type="text" class="d-none" name="pendaftar_id" value="{{ $data->id }}">
+@php
+    $deskripsi_verifikasi = json_decode($data->latest_status?->deskripsi);
+@endphp
 <div class="row">
     <div class="col-12 col-md-6">
         <dl class="row">
@@ -13,15 +15,32 @@
 
             <dt class="col-sm-6 text-truncate">Beasiswa/Tahun</dt>
             <dd class="col-sm-6">{{ $data->beasiswa?->nama }}/{{ $data->tahun_kegiatan?->tahun }}</dd>
+
+            <dt class="col-sm-8">Tahun Masuk Kuliah</dt>
+            <dd class="col-sm-4">{{ $data_pmb->tahun_masuk }}</dd>
+
+            <dt class="col-sm-8">Tahun Lulus SMA/sederajat</dt>
+            <dd class="col-sm-4">{{ $data_pmb->sekolah_asal?->tahun_lulus }}</dd>
         </dl>
     </div>
     <div class="col-12 col-md-6">
         <dl class="row">
-            <dt class="col-sm-9">Tahun Masuk Kuliah</dt>
-            <dd class="col-sm-3">{{ $data_pmb->tahun_masuk }}</dd>
+            <dt class="col-sm-8">Status Seleksi Administrasi</dt>
+            <dd class="col-sm-4">
+                @if (str_contains(strtolower($data->latest_status?->status), 'lolos'))
+                    <span class="badge badge-sm bg-success">LOLOS</span>
+                @else
+                    <span class="badge badge-sm bg-danger">GAGAL</span>
+                @endif
+            </dd>
 
-            <dt class="col-sm-9">Tahun Lulus Jenjang SMA/sederajat</dt>
-            <dd class="col-sm-3">{{ $data_pmb->sekolah_asal?->tahun_lulus }}</dd>
+            <dt class="col-sm-8">Verifikator</dt>
+            <dd class="col-sm-4">{{ $deskripsi_verifikasi?->verifikator }}</dd>
+
+            <dt class="col-sm-8">Tanggal Verifikasi</dt>
+            <dd class="col-sm-4">
+                {{ \Carbon\Carbon::parse(count($data->pendaftar_status) ? $data->pendaftar_status[0]->created_at : null)->translatedFormat('d-m-Y H:i:s') }}
+            </dd>
         </dl>
     </div>
 </div>
@@ -46,23 +65,29 @@
                                     data-url="{{ $value->value?->url }}" data-type="{{ $value->text }}"
                                     class="fw-bold text-decoration-underline base-berkas"
                                     onclick="viewControl(this)">{{ $value->value?->name }}</a>
-                                {{-- <a href="javascript:void(0);"
-                                    onclick="window.open('{{ $value->value?->url }}?type=pdf', '_blank'
-                                    , 'location=yes,height=570,width=520,scrollbars=yes,status=yes' );">{{ $value->value?->name }}</a> --}}
                             @else
                                 {{ $value->valOption }}
                             @endif
                         </td>
                         <td class="text-center align-middle">
-                            <div class="form-check form-switch d-flex justify-content-center">
-                                <input type="text" class="d-none"
-                                    name="verifikasi[{{ strtolower(str_replace(' ', '_', $value->text)) }}]"
-                                    value="0">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                    name="verifikasi[{{ strtolower(str_replace(' ', '_', $value->text)) }}]"
-                                    id="verifikasi-{{ strtolower(str_replace(' ', '-', $value->text)) }}"
-                                    value="1">
-                            </div>
+                            @php
+                                $filter_deskripsi = array_filter($deskripsi_verifikasi->valid_form, function (
+                                    $item,
+                                ) use ($value) {
+                                    return array_key_exists(
+                                        strtolower(str_replace(' ', '_', $value->text)),
+                                        (array) $item,
+                                    );
+                                });
+                                $reset_filter = reset($filter_deskripsi);
+                                $is_valid = $reset_filter ? current((array) $reset_filter) : null;
+                            @endphp
+
+                            @if (strtolower($is_valid) === 'valid')
+                                <span class="text-success h4 fw-bold"><i class="ti ti-checkbox"></i></span>
+                            @else
+                                <span class="text-danger h4 fw-bold"><i class="ti ti-x"></i></span>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
@@ -70,20 +95,18 @@
         </tbody>
     </table>
 
-    <div class="mb-3 text-center">
-        <div class="form-check">
-            <input type="radio" class="btn-check" name="status_verval" id="success-status" value="success"
-                autocomplete="off">
-            <label class="btn btn-outline-success" for="success-status"><i class="ti ti-file-check"></i> Lolos</label>
-
-            <input type="radio" class="btn-check" name="status_verval" id="fail-status" value="fail"
-                autocomplete="off">
-            <label class="btn btn-outline-danger" for="fail-status"><i class="ti ti-file-x"></i> Tidak Lolos</label>
+    <div class="mb-3">
+        <div class="alert alert-info">
+            <h5><i class="ti ti-notes"></i> Catatan Verifikator</h5>
+            {!! $deskripsi_verifikasi?->catatan !!}
         </div>
     </div>
 
-    <div class="mb-3">
-        <label for="catatan" class="form-label">Catatan</label>
-        <textarea class="form-control" id="catatan" name="catatan" rows="3"></textarea>
-    </div>
+    @if ($is_jadwal_verifikasi || $is_jadwal_sanggah)
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-danger btn-unverified" data-id="{{ $data->latest_status?->id }}"
+                data-pendaftar="{{ $data }}"><i class="ti ti-rotate-2"></i>
+                Batalkan Status Seleksi Administrasi</button>
+        </div>
+    @endif
 </div>
