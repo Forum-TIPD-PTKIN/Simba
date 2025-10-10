@@ -118,6 +118,7 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
         Route::get('/verifikasi/data', [LaporanController::class, 'data'])->name('admin.laporan.verifikasi.data');
         Route::get('/verifikasi/jadwal', [LaporanController::class, 'jadwal'])->name('admin.laporan.verifikasi.jadwal');
         Route::get('/verifikasi/{id}/edit', [LaporanController::class, 'edit'])->name('admin.laporan.verifikasi.edit');
+        Route::put('/verifikasi/{id}', [LaporanController::class, 'update'])->name('admin.laporan.verifikasi.update');
     });
 });
 

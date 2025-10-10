@@ -120,6 +120,7 @@ class SeleksiAdministrasiController extends Controller
                 ->get();
 
             $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+            $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
 
             return DataTables::of($dt_pendaftar)
                 ->editColumn('beasiswa', function ($data) {
@@ -136,7 +137,7 @@ class SeleksiAdministrasiController extends Controller
                 ->editColumn('status', function ($data) {
                     return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
                 })
-                ->addColumn('action', function ($data) use ($is_jadwal_verifikasi) {
+                ->addColumn('action', function ($data) use ($is_jadwal_verifikasi, $is_jadwal_sanggah) {
                     return view('verifikator.template._action_button_table', [
                         'data' => $data,
                         'title' => 'Pendaftar',
@@ -147,7 +148,7 @@ class SeleksiAdministrasiController extends Controller
                                 'icon' => 'ti ti-checkbox',
                                 'btn-class' => 'btn btn-primary',
                                 'encrypted_id' => $data->id,
-                                'is_disabled' => !$is_jadwal_verifikasi
+                                'is_disabled' => !$is_jadwal_verifikasi && !$is_jadwal_sanggah
                             ]
                         ]
                     ])

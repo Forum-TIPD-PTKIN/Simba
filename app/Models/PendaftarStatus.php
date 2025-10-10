@@ -12,6 +12,11 @@ class PendaftarStatus extends Uuid
 
     protected $appends = ['deskripsi_json'];
 
+    public function pendaftar()
+    {
+        return $this->belongsTo(Pendaftar::class);
+    }
+
     public function getDeskripsiJsonAttribute()
     {
         $value = $this->deskripsi;
