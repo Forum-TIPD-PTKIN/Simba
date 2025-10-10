@@ -97,6 +97,8 @@
                 icon: 'error',
                 title: 'Oops...',
                 text: "{{ session('error') }}"
+            }).then(() => {
+                window.close();
             });
         </script>
     @endif
