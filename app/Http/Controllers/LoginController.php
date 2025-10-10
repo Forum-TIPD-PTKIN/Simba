@@ -13,9 +13,9 @@ class LoginController extends Controller
         $key = $request->key;
         $akun = api()->get('https://api.iainmadura.ac.id/api/onhand/detect?key=' . $key);
         if (!$akun->status) {
-            abort(403, 'Token autentikasi gagal divefirikasi!');
+            return redirect()->route('login')->with('error', 'Token autentikasi gagal divefirikasi!');
         } else if (!$akun->data->status) {
-            abort(403, 'Token autentikasi gagal divefirikasi!');
+            return redirect()->route('login')->with('error', 'Token autentikasi gagal divefirikasi!');
         }
 
         $user = User::whereUsername($akun->data->data->user->kode)->first();
@@ -40,7 +40,7 @@ class LoginController extends Controller
                 return redirect()->route('verifikator.dashboard');
             }
         } else if ($akun->data->data->user->level == 1) {
-            abort(403, 'Anda tidak memiliki akses pada sistem ini!');
+            return redirect()->route('login')->with('error', 'Anda tidak memiliki akses pada sistem ini!');
         }
 
         $profil = $akun->data->data->user->profil;
