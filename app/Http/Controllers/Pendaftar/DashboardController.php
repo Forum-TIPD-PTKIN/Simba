@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Pendaftar;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
+use App\Models\Pendaftar;
 use App\Models\TahunKegiatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -123,18 +125,32 @@ class DashboardController extends Controller
 
     public function jadwal(Request $request)
     {
-        $master_tahun = TahunKegiatan::whereHas('pendaftar', function ($query) {
-            $query->where('user_id', Auth::id());
-        })->orderBy('tahun', 'desc')
-            ->get();
-        $master_beasiswa = Beasiswa::whereHas('pendaftar', function ($query) {
-            $query->where('user_id', Auth::id())
-                ->whereHas('tahun_kegiatan', function ($q) {
-                    $q->where('status', 1);
+        $is_pendaftar_exists = Pendaftar::where('user_id', Auth::id())->exists();
+        $master_tahun = TahunKegiatan::where(function ($query) use ($is_pendaftar_exists) {
+            if ($is_pendaftar_exists) {
+                $query->whereHas('pendaftar', function ($query) {
+                    $query->where('user_id', Auth::id());
                 });
+            } else {
+                $query->orWhere('status', 1);
+            }
+        })
+            ->orderBy('tahun', 'desc')
+            ->get();
+        $master_beasiswa = Beasiswa::where(function ($query) use ($is_pendaftar_exists) {
+            if ($is_pendaftar_exists) {
+                $query->whereHas('pendaftar', function ($q) {
+                    $q->where('user_id', Auth::id());
+                });
+            } else {
+                $query->whereHas('jadwal_kegiatan', function ($q) {
+                    $q->where('tanggal_mulai', '<=', Carbon::now('Asia/Jakarta'))
+                        ->where('tanggal_selesai', '>=', Carbon::now('Asia/Jakarta'));
+                });
+            }
         })->get();
-        $jadwal = JadwalKegiatan::where('tahun_kegiatan_id', count($master_tahun) ? $master_tahun[0]->id : null)
-            ->where('beasiswa_id', count($master_beasiswa) ? $master_beasiswa[0]->id : null)
+        $jadwal = JadwalKegiatan::where('tahun_kegiatan_id', $request->flt_tahun ?: (count($master_tahun) ? $master_tahun[0]->id : null))
+            ->where('beasiswa_id', $request->flt_beasiswa ?: (count($master_beasiswa) ? $master_beasiswa[0]->id : null))
             ->orderBy('tanggal_mulai')
             ->get();
 

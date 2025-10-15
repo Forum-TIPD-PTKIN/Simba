@@ -56,7 +56,7 @@ class DaftarController extends Controller
                 'bg' => 'danger'
             ]);
         }
-        if (in_array($pendaftar->latest_status?->status, [
+        if ($pendaftar && in_array($pendaftar->latest_status?->status, [
             'PENGAJUAN'
         ])) {
             $key_pmb = env('PMB_KEY_API');
@@ -79,7 +79,7 @@ class DaftarController extends Controller
                     'bg' => 'danger',
                 ]);
             }
-            $pengumuna_seleksi = Carbon::parse($kegiatan->tanggal_mulai)
+            $pengumuman_seleksi = Carbon::parse($kegiatan->tanggal_mulai)
                 ->locale('id')
                 ->translatedFormat('l, j F Y H:i');
 
@@ -102,7 +102,7 @@ class DaftarController extends Controller
                 }
             }
 
-            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuna_seleksi', 'berkas'));
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuman_seleksi', 'berkas'));
         }
 
         $register = $pendaftar ? true : false;
@@ -189,6 +189,7 @@ class DaftarController extends Controller
                 return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=3');
             }
         }
+
         return view('pendaftar.daftar.index', compact(
             'beasiswa',
             'step',

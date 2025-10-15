@@ -105,6 +105,7 @@
             createdRow: function(row, data, dataIndex) {
                 // Ambil bagian tanggal saja, buang jam
                 const tanggalMulai = data.tanggal_mulai.split(' ')[0]; // "15-09-2025"
+                const tanggalSelesai = data.tanggal_selesai.split(' ')[0]; // "15-09-2025"
 
                 // Ambil tanggal hari ini dalam format DD-MM-YYYY
                 const now = new Date();
@@ -113,7 +114,7 @@
                     now.getFullYear();
 
                 // Bandingkan tanggal
-                if (tanggalMulai === today) {
+                if (today >= tanggalMulai && today <= tanggalSelesai) {
                     $(row).css({
                         'background-color': '#c0e5d9',
                         'font-weight': 'bold'

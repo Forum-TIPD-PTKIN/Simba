@@ -42,7 +42,7 @@
                                 </p>
                                 <p class="mb-0">
                                     <strong class="text-danger">Pengumuman kelulusan (Administrasi) akan diumumkan pada
-                                        hari {{ $pengumuna_seleksi }}.</strong>
+                                        hari {{ $pengumuman_seleksi }}.</strong>
                                 </p>
                             </div>
                         </div>

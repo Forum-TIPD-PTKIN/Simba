@@ -73,7 +73,10 @@ class PemberkasanController extends Controller
                     $berkasdata = $berkas->data->{$form->getCode()};
                     foreach ($form->getType() as $name => $type) {
                         if ($type === 'file') {
-                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                            $extension = $berkasdata?->{$name}?->value?->extension;
+                            $url = $berkasdata->{$name}->value->url;
+                            $text = $berkasdata->{$name}->text;
+                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
                             $form->removeValidator($name, 'required');
                             $form->appendField(new FormField(
                                 name: 'old_' . $name,

@@ -33,6 +33,7 @@
         const form = $(this).find('form');
         if (form.length) {
             form[0].reset(); // Reset input from form
+            form.find('.select').val(null).trigger('change'); // reset select2
             form.validate().resetForm(); // Reset state after validated
             form.find('.is-invalid').removeClass('is-invalid');
             form.find('.is-valid').removeClass('is-valid');
