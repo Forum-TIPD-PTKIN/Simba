@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pendaftar;
 use App\Helpers\FormField;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
+use App\Models\BiodataPendaftar;
 use App\Models\FormData;
 use App\Models\JadwalKegiatan;
 use App\Models\Mahasiswa;
@@ -83,10 +84,25 @@ class DaftarController extends Controller
                 ->locale('id')
                 ->translatedFormat('l, j F Y H:i');
 
+            $biodatadata = BiodataPendaftar::wherePendaftarId($pendaftar->id)->first();
+            $biodata = [];
+            if ($biodatadata) {
+                foreach ($biodatadata->data as $key => $value) {
+                    foreach ($value as $a => $b) {
+                        $isFile = $b->type == 'file' ? true : false;
+                        $isSelect = $b->type == 'select' ? true : false;
+                        array_push($biodata, (object)[
+                            'text' => $b->text,
+                            'url' => $isFile ? $b?->value?->url : null,
+                            'value' => $isFile ? null : ($isSelect ? $b->valOption : $b->value),
+                            'extension' => $isFile ? $b?->value?->extension : null
+                        ]);
+                    }
+                }
+            }
+
             $berkasdata = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
-
             $berkas = [];
-
             if ($berkasdata) {
                 foreach ($berkasdata->data as $key => $value) {
                     foreach ($value as $a => $b) {
@@ -94,23 +110,23 @@ class DaftarController extends Controller
                         $isSelect = $b->type == 'select' ? true : false;
                         array_push($berkas, (object)[
                             'text' => $b->text,
-                            'url' => $isFile ? $b->value->url : null,
+                            'url' => $isFile ? $b?->value?->url : null,
                             'value' => $isFile ? null : ($isSelect ? $b->valOption : $b->value),
-                            'extension' => $isFile ? $b->value->extension : null
+                            'extension' => $isFile ? $b?->value?->extension : null
                         ]);
                     }
                 }
             }
 
-            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuman_seleksi', 'berkas'));
+            return view('pendaftar.daftar.finalisasi', compact('pendaftar', 'jalur', 'akunpmb', 'pengumuman_seleksi', 'biodata', 'berkas'));
         }
 
         $register = $pendaftar ? true : false;
         $readOnly =  false;
         $step = intval(request()->get('step') ?? '1');
-        if ($step > 2 && !$pendaftar) {
+        if ($step > 1 && !$pendaftar) {
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
-            return redirect()->to(route('pendaftar.daftar', ['id' => $id]) . '?step=2');
+            return redirect()->to(route('pendaftar.daftar', ['id' => $id]) . '?step=1');
         }
         if ($step < 1) $step = 1;
         else if ($step > 4) $step = 4;
@@ -118,16 +134,72 @@ class DaftarController extends Controller
         $generated_form = [];
         $akunpmb = null;
 
-        if ($step == 2) {
+        if ($step == 1) {
             $key_pmb = env('PMB_KEY_API');
             $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             if ($_jalur->status) {
                 $jalur = $_jalur->data->jalur_masuk;
                 $akunpmb = $_jalur->data->biodata->kode;
             }
-        } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
+        } else if ($step == 2 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
             $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
                 ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+                ->where(function ($query) {
+                    $query->whereJenis('BIODATA')
+                        ->orWhere('jenis', 'FORM BIODATA');
+                })
+                ->orderBy('jenis')
+                ->orderBy('indexed')
+                ->get();
+
+            $jenis_form = $master_form->pluck('jenis')->unique();
+
+            $data = BiodataPendaftar::wherePendaftarId($pendaftar->id)->first();
+
+            foreach ($jenis_form as $jenis) {
+                $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+
+                if ($data) {
+                    if (isset($data->data->{$form->getCode()})) {
+                        $biodatadata = $data->data->{$form->getCode()};
+                        foreach ($form->getType() as $name => $type) {
+                            if ($type === 'file') {
+                                $extension = $biodatadata->{$name}->value->extension;
+                                $url = $biodatadata->{$name}->value->url;
+                                $text = $biodatadata->{$name}->text;
+                                $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$biodatadata->{$name}->value->name}</a></strong></div>");
+                                $form->removeValidator($name, 'required');
+                                $form->appendField(new FormField(
+                                    name: 'old_' . $name,
+                                    type: 'hidden'
+                                ));
+                                $form->setValue('old_' . $name, $biodatadata->{$name}->value->name);
+                            } else {
+                                if (isset($biodatadata->{$name}) && !($biodatadata->{$name}->type === 'file')) {
+                                    $form->setValue($name, $biodatadata->{$name}->value);
+                                }
+                            }
+                        }
+                    }
+                }
+                array_push($generated_form, [
+                    'jenis' => $jenis,
+                    'form' => $form->render()
+                ]);
+            }
+        } else if ($step == 3 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
+            $isi = $this->validateFinalisasiBiodata($pendaftar);
+            if (!$isi->status) {
+                session()->flash('error_register', $isi->message);
+                return redirect()->to(route('pendaftar.daftar', ['id' => $pendaftar?->beasiswa_id]) . '?step=2');
+            }
+
+            $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+                ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+                ->where(function ($query) {
+                    $query->whereJenis('PEMBERKASAN')
+                        ->orWhere('jenis', 'BERKAS');
+                })
                 ->orderBy('jenis')
                 ->orderBy('indexed')
                 ->get();
@@ -136,7 +208,7 @@ class DaftarController extends Controller
             $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
 
             $masterTemplate = [
-                'file_pendukung' => url('file/template/kip/Surat_Pernyataan_Penghasilan_Orang_Tua_KIP_Kuliah.docx'),
+                'file_pendukung' => url('file/template/kip/File_Pendukung.docx'),
                 'file_pakta_integritas' => url('file/template/kip/Pakta_Integritas_KIP_Kuliah.docx'),
             ];
 
@@ -147,7 +219,7 @@ class DaftarController extends Controller
                         $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
                         if ($url_temp) {
                             if ($name === 'file_pendukung') {
-                                $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(Jika menggunakan SKTM, <a href='$url_temp' target='_blank'>Download Template</a>)</span>");
+                                $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(Jika kategori yang dipilih <span class='fw-bold'>Mahasiswa tidak mampu atau difabel</span>, <a href='$url_temp' target='_blank'>Download Template</a>)</span>");
                             } else {
                                 $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(<a href='$url_temp' target='_blank'>Download Template</a>)</small>");
                             }
@@ -159,16 +231,16 @@ class DaftarController extends Controller
                         $berkasdata = $berkas->data->{$form->getCode()};
                         foreach ($form->getType() as $name => $type) {
                             if ($type === 'file') {
-                                $extension = $berkasdata->{$name}->value->extension;
-                                $url = $berkasdata->{$name}->value->url;
-                                $text = $berkasdata->{$name}->text;
-                                $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                                $extension = $berkasdata->{$name}?->value?->extension;
+                                $url = $berkasdata->{$name}?->value?->url;
+                                $text = $berkasdata->{$name}?->text;
+                                if ($extension && $url) $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}?->value?->name}</a></strong></div>");
                                 $form->removeValidator($name, 'required');
                                 $form->appendField(new FormField(
                                     name: 'old_' . $name,
                                     type: 'hidden'
                                 ));
-                                $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
+                                $form->setValue('old_' . $name, $berkasdata->{$name}?->value?->name);
                             } else {
                                 if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
                                     $form->setValue($name, $berkasdata->{$name}->value);
@@ -203,11 +275,62 @@ class DaftarController extends Controller
         ));
     }
 
+    private function validateFinalisasiBiodata($pendaftar)
+    {
+        $biodata = BiodataPendaftar::wherePendaftarId($pendaftar->id)->first();
+        $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
+            ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+            ->where(function ($query) {
+                $query->whereJenis('BIODATA')
+                    ->orWhere('jenis', 'FORM BIODATA');
+            })
+            ->orderBy('jenis')
+            ->orderBy('indexed')
+            ->get();
+        $jenis_form = $master_form->pluck('jenis')->unique();
+
+        if (!$biodata) {
+            return (object)[
+                'status' => false,
+                'message' => 'Biodata harus dilengkapi!'
+            ];
+        }
+
+        foreach ($jenis_form as $jenis) {
+            $form = form($jenis, $pendaftar?->beasiswa_id, $pendaftar?->tahun_kegiatan_id);
+
+            $validators = $form->getValidator();
+            $biodatadata = $biodata->data->{$form->getCode()} ?? null;
+
+            foreach ($form->getType() as $name => $type) {
+                $validator = $validators->rules[$form->getCode() . '_' . $name];
+                $_valids = explode('|', $validator);
+                if (in_array('required', collect($_valids)->map(function ($v) {
+                    return strtolower(trim($v));
+                })->toArray())) {
+                    if (!$biodatadata) {
+                        return (object)[
+                            'status' => false,
+                            'message' => "{$form->getLabel($name)} harus diisi!"
+                        ];
+                    }
+                }
+            }
+        }
+        return (object)[
+            'status' => true
+        ];
+    }
+
     private function validateFinalisasiBerkas($pendaftar)
     {
         $berkas = Pemberkasan::wherePendaftarId($pendaftar->id)->first();
         $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
             ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+            ->where(function ($query) {
+                $query->whereJenis('PEMBERKASAN')
+                    ->orWhere('jenis', 'BERKAS');
+            })
             ->orderBy('jenis')
             ->orderBy('indexed')
             ->get();
@@ -303,9 +426,9 @@ class DaftarController extends Controller
         /* PROSES CEK VALIDASI PENDAFTARAN */
         $valid = true;
         if (!$valid) {
-            /* kembalikan ke step 2 dan tampilkan pesan kesalahan  */
+            /* kembalikan ke step 1 dan tampilkan pesan kesalahan  */
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
-            return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2');
+            return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=1');
         }
         if ($config_matches && !in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
             return response()->json('Tahun lulus tidak sesuai dengan ketentuan pendaftaran', 422);
@@ -351,7 +474,7 @@ class DaftarController extends Controller
             'icon' => 'success',
             'title' => 'Berhasil',
             'message' => "Pendaftaran beasiswa {$beasiswa->nama} berhasil",
-            'redirect' => route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=3'
+            'redirect' => route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=2'
         ]);
     }
 

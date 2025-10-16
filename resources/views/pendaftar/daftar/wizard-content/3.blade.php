@@ -4,14 +4,21 @@
 <div class="row">
     <div class="col-12">
         @foreach ($generated_form as $item)
-            <form enctype="multipart/form-data" action="{{ route('pendaftar.pemberkasan.store') }}" id="form-berkas"
-                method="POST">
-                @csrf
-                <input type="hidden" name="beasiswa" value="{{ $beasiswa->id }}">
-                {!! $item['form'] !!}
-            </form>
-            <div class="d-flex justify-content-end">
-                <button onclick="simpanFile()" class="btn btn-success">Unggah & Simpan</button>
+            <div class="card">
+                <div class="card-header bg-gray-300">
+                    <h5>{{ $item['jenis'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <form enctype="multipart/form-data" action="{{ route('pendaftar.pemberkasan.store') }}"
+                        id="form-berkas" method="POST">
+                        @csrf
+                        <input type="hidden" name="beasiswa" value="{{ $beasiswa->id }}">
+                        {!! $item['form'] !!}
+                    </form>
+                    <div class="d-flex justify-content-end">
+                        <button onclick="simpanFile()" class="btn btn-success">Simpan</button>
+                    </div>
+                </div>
             </div>
         @endforeach
     </div>

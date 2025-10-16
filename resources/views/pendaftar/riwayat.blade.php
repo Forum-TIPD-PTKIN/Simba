@@ -69,7 +69,7 @@
                                                     @endswitch
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('pendaftar.daftar', ['id' => $item->beasiswa->id, 'step' => 2]) }}"
+                                                    <a href="{{ route('pendaftar.daftar', ['id' => $item->beasiswa->id, 'step' => 1]) }}"
                                                         class="btn btn-sm btn-info">Detail</a>
                                                 </td>
                                             </tr>

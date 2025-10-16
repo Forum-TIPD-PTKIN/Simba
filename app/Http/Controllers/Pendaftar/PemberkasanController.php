@@ -59,6 +59,10 @@ class PemberkasanController extends Controller
         $is_jadwal_daftar = cek_jadwal($data->tahun_kegiatan_id, $data->beasiswa_id, 'PENDAFTARAN', is_active: true); // return true atau false
         $master_form = FormData::whereBeasiswaId($data?->beasiswa_id)
             ->whereTahunKegiatanId($data?->tahun_kegiatan_id)
+            ->where(function ($query) {
+                $query->whereJenis('PEMBERKASAN')
+                    ->orWhere('jenis', 'BERKAS');
+            })
             ->orderBy('jenis')
             ->orderBy('indexed')
             ->get();
@@ -74,18 +78,18 @@ class PemberkasanController extends Controller
                     foreach ($form->getType() as $name => $type) {
                         if ($type === 'file') {
                             $extension = $berkasdata?->{$name}?->value?->extension;
-                            $url = $berkasdata->{$name}->value->url;
-                            $text = $berkasdata->{$name}->text;
-                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}->value->name}</a></strong></div>");
+                            $url = $berkasdata?->{$name}?->value?->url;
+                            $text = $berkasdata?->{$name}?->text;
+                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata?->{$name}?->value?->name}</a></strong></div>");
                             $form->removeValidator($name, 'required');
                             $form->appendField(new FormField(
                                 name: 'old_' . $name,
                                 type: 'hidden'
                             ));
-                            $form->setValue('old_' . $name, $berkasdata->{$name}->value->name);
+                            $form->setValue('old_' . $name, $berkasdata?->{$name}?->value?->name);
                         } else {
                             if (isset($berkasdata->{$name}) && !($berkasdata->{$name}->type === 'file')) {
-                                $form->setValue($name, $berkasdata->{$name}->value);
+                                $form->setValue($name, $berkasdata?->{$name}?->value);
                             }
                         }
                     }
@@ -139,6 +143,10 @@ class PemberkasanController extends Controller
 
         $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)
             ->whereTahunKegiatanId($pendaftar?->tahun_kegiatan_id)
+            ->where(function ($query) {
+                $query->whereJenis('PEMBERKASAN')
+                    ->orWhere('jenis', 'BERKAS');
+            })
             ->orderBy('jenis')
             ->orderBy('indexed')
             ->get();
@@ -174,12 +182,12 @@ class PemberkasanController extends Controller
                     if (!$val) {
                         // tidak ada unggahan baru
                         if ($berkas) {
-                            $val = $berkas->data->{$form->getCode()}->{$name}->value;
+                            $val = $berkas?->data?->{$form->getCode()}?->{$name}?->value;
                         }
                     } else {
                         if ($berkas) {
-                            if (isset($berkas->data->{$form->getCode()}->{$name}->value->path)) {
-                                $path = storage_path("app/{$berkas->data->{$form->getCode()}->{$name}->value->path}");
+                            if (isset($berkas?->data?->{$form->getCode()}?->{$name}?->value?->path)) {
+                                $path = storage_path("app/{$berkas?->data?->{$form->getCode()}?->{$name}?->value?->path}");
                                 if (file_exists($path)) {
                                     try {
                                         unlink($path);

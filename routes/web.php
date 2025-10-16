@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\{
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\Pendaftar\{
+    BiodataPendaftarController,
     DaftarController,
     DashboardController,
     PemberkasanController,
@@ -135,6 +136,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 
     Route::group(['middleware' => 'zonaPendaftar'], function () {
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('pendaftar.riwayat');
+        Route::post('/biodata', [BiodataPendaftarController::class, 'store'])->name('pendaftar.biodata.store');
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
         Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
         Route::get('/seleksi-administrasi', [PendaftarSeleksiAdministrasiController::class, 'index'])->name('pendaftar.seleksi-administrasi');

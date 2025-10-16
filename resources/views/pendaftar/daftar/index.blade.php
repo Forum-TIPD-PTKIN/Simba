@@ -41,7 +41,7 @@
                     @if ($readOnly)
                         <div class="alert alert-warning">
                             <strong>Perhatian</strong> Tidak dapat mengubah data pendaftaran ini, dikarenakan tahun kegiatan
-                            telah tidak aktif
+                            tidak aktif
                         </div>
                     @endif
 

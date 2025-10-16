@@ -4,7 +4,7 @@
         class="wizard-step @if ($step == 1) active @elseif ($step > 1) completed @endif">
         <a href="?step=1" class="text-dark">
             <div class="step-circle">1</div>
-            <div class="xsmall">Tentang Beasiswa</div>
+            <div class="xsmall">Pendaftaran</div>
         </a>
     </div>
     <div
