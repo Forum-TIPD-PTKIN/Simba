@@ -54,10 +54,16 @@
                                                         <h6 class="mb-0">{{ $item->nama }}</h6>
                                                     </div>
                                                     <div class="col-6 text-end fw-bold">
-                                                        <p class="text-success mb-0 small">{{ $item->tgl_mulai_formatted }}
-                                                        </p>
-                                                        <p class="text-danger mb-0 small">{{ $item->tgl_selesai_formatted }}
-                                                        </p>
+                                                        @if ($item->role !== 'SURVEI_LOKASI')
+                                                            <p class="text-success mb-0 small">
+                                                                {{ $item->tgl_mulai_formatted }}
+                                                            </p>
+                                                            <p class="text-danger mb-0 small">
+                                                                {{ $item->tgl_selesai_formatted }}
+                                                            </p>
+                                                        @else
+                                                            Kondisional
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
