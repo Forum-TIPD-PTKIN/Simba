@@ -297,7 +297,7 @@
 
     <script>
         function viewControl(e) {
-            let container = document.getElementById('berkas-control');
+            let container = e.closest('.berkas-control');
             let links = container.querySelectorAll('.base-berkas');
             let urls = []
             links.forEach(link => {
@@ -316,7 +316,7 @@
                     type: e.getAttribute('data-type'),
                     extension: e.getAttribute('data-extension')
                 },
-                data: urls.sort((a, b) => a.type.localeCompare(b.type))
+                data: urls
             }
             $.ajax({
                 type: 'post',

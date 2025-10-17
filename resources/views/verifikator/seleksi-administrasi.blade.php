@@ -100,8 +100,8 @@
             </div>
 
             <!-- Modal -->
-            <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
-                aria-hidden="true">
+            <div class="modal fade" id="modalVerifikasi" data-bs-backdrop="static" tabindex="-1"
+                aria-labelledby="modalVerifikasiLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <form id="formVerifikasi" class="needs-validation">
                         @csrf
@@ -373,7 +373,7 @@
         }
 
         function viewControl(e) {
-            let container = document.getElementById('berkas-control');
+            let container = e.closest('.berkas-control');
             let links = container.querySelectorAll('.base-berkas');
             let urls = []
             links.forEach(link => {
@@ -423,7 +423,6 @@
                 }
             });
         }
-
 
         $('#modalVerifikasi').on('hidden.bs.modal', function(e) {
             // Kirim event bahwa preview sudah ditutup

@@ -50,7 +50,7 @@ class SeleksiAdministrasiController extends Controller
 
     public function edit(string $id)
     {
-        $data = Pendaftar::with(['pemberkasan', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
+        $data = Pendaftar::with(['pemberkasan', 'biodata_pendaftar', 'mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pendaftar_status'])
             ->find($id);
 
         $key_pmb = env('PMB_KEY_API');

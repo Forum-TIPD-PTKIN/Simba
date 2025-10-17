@@ -18,6 +18,11 @@ class Pendaftar extends Uuid
         return $this->hasOne(Pemberkasan::class);
     }
 
+    public function biodata_pendaftar()
+    {
+        return $this->hasOne(BiodataPendaftar::class);
+    }
+
     public function mahasiswa()
     {
         return $this->hasOne(Mahasiswa::class);
