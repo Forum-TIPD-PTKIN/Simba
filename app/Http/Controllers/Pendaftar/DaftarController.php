@@ -384,16 +384,6 @@ class DaftarController extends Controller
      */
     public function store(Request $request, $id)
     {
-        $config = [
-            [
-                'beasiswa' => 'KIP',
-                'setting' => [
-                    'tahun_lulus' => [2023, 2024, 2025],
-                    'tahun_masuk' => 2025
-                ]
-            ]
-        ];
-
         $beasiswa = Beasiswa::where('status', 1)
             ->whereHas('jadwal_kegiatan', function ($query) {
                 $query->is_active()
@@ -403,13 +393,6 @@ class DaftarController extends Controller
                     });
             })
             ->find($id);
-
-        $matches = array_filter($config, function ($c) use ($beasiswa) {
-            $configBeasiswa = $c['beasiswa'];
-            return stripos($beasiswa->nama, $configBeasiswa) !== false
-                || stripos($configBeasiswa, $beasiswa->nama) !== false;
-        });
-        $config_matches = count($matches) ? $matches[0] : null;
 
         $pendaftar = Pendaftar::whereBeasiswaId($id)
             ->whereHas('tahun_kegiatan', function ($db) {
@@ -430,11 +413,15 @@ class DaftarController extends Controller
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
             return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=1');
         }
-        if ($config_matches && !in_array($request->tahun_lulus, $config_matches['setting']['tahun_lulus'] ?? [])) {
-            return response()->json('Tahun lulus tidak sesuai dengan ketentuan pendaftaran', 422);
-        }
-        if ($config_matches && ($request->tahun_masuk != $config_matches['setting']['tahun_masuk'] ?? 0)) {
-            return response()->json('Tahun masuk tidak sesuai dengan ketentuan pendaftaran', 422);
+        // Cek Aturan Beasiswa ==================================
+        foreach ($beasiswa->config_data_json as $key => $value) {
+            foreach ($value as $k => $v) {
+                if ($request->input($k)) {
+                    if (!($request->input($k) >= $v['min_' . $k] && $request->input($k) <= $v['max_' . $k])) {
+                        return response()->json(ucfirst(str_replace('_', ' ', $k)) . ' tidak sesuai dengan ketentuan', 422);
+                    }
+                }
+            }
         }
         /* =============================== */
 

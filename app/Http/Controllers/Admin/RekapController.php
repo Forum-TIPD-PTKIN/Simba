@@ -54,8 +54,7 @@ class RekapController extends Controller
                 })
                 ->orderBy('mahasiswas.fakultas')
                 ->orderBy('mahasiswas.prodi')
-                ->orderBy('mahasiswas.nim')
-                ->get();
+                ->orderBy('mahasiswas.nim');
 
             return DataTables::of($pendaftar)
                 ->editColumn('beasiswa', function ($data) {

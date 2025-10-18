@@ -35,6 +35,8 @@ class LaporanController extends Controller
     {
         if ($request->ajax()) {
             $dt_pendaftar = Pendaftar::with(['mahasiswa'])
+                ->selectRaw('pendaftars.*')
+                ->join('mahasiswas', 'pendaftars.id', '=', 'mahasiswas.pendaftar_id')
                 ->when($request->flt_tahun, function ($q) use ($request) {
                     return $q->where('tahun_kegiatan_id', $request->flt_tahun);
                 })
@@ -46,7 +48,9 @@ class LaporanController extends Controller
                     'latestStatus',
                     fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
                 )
-                ->get();
+                ->orderBy('mahasiswas.fakultas')
+                ->orderBy('mahasiswas.prodi')
+                ->orderBy('mahasiswas.nim');
 
             return DataTables::of($dt_pendaftar)
                 ->editColumn('beasiswa', function ($data) {

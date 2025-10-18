@@ -73,7 +73,20 @@ class BiodataPendaftarController extends Controller
                     if (!$val) {
                         // tidak ada unggahan baru
                         if ($biodata) {
-                            $val = $biodata->data->{$form->getCode()}->{$name}->value;
+                            // $val = $biodata?->data?->{$form->getCode()}?->{$name}?->value;
+                            $data = $biodata?->data;
+                            $section = $form->getCode();
+
+                            // Ambil key fallback dari properti yang tersedia
+                            $fallbackKey = array_keys((array) $data)[0] ?? null;
+
+                            // Tentukan active section
+                            $activeSection = property_exists($data, $section)
+                                ? $section
+                                : $fallbackKey;
+
+                            // Akses value
+                            $val = $data?->{$activeSection}?->{$name}?->value ?? null;
                         }
                     } else {
                         if ($biodata) {

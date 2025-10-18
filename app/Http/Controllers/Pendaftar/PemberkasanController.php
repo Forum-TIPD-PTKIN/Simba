@@ -70,8 +70,25 @@ class PemberkasanController extends Controller
 
         $berkas = Pemberkasan::wherePendaftarId($data->id)->first();
 
+        $masterTemplate = [
+            'file_pendukung' => url('file/template/kip/File_Pendukung.docx'),
+            'file_pakta_integritas' => url('file/template/kip/Pakta_Integritas_KIP_Kuliah.docx'),
+        ];
+
         foreach ($jenis_form as $jenis) {
             $form = form($jenis, $data?->beasiswa_id, $data?->tahun_kegiatan_id);
+            foreach ($form->getType() as $name => $type) {
+                if ($type === 'file') {
+                    $url_temp = isset($masterTemplate[$name]) ? $masterTemplate[$name] : null;
+                    if ($url_temp) {
+                        if ($name === 'file_pendukung') {
+                            $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(Jika kategori yang dipilih <span class='fw-bold'>Mahasiswa tidak mampu atau difabel</span>, <a href='$url_temp' target='_blank'>Download Template</a>)</span>");
+                        } else {
+                            $form->setLabel($name, "{$form->getLabel($name)} <span class='small'>(<a href='$url_temp' target='_blank'>Download Template</a>)</small>");
+                        }
+                    }
+                }
+            }
             if ($berkas) {
                 if (isset($berkas->data->{$form->getCode()})) {
                     $berkasdata = $berkas->data->{$form->getCode()};
@@ -80,7 +97,7 @@ class PemberkasanController extends Controller
                             $extension = $berkasdata?->{$name}?->value?->extension;
                             $url = $berkasdata?->{$name}?->value?->url;
                             $text = $berkasdata?->{$name}?->text;
-                            $form->setValue($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$form->getLabel($name)} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata?->{$name}?->value?->name}</a></strong></div>");
+                            if ($extension && $url) $form->setDescription($name, "<div class='alert alert-info mt-1 mb-0'><div class='text-success fst-italic'>{$text} telah diunggah, biarkan kosong apabila tidak ingin diganti</div>File saat ini: <strong><a href='javascript:void(0);' data-extension='$extension' data-url='$url' data-type='$text' class='fw-bold text-decoration-underline base-berkas' onclick='viewControl(this)' class='btn btn-link p-0 fw-bold text-primary'>{$berkasdata->{$name}?->value?->name}</a></strong></div>");
                             $form->removeValidator($name, 'required');
                             $form->appendField(new FormField(
                                 name: 'old_' . $name,
@@ -182,7 +199,20 @@ class PemberkasanController extends Controller
                     if (!$val) {
                         // tidak ada unggahan baru
                         if ($berkas) {
-                            $val = $berkas?->data?->{$form->getCode()}?->{$name}?->value;
+                            // $val = $berkas?->data?->{$form->getCode()}?->{$name}?->value;
+                            $data = $berkas?->data;
+                            $section = $form->getCode();
+
+                            // Ambil key fallback dari properti yang tersedia
+                            $fallbackKey = array_keys((array) $data)[0] ?? null;
+
+                            // Tentukan active section
+                            $activeSection = property_exists($data, $section)
+                                ? $section
+                                : $fallbackKey;
+
+                            // Akses value
+                            $val = $data?->{$activeSection}?->{$name}?->value ?? null;
                         }
                     } else {
                         if ($berkas) {

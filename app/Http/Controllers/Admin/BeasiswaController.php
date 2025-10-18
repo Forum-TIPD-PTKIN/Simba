@@ -72,9 +72,21 @@ class BeasiswaController extends Controller
         ]);
 
         try {
+            $config_data = array();
+            foreach ($request->aturan ?? [] as $key => $value) {
+                $aturan = [
+                    $key => [
+                        'min_' . $key => $request->input('min_' . $key),
+                        'max_' . $key => $request->input('max_' . $key)
+                    ]
+                ];
+                array_push($config_data, $aturan);
+            }
+
             $beasiswa = new Beasiswa();
             $beasiswa->nama = trim(strip_tags($request->nama));
             $beasiswa->deskripsi = $request->deskripsi;
+            $beasiswa->config_data = isset($request->aturan) ? json_encode($config_data) : null;
             $beasiswa->status = $request->status === 'on' ? 1 : 0;
             $beasiswa->save();
 
@@ -126,8 +138,20 @@ class BeasiswaController extends Controller
 
         $beasiswa = Beasiswa::find(Crypt::decryptString($id));
         try {
+            $config_data = array();
+            foreach ($request->aturan ?? [] as $key => $value) {
+                $aturan = [
+                    $key => [
+                        'min_' . $key => $request->input('min_' . $key),
+                        'max_' . $key => $request->input('max_' . $key)
+                    ]
+                ];
+                array_push($config_data, $aturan);
+            }
+
             $beasiswa->nama = trim(strip_tags($request->nama));
             $beasiswa->deskripsi = $request->deskripsi;
+            $beasiswa->config_data = isset($request->aturan) ? json_encode($config_data) : null;
             $beasiswa->status = $request->status === 'on' ? 1 : 0;
             $beasiswa->update();
 

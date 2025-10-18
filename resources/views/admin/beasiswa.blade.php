@@ -106,6 +106,86 @@
                                                 class="small">Tidak Aktif</span></label>
                                     </div>
                                 </div>
+
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header p-3 bg-yellow-200">
+                                            <h5 class="card-title">
+                                                <i class="ti ti-settings"></i>
+                                                Aturan Beasiswa
+                                            </h5>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="table-responsive" id="table-pengaturan">
+                                                    <table class="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Kriteria</th>
+                                                                <th scope="col" width="15%">Minimal</th>
+                                                                <th scope="col" width="15%">Maksimal</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <div
+                                                                        class="form-check d-flex align-items-center gap-2">
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input input-config"
+                                                                            name="aturan[tahun_lulus]" id="tahun-lulus">
+                                                                        <label class="form-check-label"
+                                                                            for="tahun-lulus"><span class="small">Tahun
+                                                                                Lulus SMA/sederajat</span></label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        id="min_tahun_lulus" name="min_tahun_lulus"
+                                                                        autocomplete="off" disabled>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        id="max_tahun_lulus" name="max_tahun_lulus"
+                                                                        autocomplete="off" disabled>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td>
+                                                                    <div
+                                                                        class="form-check d-flex align-items-center gap-2">
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input input-config"
+                                                                            name="aturan[tahun_masuk]" id="tahun-masuk">
+                                                                        <label class="form-check-label"
+                                                                            for="tahun-masuk"><span class="small">Tahun
+                                                                                Masuk Kuliah</span></label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        id="min_tahun_masuk" name="min_tahun_masuk"
+                                                                        autocomplete="off" disabled>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                        class="form-control form-control-sm"
+                                                                        id="max_tahun_masuk" name="max_tahun_masuk"
+                                                                        autocomplete="off" disabled>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -420,6 +500,7 @@
 
         async function editData(id) {
             const response = await getData(id);
+            const config = response.config_data_json ?? [];
 
             $('#beasiswa_id').val(response.encrypted_id);
             $('#nama').val(response.nama);
@@ -429,6 +510,22 @@
                 tinymce.activeEditor.setContent(response.deskripsi);
                 tinymce.triggerSave();
             }, 500);
+            config.forEach(function(item) {
+                const key = Object.keys(item)[0]; // contoh: 'tahun_lulus'
+                const values = item[key]; // contoh: { max_tahun_lulus: "2025", ... }
+
+                // Centang checkbox aturan[key]
+                $(`input[name="aturan[${key}]"]`).prop('checked', true);
+
+                // Aktifkan dan isi input min/max
+                Object.entries(values).forEach(function([subKey, value]) {
+                    $(`input[name="${subKey}"]`)
+                        .prop('disabled', false)
+                        .prop('required', true)
+                        .val(value);
+                });
+            });
+
             $(`input[name="status"][value="${response.status === 1 ? 'on' : 'off'}"]`).prop('checked', true);
             $('#modalBeasiswa').modal('show');
         }
@@ -490,5 +587,32 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        $(document).on('change', '.input-config', function() {
+            $(this).closest('tr').find('input:not(:first)').prop('disabled', !$(this).is(':checked')).prop(
+                'required', $(this).is(':checked'));
+        });
+
+        // Hapus class jika class ditambahkan, baik di awal atau karena ada event
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    $(mutation.target).removeClass('is-valid is-invalid');
+                }
+            });
+        });
+
+        $('.input-config').closest('tr').find('input[type="number"]').each(function() {
+            observer.observe(this, {
+                attributes: true
+            });
+        });
+        // Hapus class jika class ditambahkan, baik di awal atau karena ada event
+
+        // $('.input-config').closest('tr').find('input[type="number"]').on('input focus blur keyup change', function() {
+        //     $(this).removeClass(['is-valid', 'is-invalid']);
+        // })
     </script>
 @endpush

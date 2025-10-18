@@ -122,13 +122,16 @@
                     data: 'mahasiswa.nama'
                 },
                 {
-                    data: 'mahasiswa.fakultas_prodi'
+                    data: 'mahasiswa.fakultas_prodi',
+                    name: 'mahasiswas.prodi'
                 },
                 {
-                    data: 'beasiswa'
+                    data: 'beasiswa',
+                    searchable: false
                 },
                 {
-                    data: 'status'
+                    data: 'status',
+                    searchable: false
                 },
             ],
             responsive: true,
@@ -137,7 +140,7 @@
             fixedColumns: true,
             fixedHeader: true,
             ordering: false,
-            searching: false,
+            searching: true,
             language: {
                 "url": 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/id.json',
             },

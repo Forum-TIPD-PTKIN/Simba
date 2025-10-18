@@ -106,6 +106,8 @@ class SeleksiAdministrasiController extends Controller
     {
         if ($request->ajax()) {
             $dt_pendaftar = Pendaftar::with(['mahasiswa'])
+                ->selectRaw('pendaftars.*, mahasiswas.nim, mahasiswas.nama as nama_mahasiswa')
+                ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
                 ->when($request->flt_tahun, function ($q) use ($request) {
                     return $q->where('tahun_kegiatan_id', $request->flt_tahun);
                 })
@@ -116,8 +118,7 @@ class SeleksiAdministrasiController extends Controller
                 ->whereHas(
                     'latestStatus',
                     fn($q) => $q->where('status', 'PENGAJUAN')
-                )
-                ->get();
+                );
 
             $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
             $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
