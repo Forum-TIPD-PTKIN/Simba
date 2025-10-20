@@ -118,7 +118,10 @@ class SeleksiAdministrasiController extends Controller
                 ->whereHas(
                     'latestStatus',
                     fn($q) => $q->where('status', 'PENGAJUAN')
-                );
+                )
+                ->orderBy('mahasiswas.fakultas')
+                ->orderBy('mahasiswas.prodi')
+                ->orderBy('mahasiswas.nim');
 
             $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
             $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false

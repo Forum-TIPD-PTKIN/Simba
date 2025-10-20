@@ -90,33 +90,18 @@
                         </li>
                     </ul>
                 </li>
-                {{-- <li class="pc-item">
-                    <a href="{{ route('admin.tahun-kegiatan') }}" class="pc-link"><span class="pc-micon">
-                        <svg class="pc-icon">
-                            <use xlink:href="#custom-story"></use>
-                        </svg> </span><span class="pc-mtext">Tahun Kegiatan</span>
+
+                <li class="pc-item">
+                    <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-layer"></use>
+                            </svg>
+                        </span>
+                        <span class="pc-mtext">Seleksi TPA</span>
                     </a>
                 </li>
-                <li class="pc-item">
-                    <a href="{{ route('admin.beasiswa') }}" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-share-bold"></use>
-                            </svg> </span><span class="pc-mtext">Beasiswa</span>
-                    </a>
-                </li>
-                <li class="pc-item">
-                    <a href="{{ route('admin.jadwal-kegiatan') }}" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-calendar-1"></use>
-                            </svg> </span><span class="pc-mtext">Jadwal Kegiatan</span>
-                    </a>
-                </li>
-                <li class="pc-item">
-                    <a href="{{ route('admin.form-data') }}" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-note-1"></use>
-                            </svg> </span><span class="pc-mtext">Form Data</span></a>
-                </li> --}}
+
                 <li class="pc-item pc-caption">
                     <label>Laporan</label>
                     <svg class="pc-icon">
@@ -141,75 +126,7 @@
                         </span>
                     </a>
                 </li>
-                {{-- <li class="pc-item">
-                    <a href="../elements/bc_color.html" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-clipboard"></use>
-                            </svg> </span><span class="pc-mtext">Color</span></a>
-                </li>
-                <li class="pc-item">
-                    <a href="../elements/icon-tabler.html" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-mouse-circle"></use>
-                            </svg> </span><span class="pc-mtext">Tabler</span>
-                    </a>
-                </li>
-                <li class="pc-item pc-caption">
-                    <label>Other</label>
-                    <svg class="pc-icon">
-                        <use xlink:href="#custom-notification-status"></use>
-                    </svg>
-                </li>
-                <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link"><span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-level"></use>
-                            </svg> </span><span class="pc-mtext">Menu levels</span><span class="pc-arrow"><i
-                                data-feather="chevron-right"></i></span></a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item"><a class="pc-link" href="#!">Level 2.1</a></li>
-                        <li class="pc-item pc-hasmenu">
-                            <a href="#!" class="pc-link">Level 2.2<span class="pc-arrow"><i
-                                        data-feather="chevron-right"></i></span></a>
-                            <ul class="pc-submenu">
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
-                                <li class="pc-item pc-hasmenu">
-                                    <a href="#!" class="pc-link">Level 3.3<span class="pc-arrow"><i
-                                                data-feather="chevron-right"></i></span></a>
-                                    <ul class="pc-submenu">
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="pc-item pc-hasmenu">
-                            <a href="#!" class="pc-link">Level 2.3<span class="pc-arrow"><i
-                                        data-feather="chevron-right"></i></span></a>
-                            <ul class="pc-submenu">
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.1</a></li>
-                                <li class="pc-item"><a class="pc-link" href="#!">Level 3.2</a></li>
-                                <li class="pc-item pc-hasmenu">
-                                    <a href="#!" class="pc-link">Level 3.3<span class="pc-arrow"><i
-                                                data-feather="chevron-right"></i></span></a>
-                                    <ul class="pc-submenu">
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.1</a></li>
-                                        <li class="pc-item"><a class="pc-link" href="#!">Level 4.2</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="pc-item"><a href="../other/sample-page.html" class="pc-link">
-                        <span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-notification-status"></use>
-                            </svg>
-                        </span>
-                        <span class="pc-mtext">Sample page</span></a>
-                </li> --}}
+
             </ul>
         </div>
     </div>

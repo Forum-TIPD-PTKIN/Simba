@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\{
     PenggunaController,
     RekapController,
     TahunKegiatanController,
+    TesPotensiAkademikController,
 };
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\NotifikasiController;
@@ -109,6 +110,9 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('admin.notifikasi.show');
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
+
+    Route::get('/seleksi-tpa', [TesPotensiAkademikController::class, 'index'])->name('admin.seleksi-tpa');
+    Route::post('/seleksi-tpa/data', [TesPotensiAkademikController::class, 'data'])->name('admin.seleksi-tpa.data');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
