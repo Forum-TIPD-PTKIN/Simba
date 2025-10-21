@@ -25,28 +25,3 @@
         </tbody>
     </table>
 </div>
-
-@push('script')
-    <script>
-        const tablePendaftarLolosAdministrasi = $("#tablePendaftarLolosAdministrasi").DataTable({
-            "columnDefs": [{
-                    "targets": "_all",
-                    "className": "dt-head-center dt-body-center cell-border",
-                    "visible": true
-                },
-                {
-                    "targets": 0,
-                    "width": "5%"
-                },
-            ],
-            "responsive": true,
-            "autoWidth": true,
-            "fixedColumns": true,
-            "fixedHeader": true,
-            "searching": false,
-            "language": {
-                "url": 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/id.json',
-            },
-        });
-    </script>
-@endpush
