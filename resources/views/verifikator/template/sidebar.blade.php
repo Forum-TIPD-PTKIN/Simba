@@ -77,15 +77,21 @@
                 </li>
 
                 @if (session('level') === 1)
-                    <li class="pc-item pc-caption">
-                        <label>Data Pendaftar</label>
-                    </li>
                     <li class="pc-item">
                         <a href="{{ route('verifikator.seleksi-administrasi') }}" class="pc-link"><span
                                 class="pc-micon">
                                 <svg class="pc-icon">
                                     <use xlink:href="#custom-user-add"></use>
                                 </svg> </span><span class="pc-mtext">Seleksi Administrasi</span>
+                        </a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="{{ route('verifikator.seleksi-administrasi.rekap') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-document-text"></use>
+                                </svg>
+                            </span><span class="pc-mtext">Sudah Verifikasi</span>
                         </a>
                     </li>
                 @endif

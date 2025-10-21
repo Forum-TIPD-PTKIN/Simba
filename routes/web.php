@@ -112,7 +112,9 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
 
     Route::get('/seleksi-tpa', [TesPotensiAkademikController::class, 'index'])->name('admin.seleksi-tpa');
+    Route::post('/seleksi-tpa', [TesPotensiAkademikController::class, 'store'])->name('admin.seleksi-tpa.store');
     Route::post('/seleksi-tpa/data', [TesPotensiAkademikController::class, 'data'])->name('admin.seleksi-tpa.data');
+    Route::get('/seleksi-tpa/{tahun}/{beasiswa}/show', [TesPotensiAkademikController::class, 'show'])->name('admin.seleksi-tpa.show');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
@@ -159,6 +161,8 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::get('/seleksi-administrasi/jadwal', [SeleksiAdministrasiController::class, 'jadwal'])->name('verifikator.seleksi-administrasi.jadwal');
     Route::get('/seleksi-administrasi/{id}', [SeleksiAdministrasiController::class, 'edit'])->name('verifikator.seleksi-administrasi.edit');
     Route::post('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'store'])->name('verifikator.seleksi-administrasi.store');
+
+    Route::get('/hasil-seleksi-administrasi', [SeleksiAdministrasiController::class, 'rekap'])->name('verifikator.seleksi-administrasi.rekap');
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('verifikator.notifikasi.show');
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('verifikator.notifikasi.destroy');

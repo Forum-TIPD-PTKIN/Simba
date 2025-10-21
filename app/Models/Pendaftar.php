@@ -48,6 +48,11 @@ class Pendaftar extends Uuid
         return $this->hasMany(PendaftarStatus::class)->orderByDesc('created_at');
     }
 
+    public function map_ujian()
+    {
+        return $this->hasOne(MapUjian::class);
+    }
+
     public function latestStatus()
     {
         return $this->hasOne(PendaftarStatus::class)->latestOfMany('created_at');

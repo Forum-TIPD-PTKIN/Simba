@@ -175,4 +175,9 @@ class SeleksiAdministrasiController extends Controller
             return response()->json($jadwal_kegiatan);
         }
     }
+
+    public function rekap()
+    {
+        return 'Dalam pengembangan';
+    }
 }

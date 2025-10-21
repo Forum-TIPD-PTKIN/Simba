@@ -4,6 +4,12 @@
 
 @push('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+
+    <style>
+        .swal2-container {
+            z-index: 2000 !important;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -72,7 +78,6 @@
                                             <th scope="col">Tanggal Ujian</th>
                                             <th scope="col">Sesi</th>
                                             <th scope="col">Ruang</th>
-                                            <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="table-group-divider">
@@ -84,6 +89,25 @@
                 </div>
             </div>
             <!--[ Main Content ] end-->
+
+            <!-- Modal -->
+            <div class="modal fade" id="modalDataPendaftar" tabindex="-1" aria-labelledby="modalDataPendaftarLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalDataPendaftarLabel">Generate Data Peserta CBT</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <button type="submit" class="btn btn-primary">Proses</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- [ Main Content ] end -->
@@ -118,11 +142,11 @@
                     render: (data, type, row, meta) => meta.row + meta.settings._iDisplayStart + 1
                 },
                 {
-                    data: 'nim_pendaftar',
+                    data: 'pendaftar.mahasiswa.nim',
                     name: 'mahasiswas.nim'
                 },
                 {
-                    data: 'nama_pendaftar',
+                    data: 'pendaftar.mahasiswa.nama',
                     name: 'mahasiswas.nama'
                 },
                 {
@@ -142,12 +166,6 @@
                 },
                 {
                     data: 'ruang'
-                },
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false
                 }
             ],
             "columnDefs": [{
@@ -179,13 +197,15 @@
     </script>
 
     <script>
-        function getData(id) {
-            let url = "{{ route('admin.jadwal-kegiatan.edit', ':id') }}";
-            url = url.replace(':id', id);
+        $(document).on('click', '#generateDataPesertaCBT', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
 
-            return $.ajax({
+            let url = "{{ route('admin.seleksi-tpa.show', ['tahun' => ':tahun', 'beasiswa' => ':beasiswa']) }}";
+            url = url.replace(':tahun', tahun).replace(':beasiswa', beasiswa);
+
+            $.ajax({
                 url: url,
-                dataType: "JSON",
                 beforeSend: () => {
                     Swal.fire({
                         title: 'Mengambil data...',
@@ -197,94 +217,91 @@
                         allowOutsideClick: false
                     });
                 },
-                complete: () => {
+                success: (res) => {
+                    $('#modalDataPendaftar .modal-body').html(res);
+
+                    $('#modalDataPendaftar').modal('show');
                     Swal.close();
                 }
             });
-        }
+        });
+    </script>
 
-        async function editData(id) {
-            const response = await getData(id),
-                tanggal_mulai = new Date(response.tanggal_mulai),
-                tanggal_selesai = new Date(response.tanggal_selesai);
 
-            $('#jadwal_id').val(response.encrypted_id);
-            $(`#beasiswa option[value="${response.beasiswa_id}"]`).prop('selected', true);
-            $(`#role option[value="${response.role}"]`).prop('selected', true);
-            $('#nama').val(response.nama);
-            $('#tanggal_mulai').data('daterangepicker').setStartDate(tanggal_mulai);
-            $('#tanggal_mulai').data('daterangepicker').setEndDate(tanggal_mulai);
-            $('#tanggal_selesai').data('daterangepicker').setStartDate(tanggal_selesai);
-            $('#tanggal_selesai').data('daterangepicker').setEndDate(tanggal_selesai);
-            $('#tanggal_mulai').val(moment(tanggal_mulai).format('D/M/YYYY HH:mm'));
-            $('#tanggal_selesai').val(moment(tanggal_selesai).format('D/M/YYYY HH:mm'));
-            if (response.deskripsi) {
-                tinymce.activeEditor.setProgressState(true)
-                tinymce.activeEditor.setProgressState(false, 1000)
-                setTimeout(() => {
-                    tinymce.activeEditor.setContent(response.deskripsi);
-                    tinymce.triggerSave();
-                }, 500);
+    <script>
+        $('#modalDataPendaftar button[type="submit"]').on('click', function(e) {
+            e.preventDefault();
+
+            const count_data = $('#count-data-pendaftar').val(),
+                per_process = 50,
+                total_batch = Math.ceil(count_data / per_process),
+                tahun = $('#tahun-kegiatan').val(),
+                beasiswa = $('#beasiswa').val();
+            let start = 0;
+
+            // recursive function
+            processData(tahun, beasiswa, start, total_batch, per_process);
+
+            // Loop per batch
+            // for (let i = 0; i < total_batch; i++) {
+            //     const start = i * per_process;
+            //     const end = Math.min(start + per_process, count_data);
+
+            //     console.log(`Batch ${i + 1}: Proses dari index ${start} sampai ${end - 1}`);
+
+            //     // Lakukan proses di sini, misalnya:
+            //     // processData(start, end);
+            // }
+        });
+
+        function processData(tahun, beasiswa, start, total, per_process) {
+            if (start < total) {
+                $.ajax({
+                    url: "{{ route('admin.seleksi-tpa.store') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        tahun: tahun,
+                        beasiswa: beasiswa,
+                        start: start,
+                        per_process: per_process
+                    },
+                    beforeSend: () => {
+                        Swal.fire({
+                            title: 'Proses generate data CBT...',
+                            showCancelButton: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            allowOutsideClick: false
+                        });
+                    },
+                    success: (res) => {
+                        Swal.close();
+                        processData(tahun, beasiswa, start + 1, total, per_process);
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: xhr.responseJSON.message ??
+                                'Terdapat kesalahan server, periksa lebih lanjut!',
+                        });
+                    }
+                });
+            } else {
+                $('.modal').modal('hide');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses',
+                    text: 'Proses generate data peserta CBT selesai',
+                    timer: 1500,
+                    timerProgressBar: true,
+                });
+                reloadData();
+                return false;
             }
-            $('#modalJadwal').modal('show');
-        }
-
-        async function deleteData(id) {
-            const response = await getData(id);
-
-            Swal.fire({
-                title: 'Apa Anda Yakin?',
-                html: `Anda akan menghapus data jadwal : <span class="fw-bold fst-italic">"${response.nama} (${response.beasiswa?.nama} - ${response.tahun_kegiatan?.tahun})"</span>`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    url = "{{ route('admin.jadwal-kegiatan.destroy', ':id') }}";
-                    url = url.replace(':id', id);
-
-                    Swal.fire({
-                        title: 'Sedang memproses...',
-                        showCancelButton: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                            $.ajax({
-                                url: url,
-                                type: "DELETE",
-                                data: {
-                                    "_token": "{{ csrf_token() }}"
-                                },
-                                success: function(res) {
-                                    dataTable.ajax.reload(null, false);
-
-                                    Swal.fire({
-                                        title: res.title,
-                                        text: res.message,
-                                        icon: res.icon,
-                                        timer: 2000,
-                                        timerProgressBar: true,
-                                    });
-                                },
-                                error: function(res) {
-                                    Swal.fire({
-                                        title: 'Gagal',
-                                        icon: 'error',
-                                        text: res.responseJSON.message ??
-                                            'Ada kesalahan'
-                                    });
-                                },
-                                complete: () => {
-                                    $("form.needs-validation").trigger('reset');
-                                }
-                            });
-                        },
-                        allowOutsideClick: false
-                    });
-                }
-            });
         }
     </script>
 @endpush
