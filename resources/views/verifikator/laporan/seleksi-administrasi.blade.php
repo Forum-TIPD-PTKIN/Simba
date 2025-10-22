@@ -1,4 +1,4 @@
-@extends('admin.template.master-template')
+@extends('verifikator.template.master-template')
 
 @section('title', 'Seleksi Administrasi')
 
@@ -72,17 +72,6 @@
                         </div>
 
                         <div class="card-body">
-                            <div
-                                class="alert {{ $jadwal_kegiatan ? 'alert-warning' : 'alert-danger' }} container-alert-jadwal">
-                                <h5><i class="ti ti-calendar-event"></i> Jadwal Kegiatan</h5>
-                                @if ($jadwal_kegiatan)
-                                    Seleksi administrasi untuk beasiswa {{ $beasiswa[0]->nama }} tahun
-                                    {{ $tahun_kegiatan[0]->tahun }} dimulai dari
-                                    {{ $jadwal_kegiatan?->tanggal_mulai }} s.d. {{ $jadwal_kegiatan?->tanggal_selesai }}
-                                @else
-                                    Jadwal kegiatan belum dibuat oleh Administrator
-                                @endif
-                            </div>
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover text-center align-middle"
                                     id="dataTable">
@@ -133,35 +122,83 @@
 @endpush
 
 @push('script')
+    <script src="{{ asset('assets/admin/plugins/tinymce/tinymce.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="{{ env('SERVER_NODEJS') }}/socket.io/socket.io.js"></script>
+
+    <script>
+        let statusLama = {}
+        const user = @json(auth()->user());
+        const socket = io('{{ env('SERVER_NODEJS') }}', {
+            transports: ["websocket"],
+            auth: {
+                user: user,
+            }
+        });
+
+        socket.on('verifikator:preview:opened', (data) => {
+            for (item of data) {
+                const el = document.getElementById(`status_${item.id}`);
+                if (el) {
+                    pendaftarIdPreview.push(item.id);
+                    statusLama[item.id] = el.innerHTML;
+                    el.innerHTML = `<span class='badge bg-warning'>Preview ${item.user.name}</span>`
+                }
+            }
+        })
+
+
+        socket.on('verifikator:preview:finish', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    pendaftarIdPreview.push(data.pendaftarId);
+                    const oldSpan = document.createElement('span');
+                    oldSpan.className = 'badge bg-info';
+                    oldSpan.innerHTML = 'Selesai Diperiksa';
+                    el.replaceWith(oldSpan);
+                    el.innerHTML = `<span class='badge bg-success'>Selesai Diperiksa</span>`
+
+                    const elbtn = document.getElementById(`verifikasiBtnAction${data.pendaftarId}`);
+                    if (elbtn) {
+                        elbtn.disabled = true;
+                        elbtn.innerHTML = 'Selesai Diperiksa';
+                    }
+                }
+            }
+        });
+
+        socket.on('verifikator:preview', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    pendaftarIdPreview.push(data.pendaftarId);
+                    statusLama[data.pendaftarId] = el.innerHTML;
+                    el.innerHTML = `<span class='badge bg-warning'>Preview ${data.user.name}</span>`
+                }
+            }
+        });
+
+        socket.on('verifikator:preview:close', (data) => {
+            if (user.id != data.user.id) {
+                const el = document.getElementById(`status_${data.pendaftarId}`);
+                if (el) {
+                    const index = pendaftarIdPreview.indexOf(data.pendaftarId)
+                    if (index !== -1) {
+                        pendaftarIdPreview.splice(index, 1);
+                        el.innerHTML = statusLama[data.pendaftarId];
+                        delete statusLama[data.pendaftarId];
+                    }
+                }
+            }
+        });
+    </script>
+
     <script>
         // Reload data
         function reloadData() {
-            $.ajax({
-                url: "{{ route('admin.laporan.verifikasi.jadwal') }}",
-                data: {
-                    tahun: $('#flt_tahun').val(),
-                    beasiswa: $('#flt_beasiswa').val()
-                },
-                success: (res) => {
-                    const alert_jadwal = $('.container-alert-jadwal'),
-                        text = res && Object.keys(res).length > 0 ?
-                        `Seleksi administrasi untuk beasiswa ${res.beasiswa?.nama} tahun ${res.tahun_kegiatan?.tahun} dimulai dari ${res.tanggal_mulai} s.d. ${res.tanggal_selesai}` :
-                        `Jadwal kegiatan belum dibuat oleh Administrator`;
-
-                    alert_jadwal
-                        .removeClass(function(index, className) {
-                            return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
-                        })
-                        .addClass((res && Object.keys(res).length > 0) ? 'alert-warning' : 'alert-danger')
-                        .html('')
-                        .append(`
-                        <h5><i class="ti ti-calendar-event"></i> Jadwal Kegiatan</h5>
-                        ${text}
-                    `);
-                }
-            });
-
             dataTable.ajax.reload(null, false);
         }
 
@@ -170,7 +207,7 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('admin.laporan.verifikasi.data') }}",
+                url: "{{ route('verifikator.seleksi-administrasi.rekap.data') }}",
                 type: "GET",
                 data: (data) => {
                     data._token = "{{ csrf_token() }}";
@@ -312,6 +349,81 @@
     </script>
 
     <script>
+        // Verifikasi data
+        let pendaftarId = null;
+        let pendaftarIdPreview = [];
+
+        function verifikasiData(id) {
+            if (pendaftarIdPreview.indexOf(id) !== -1) {
+                Swal.fire({
+                    title: "Gagal Membuka Preview",
+                    text: "Pendaftar sedang preview oleh verifikator lain!",
+                    icon: 'warning'
+                });
+                return;
+            }
+            pendaftarId = id;
+            socket.emit('verifikator:preview', {
+                id: id
+            });
+            let url = "{{ route('verifikator.seleksi-administrasi.edit', ':id') }}";
+            url = url.replace(':id', id);
+
+            $.ajax({
+                url: url,
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    $('#modalVerifikasi .modal-body').html(res);
+
+                    $('#modalVerifikasi').modal('show');
+                    Swal.close();
+
+                    const oldEditor = tinymce.get('catatan');
+                    if (oldEditor && typeof oldEditor.remove === 'function') {
+                        oldEditor.remove();
+                    }
+
+                    // Prevent Bootstrap dialog from blocking focusin
+                    document.addEventListener('focusin', (e) => {
+                        if (e.target.closest(
+                                ".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+                            e.stopImmediatePropagation();
+                        }
+                    });
+
+
+                    tinymce.init({
+                        selector: '#catatan',
+                        branding: false,
+                        menubar: 'edit insert view format help',
+                        toolbar: "undo redo |link | bold italic underline strikethrough | align | bullist numlist",
+                        toolbar_mode: 'sliding',
+                        plugins: [
+                            "advlist", "anchor", "autolink", "charmap", "code", "fullscreen",
+                            "help", "link", "lists", "preview", "searchreplace", "visualblocks",
+                            "autoresize", "directionality", "emoticons", "visualchars", "wordcount"
+                        ],
+                        setup: function(editor) {
+                            editor.on('blur', function() {
+                                tinymce
+                                    .triggerSave(); // Sinkronkan TinyMCE ke textarea setiap kali editor kehilangan fokus
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
         function viewControl(e) {
             let container = e.closest('.berkas-control');
             let links = container.querySelectorAll('.base-berkas');
@@ -363,5 +475,103 @@
                 }
             });
         }
+
+        $('#modalVerifikasi').on('hidden.bs.modal', function(e) {
+            // Kirim event bahwa preview sudah ditutup
+            socket.emit('verifikator:preview:close', {
+                id: pendaftarId
+            });
+            pendaftarId = null;
+        });
+    </script>
+
+    <script>
+        const validForm = $("form.needs-validation").validate({
+            ignore: "",
+            rules: {
+                status_verval: {
+                    required: true
+                }
+            },
+            messages: {
+                status_verval: {
+                    required: 'Status verifikasi dan validasi harus dipilih'
+                }
+            },
+            errorPlacement: function(error, element) {
+                // Cek apakah elemen adalah TinyMCE (textarea yang diubah menjadi TinyMCE)
+                if (element.siblings().hasClass('tox-tinymce')) {
+                    const editorContainer = tinymce.activeEditor.getContainer();
+                    // Tempatkan error di bawah editor TinyMCE
+                    error.insertAfter(editorContainer).addClass('invalid-feedback');
+                } else if (element.attr("type") === "radio") {
+                    // Untuk radio buttons, tempatkan error setelah .form-check
+                    error.insertAfter(element.closest('.form-check'));
+                } else {
+                    // Untuk input biasa, tempatkan error setelah input
+                    error.addClass('invalid-feedback');
+                    error.insertAfter(element);
+                }
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass('is-invalid').removeClass('is-valid');
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass('is-invalid').addClass('is-valid');
+            },
+            submitHandler: function(form, e) {
+                tinymce.triggerSave();
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span role="status">Loading...</span>`;
+
+                // Serialize form
+                const formData = new URLSearchParams(new FormData(form)).toString();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('verifikator.seleksi-administrasi.store') }}",
+                    data: formData,
+                    success: function(data) {
+                        socket.emit('verifikator:preview:finish', {
+                            id: pendaftarId,
+                        });
+                        form.reset();
+                        $('#modalVerifikasi').modal('hide');
+                        dataTable.ajax.reload(null, false);
+
+                        const msg = JSON.parse(JSON.stringify(data));
+                        Swal.fire({
+                            icon: msg.icon,
+                            title: msg.title,
+                            text: msg.message,
+                            timer: 1500,
+                            timerProgressBar: true,
+                            customClass: {
+                                timerProgressBar: 'bg-success bg-opacity-50'
+                            }
+                        });
+                    },
+                    error: function(data) {
+                        const msg = JSON.parse(JSON.stringify(data));
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Gagal",
+                            text: msg.responseJSON.message
+                        });
+                    },
+                    complete: function() {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Simpan';
+                    }
+                });
+                return false;
+            }
+        });
     </script>
 @endpush

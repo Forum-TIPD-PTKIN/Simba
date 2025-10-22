@@ -41,7 +41,7 @@
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-                            <h5 class="mb-3 mb-sm-0">Data Peserta Lolos Seleksi Administrasi</h5>
+                            <h5 class="mb-3 mb-sm-0">Data Peserta Tes Potensi Akademik</h5>
                             <div class="d-flex gap-1">
                                 <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
                                     id="flt_tahun">
@@ -253,7 +253,6 @@
     <script>
         $('#modalDataPendaftar button[type="submit"]').on('click', function(e) {
             e.preventDefault();
-
             const count_data = $('#count-data-pendaftar').val(),
                 per_process = 50,
                 total_batch = Math.ceil(count_data / per_process),
@@ -261,19 +260,31 @@
                 beasiswa = $('#beasiswa').val();
             let start = 0;
 
-            // recursive function
-            processData(tahun, beasiswa, start, total_batch, per_process);
+            Swal.fire({
+                title: 'Apa Anda Yakin?',
+                html: `Anda akan melakukan generate data peserta CBT sebanyak : <span class="fw-bold fst-italic">${count_data} pendaftar</span>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Lanjut!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // recursive function
+                    processData(tahun, beasiswa, start, total_batch, per_process);
 
-            // Loop per batch
-            // for (let i = 0; i < total_batch; i++) {
-            //     const start = i * per_process;
-            //     const end = Math.min(start + per_process, count_data);
+                    // Loop per batch
+                    // for (let i = 0; i < total_batch; i++) {
+                    //     const start = i * per_process;
+                    //     const end = Math.min(start + per_process, count_data);
 
-            //     console.log(`Batch ${i + 1}: Proses dari index ${start} sampai ${end - 1}`);
+                    //     console.log(`Batch ${i + 1}: Proses dari index ${start} sampai ${end - 1}`);
 
-            //     // Lakukan proses di sini, misalnya:
-            //     // processData(start, end);
-            // }
+                    //     // Lakukan proses di sini, misalnya:
+                    //     // processData(start, end);
+                    // }
+                }
+            });
         });
 
         function processData(tahun, beasiswa, start, total, per_process) {

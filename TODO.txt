@@ -1,8 +1,6 @@
 ADMINISTRATOR
 ===================================================================
-> Filter (Lolos/Gagal) di menu Seleksi Administrasi (Administrator)
 > Fitur verifikator terbanyak (Administrator)
-> Tambah kolom verifikator di menu Rekapitulasi
 
 VERIFIKATOR
 ===================================================================

@@ -163,6 +163,7 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
     Route::post('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'store'])->name('verifikator.seleksi-administrasi.store');
 
     Route::get('/hasil-seleksi-administrasi', [SeleksiAdministrasiController::class, 'rekap'])->name('verifikator.seleksi-administrasi.rekap');
+    Route::get('/hasil-seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'rekap_data'])->name('verifikator.seleksi-administrasi.rekap.data');
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('verifikator.notifikasi.show');
     Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('verifikator.notifikasi.destroy');

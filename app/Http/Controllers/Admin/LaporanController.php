@@ -9,6 +9,7 @@ use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class LaporanController extends Controller
@@ -21,6 +22,7 @@ class LaporanController extends Controller
         $beasiswa = Beasiswa::where('status', 1)
             ->orderBy('nama')
             ->get();
+        $status = ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'];
         $jadwal_kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null)
             ->where('beasiswa_id', count($beasiswa) ? $beasiswa[0]->id : null)
             ->where('role', 'SELEKSI_ADMINISTRASI')
@@ -28,7 +30,8 @@ class LaporanController extends Controller
         return view('admin.laporan.verifikasi', [
             'tahun_kegiatan' => $tahun_kegiatan,
             'beasiswa' => $beasiswa,
-            'jadwal_kegiatan' => $jadwal_kegiatan
+            'jadwal_kegiatan' => $jadwal_kegiatan,
+            'status' => $status
         ]);
     }
     public function data(Request $request)
@@ -37,6 +40,20 @@ class LaporanController extends Controller
             $dt_pendaftar = Pendaftar::with(['mahasiswa'])
                 ->selectRaw('pendaftars.*')
                 ->join('mahasiswas', 'pendaftars.id', '=', 'mahasiswas.pendaftar_id')
+                ->join(
+                    DB::raw('(
+                    SELECT *
+                    FROM pendaftar_statuses AS ps1
+                    WHERE created_at = (
+                        SELECT MAX(created_at)
+                        FROM pendaftar_statuses AS ps2
+                        WHERE ps2.pendaftar_id = ps1.pendaftar_id
+                    )
+                ) as ps'),
+                    'pendaftars.id',
+                    '=',
+                    'ps.pendaftar_id'
+                )
                 ->when($request->flt_tahun, function ($q) use ($request) {
                     return $q->where('tahun_kegiatan_id', $request->flt_tahun);
                 })
@@ -44,10 +61,16 @@ class LaporanController extends Controller
                     return $q->where('beasiswa_id', $request->flt_beasiswa);
                 })
                 ->whereHas('pemberkasan')
-                ->whereHas(
-                    'latestStatus',
-                    fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
-                )
+                ->where(function ($query) use ($request) {
+                    if ($request->flt_status) {
+                        return $query->whereHas('latestStatus', fn($q) => $q->where('status', $request->flt_status));
+                    }
+
+                    return $query->whereHas(
+                        'latestStatus',
+                        fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
+                    );
+                })
                 ->orderBy('mahasiswas.fakultas')
                 ->orderBy('mahasiswas.prodi')
                 ->orderBy('mahasiswas.nim');
@@ -66,6 +89,10 @@ class LaporanController extends Controller
                 })
                 ->editColumn('status', function ($data) {
                     return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
+                })
+                ->editColumn('verifikator', function ($data) {
+                    $deskripsi = json_decode($data->latest_status?->deskripsi);
+                    return $deskripsi?->verifikator;
                 })
                 ->addColumn('action', function ($data) {
                     return view('admin.template._action_button_table', [

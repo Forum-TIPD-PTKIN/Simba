@@ -178,6 +178,104 @@ class SeleksiAdministrasiController extends Controller
 
     public function rekap()
     {
-        return 'Dalam pengembangan';
+        $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
+            ->get();
+        $beasiswa = Beasiswa::where('status', 1)
+            ->orderBy('nama')
+            ->get();
+        $status = ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'];
+
+        return view('verifikator.laporan.seleksi-administrasi', [
+            'tahun_kegiatan' => $tahun_kegiatan,
+            'beasiswa' => $beasiswa,
+            'status' => $status
+        ]);
+    }
+
+    public function rekap_data(Request $request)
+    {
+        if ($request->ajax()) {
+            $dt_pendaftar = Pendaftar::with(['mahasiswa'])
+                ->selectRaw('pendaftars.*')
+                ->join('mahasiswas', 'pendaftars.id', '=', 'mahasiswas.pendaftar_id')
+                ->join(
+                    DB::raw('(
+                    SELECT *
+                    FROM pendaftar_statuses AS ps1
+                    WHERE created_at = (
+                        SELECT MAX(created_at)
+                        FROM pendaftar_statuses AS ps2
+                        WHERE ps2.pendaftar_id = ps1.pendaftar_id
+                    )
+                ) as ps'),
+                    'pendaftars.id',
+                    '=',
+                    'ps.pendaftar_id'
+                )
+                ->when($request->flt_tahun, function ($q) use ($request) {
+                    return $q->where('tahun_kegiatan_id', $request->flt_tahun);
+                })
+                ->when($request->flt_beasiswa, function ($q) use ($request) {
+                    return $q->where('beasiswa_id', $request->flt_beasiswa);
+                })
+                ->whereHas('pemberkasan')
+                ->where(function ($query) use ($request) {
+                    if ($request->flt_status) {
+                        return $query->whereHas('latestStatus', fn($q) => $q->where('status', $request->flt_status));
+                    }
+
+                    return $query->whereHas(
+                        'latestStatus',
+                        fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
+                    );
+                })
+                ->orderBy('mahasiswas.fakultas')
+                ->orderBy('mahasiswas.prodi')
+                ->orderBy('mahasiswas.nim');
+
+            $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+            $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+
+            return DataTables::of($dt_pendaftar)
+                ->editColumn('beasiswa', function ($data) {
+                    return "
+                            <div class='flex-grow-1'>
+                              <div class='row g-1'>
+                                <div class='col-12'>
+                                  <h6 class='mb-0'>{$data->beasiswa?->nama}</h6>
+                                  <p class='text-muted mb-0'><small>{$data->tahun_kegiatan?->tahun}</small></p>
+                                </div>
+                              </div>
+                            </div>";
+                })
+                ->editColumn('status', function ($data) {
+                    return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
+                })
+                ->editColumn('verifikator', function ($data) {
+                    $deskripsi = json_decode($data->latest_status?->deskripsi);
+                    return $deskripsi?->verifikator;
+                })
+                ->addColumn('action', function ($data) use ($is_jadwal_verifikasi, $is_jadwal_sanggah) {
+                    $deskripsi = json_decode($data->latest_status?->deskripsi);
+                    if (Auth::user()->name === $deskripsi->verifikator) {
+                        return view('admin.template._action_button_table', [
+                            'data' => $data,
+                            'title' => 'Status Seleksi',
+                            'buttons' => [
+                                'verifikasi' => [
+                                    'title' => 'Sunting',
+                                    'icon' => 'ti ti-edit-circle',
+                                    'btn-class' => 'btn btn-warning',
+                                    'encrypted_id' => $data->id,
+                                    'is_disabled' => !$is_jadwal_verifikasi && !$is_jadwal_sanggah
+                                ]
+                            ]
+                        ])
+                            ->render();
+                    }
+                })
+                ->rawColumns(['beasiswa', 'status', 'action'])
+                ->make(true);
+        }
     }
 }
