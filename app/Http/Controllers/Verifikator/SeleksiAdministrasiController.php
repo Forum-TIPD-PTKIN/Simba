@@ -71,6 +71,11 @@ class SeleksiAdministrasiController extends Controller
             'status_verval.required' => 'Status verifikasi dan validasi belum dipilih'
         ]);
 
+        $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+        $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+
+        if (!$is_jadwal_verifikasi && !$is_jadwal_sanggah) return response()->json('Tidak dapat melakukan seleksi administrasi', 419);
+
         $is_valid_form = [];
         foreach ($request->verifikasi as $key => $value) {
             array_push($is_valid_form, [$key => $value == 1 ? 'Valid' : 'Invalid']);

@@ -50,6 +50,7 @@ Route::post("/view-control", [LoginController::class, 'view_control'])->name('vi
 // administrator
 Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
     Route::get('/', [DashboardAdmin::class, 'index'])->name('admin.dashboard');
+    Route::get('/show/{tahun}/{beasiswa}', [DashboardAdmin::class, 'show'])->name('admin.dashboard.show');
 
     Route::resource('/tahun-kegiatan', TahunKegiatanController::class, [
         'names' => [

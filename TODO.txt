@@ -1,6 +1,7 @@
 ADMINISTRATOR
 ===================================================================
 > Fitur verifikator terbanyak (Administrator)
+> Rekap pendaftar per-prodi
 
 VERIFIKATOR
 ===================================================================
