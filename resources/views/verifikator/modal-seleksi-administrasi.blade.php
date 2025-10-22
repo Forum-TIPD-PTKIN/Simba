@@ -1,4 +1,8 @@
+@php
+    $deskripsi_verifikasi = json_decode($data->latest_status?->deskripsi);
+@endphp
 <input type="text" class="d-none" name="pendaftar_id" value="{{ $data->id }}">
+<input type="text" class="d-none" name="pendaftar_status_id" value="{{ $data->latest_status?->id }}">
 <div class="row">
     <div class="col-12 col-md-6">
         <dl class="row">
@@ -101,6 +105,19 @@
                                     @endif
                                 </td>
                                 <td class="text-center align-middle">
+                                    @php
+                                        $filter_deskripsi = array_filter(
+                                            $deskripsi_verifikasi?->valid_form ?? [],
+                                            function ($item) use ($value) {
+                                                return array_key_exists(
+                                                    strtolower(str_replace(' ', '_', $value->text)),
+                                                    (array) $item,
+                                                );
+                                            },
+                                        );
+                                        $reset_filter = reset($filter_deskripsi);
+                                        $is_valid = $reset_filter ? current((array) $reset_filter) : null;
+                                    @endphp
                                     <div class="form-check form-switch d-flex justify-content-center">
                                         <input type="text" class="d-none"
                                             name="verifikasi[{{ strtolower(str_replace(' ', '_', $value->text)) }}]"
@@ -108,7 +125,7 @@
                                         <input class="form-check-input" type="checkbox" role="switch"
                                             name="verifikasi[{{ strtolower(str_replace(' ', '_', $value->text)) }}]"
                                             id="verifikasi-{{ strtolower(str_replace(' ', '-', $value->text)) }}"
-                                            value="1">
+                                            value="1" @checked($is_valid === 'Valid')>
                                     </div>
                                 </td>
                             </tr>
@@ -138,12 +155,12 @@
 <div class="mb-3 text-center">
     <div class="form-check">
         <input type="radio" class="btn-check" name="status_verval" id="success-status" value="success"
-            autocomplete="off">
+            autocomplete="off" @checked($data->latest_status?->status === 'LOLOS ADMINISTRASI')>
         <label class="btn btn-outline-success" for="success-status"><i class="ti ti-file-check"></i>
             Lolos</label>
 
         <input type="radio" class="btn-check" name="status_verval" id="fail-status" value="fail"
-            autocomplete="off">
+            autocomplete="off" @checked($data->latest_status?->status === 'GAGAL ADMINISTRASI')>
         <label class="btn btn-outline-danger" for="fail-status"><i class="ti ti-file-x"></i> Tidak
             Lolos</label>
     </div>
@@ -151,7 +168,7 @@
 
 <div class="mb-3">
     <label for="catatan" class="form-label">Catatan</label>
-    <textarea class="form-control" id="catatan" name="catatan" rows="3"></textarea>
+    <textarea class="form-control" id="catatan" name="catatan" rows="3">{!! $deskripsi_verifikasi?->catatan !!}</textarea>
 </div>
 
 <script>

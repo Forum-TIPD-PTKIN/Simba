@@ -97,20 +97,25 @@
             </div>
 
             <!-- Modal -->
-            <div class="modal fade" id="modalVerifikasi" tabindex="-1" aria-labelledby="modalVerifikasiLabel"
-                aria-hidden="true">
+            <div class="modal fade" id="modalVerifikasi" data-bs-backdrop="static" tabindex="-1"
+                aria-labelledby="modalVerifikasiLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <form id="formVerifikasi" class="needs-validation">
+                        @csrf
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -126,75 +131,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-    <script src="{{ env('SERVER_NODEJS') }}/socket.io/socket.io.js"></script>
-
-    <script>
-        let statusLama = {}
-        const user = @json(auth()->user());
-        const socket = io('{{ env('SERVER_NODEJS') }}', {
-            transports: ["websocket"],
-            auth: {
-                user: user,
-            }
-        });
-
-        socket.on('verifikator:preview:opened', (data) => {
-            for (item of data) {
-                const el = document.getElementById(`status_${item.id}`);
-                if (el) {
-                    pendaftarIdPreview.push(item.id);
-                    statusLama[item.id] = el.innerHTML;
-                    el.innerHTML = `<span class='badge bg-warning'>Preview ${item.user.name}</span>`
-                }
-            }
-        })
-
-
-        socket.on('verifikator:preview:finish', (data) => {
-            if (user.id != data.user.id) {
-                const el = document.getElementById(`status_${data.pendaftarId}`);
-                if (el) {
-                    pendaftarIdPreview.push(data.pendaftarId);
-                    const oldSpan = document.createElement('span');
-                    oldSpan.className = 'badge bg-info';
-                    oldSpan.innerHTML = 'Selesai Diperiksa';
-                    el.replaceWith(oldSpan);
-                    el.innerHTML = `<span class='badge bg-success'>Selesai Diperiksa</span>`
-
-                    const elbtn = document.getElementById(`verifikasiBtnAction${data.pendaftarId}`);
-                    if (elbtn) {
-                        elbtn.disabled = true;
-                        elbtn.innerHTML = 'Selesai Diperiksa';
-                    }
-                }
-            }
-        });
-
-        socket.on('verifikator:preview', (data) => {
-            if (user.id != data.user.id) {
-                const el = document.getElementById(`status_${data.pendaftarId}`);
-                if (el) {
-                    pendaftarIdPreview.push(data.pendaftarId);
-                    statusLama[data.pendaftarId] = el.innerHTML;
-                    el.innerHTML = `<span class='badge bg-warning'>Preview ${data.user.name}</span>`
-                }
-            }
-        });
-
-        socket.on('verifikator:preview:close', (data) => {
-            if (user.id != data.user.id) {
-                const el = document.getElementById(`status_${data.pendaftarId}`);
-                if (el) {
-                    const index = pendaftarIdPreview.indexOf(data.pendaftarId)
-                    if (index !== -1) {
-                        pendaftarIdPreview.splice(index, 1);
-                        el.innerHTML = statusLama[data.pendaftarId];
-                        delete statusLama[data.pendaftarId];
-                    }
-                }
-            }
-        });
-    </script>
 
     <script>
         // Reload data
@@ -269,103 +205,7 @@
     </script>
 
     <script>
-        // Lihat Verifikasi data
-        function verifikasiData(id) {
-            let url = "{{ route('admin.laporan.verifikasi.edit', ':id') }}";
-            url = url.replace(':id', id);
-
-            $.ajax({
-                url: url,
-                beforeSend: () => {
-                    Swal.fire({
-                        title: 'Mengambil data...',
-                        showCancelButton: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        allowOutsideClick: false
-                    });
-                },
-                success: (res) => {
-                    $('#modalVerifikasi .modal-body').html(res);
-
-                    $('#modalVerifikasi').modal('show');
-                    Swal.close();
-                }
-            });
-        }
-
-        // Batal Verifikasi Data
-        $(document).on('click', '.btn-unverified', function() {
-            let url = "{{ route('admin.laporan.verifikasi.update', ':id') }}";
-            url = url.replace(':id', $(this).data('id'));
-            const pendaftar = $(this).data('pendaftar');
-
-            Swal.fire({
-                title: 'Apa Anda Yakin?',
-                html: `Status Seleksi Administrasi a.n. ${pendaftar?.mahasiswa?.nama} akan dibatalkan`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Lanjut!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: "PUT",
-                        url: url,
-                        data: {
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function(data) {
-                            $('#modalVerifikasi').modal('hide');
-                            dataTable.ajax.reload(null, false);
-
-                            const msg = JSON.parse(JSON.stringify(data));
-                            Swal.fire({
-                                icon: msg.icon,
-                                title: msg.title,
-                                text: msg.message,
-                                timer: 1500,
-                                timerProgressBar: true,
-                                customClass: {
-                                    timerProgressBar: 'bg-success bg-opacity-50'
-                                }
-                            });
-                        },
-                        error: function(data) {
-                            const msg = JSON.parse(JSON.stringify(data));
-                            Swal.fire({
-                                icon: 'error',
-                                title: "Gagal",
-                                text: msg.responseJSON.message
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-
-    <script>
-        // Verifikasi data
-        let pendaftarId = null;
-        let pendaftarIdPreview = [];
-
-        function verifikasiData(id) {
-            if (pendaftarIdPreview.indexOf(id) !== -1) {
-                Swal.fire({
-                    title: "Gagal Membuka Preview",
-                    text: "Pendaftar sedang preview oleh verifikator lain!",
-                    icon: 'warning'
-                });
-                return;
-            }
-            pendaftarId = id;
-            socket.emit('verifikator:preview', {
-                id: id
-            });
+        function ubahVerifikasiData(id) {
             let url = "{{ route('verifikator.seleksi-administrasi.edit', ':id') }}";
             url = url.replace(':id', id);
 
@@ -438,6 +278,7 @@
                     extension
                 })
             });
+
             const data = {
                 active: {
                     url: e.getAttribute('data-url'),
@@ -446,6 +287,7 @@
                 },
                 data: urls
             }
+
             $.ajax({
                 type: 'post',
                 url: "{{ route('view.control') }}",
@@ -475,14 +317,6 @@
                 }
             });
         }
-
-        $('#modalVerifikasi').on('hidden.bs.modal', function(e) {
-            // Kirim event bahwa preview sudah ditutup
-            socket.emit('verifikator:preview:close', {
-                id: pendaftarId
-            });
-            pendaftarId = null;
-        });
     </script>
 
     <script>
@@ -538,9 +372,6 @@
                     url: "{{ route('verifikator.seleksi-administrasi.store') }}",
                     data: formData,
                     success: function(data) {
-                        socket.emit('verifikator:preview:finish', {
-                            id: pendaftarId,
-                        });
                         form.reset();
                         $('#modalVerifikasi').modal('hide');
                         dataTable.ajax.reload(null, false);

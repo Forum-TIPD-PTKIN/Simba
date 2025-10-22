@@ -77,7 +77,10 @@ class SeleksiAdministrasiController extends Controller
         }
 
         try {
-            $status_pendaftar = new PendaftarStatus();
+            $status_pendaftar = PendaftarStatus::find($request->pendaftar_status_id);
+            if ($status_pendaftar?->status === 'PENGAJUAN') {
+                $status_pendaftar = new PendaftarStatus();
+            }
             $status_pendaftar->pendaftar_id = trim(strip_tags($request->pendaftar_id));
             $status_pendaftar->status = trim(strip_tags($request->status_verval)) === 'success' ? 'LOLOS ADMINISTRASI' : 'GAGAL ADMINISTRASI';
             $status_pendaftar->deskripsi = json_encode([
@@ -262,7 +265,7 @@ class SeleksiAdministrasiController extends Controller
                             'data' => $data,
                             'title' => 'Status Seleksi',
                             'buttons' => [
-                                'verifikasi' => [
+                                'ubahVerifikasi' => [
                                     'title' => 'Sunting',
                                     'icon' => 'ti ti-edit-circle',
                                     'btn-class' => 'btn btn-warning',
