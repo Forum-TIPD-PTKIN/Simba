@@ -1,5 +1,5 @@
 <div class="row">
-    @foreach ($rekap as $item)
+    @foreach ($rekap_status as $item)
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">

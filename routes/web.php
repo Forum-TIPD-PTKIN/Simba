@@ -156,6 +156,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 // Verifikator
 Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator']], function () {
     Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
+    Route::get('/show/{tahun}/{beasiswa}', [DashboardAdmin::class, 'show'])->name('verifikator.dashboard.show');
 
     Route::get('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'index'])->name('verifikator.seleksi-administrasi');
     Route::get('/seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'data'])->name('verifikator.seleksi-administrasi.data');
