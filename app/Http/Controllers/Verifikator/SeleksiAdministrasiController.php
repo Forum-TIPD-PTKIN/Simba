@@ -71,8 +71,11 @@ class SeleksiAdministrasiController extends Controller
             'status_verval.required' => 'Status verifikasi dan validasi belum dipilih'
         ]);
 
-        $is_jadwal_verifikasi = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
-        $is_jadwal_sanggah = cek_jadwal($request->flt_tahun, $request->flt_beasiswa, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+        $pendaftar = Pendaftar::find($request->pendaftar_id);
+        if (!$pendaftar) return response()->json('Pendaftar tidak ditemukan', 404);
+
+        $is_jadwal_verifikasi = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
+        $is_jadwal_sanggah = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'SANGGAH_SELEKSI_ADMINISTRASI', is_active: true); // return true atau false
 
         if (!$is_jadwal_verifikasi && !$is_jadwal_sanggah) return response()->json('Tidak dapat melakukan seleksi administrasi', 419);
 
