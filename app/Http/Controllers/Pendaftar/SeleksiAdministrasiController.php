@@ -47,6 +47,7 @@ class SeleksiAdministrasiController extends Controller
         ]);
 
         $is_pengumuman_seleksi_administrasi = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true);
+        $is_pengumuman_pasca_sanggah = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_PASCA_SANGGAH_SELEKSI_ADMINISTRASI', false, true);
         $jadwal_pengumuman_seleksi_admnistrasi = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
             ->whereBeasiswaId($pendaftar->beasiswa_id)
             ->whereRole('PENGUMUMAN_SELEKSI_ADMINISTRASI')
@@ -55,6 +56,7 @@ class SeleksiAdministrasiController extends Controller
         $hasil_seleksi = view('pendaftar.hasil-seleksi-administrasi', [
             'pendaftar' => $pendaftar,
             'is_pengumuman_seleksi_administrasi' => $is_pengumuman_seleksi_administrasi,
+            'is_pengumuman_pasca_sanggah' => $is_pengumuman_pasca_sanggah,
             'jadwal_pengumuman_seleksi_administrasi' => $jadwal_pengumuman_seleksi_admnistrasi
         ])->render();
 

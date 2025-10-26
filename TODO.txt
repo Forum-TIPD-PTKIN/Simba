@@ -1,11 +1,15 @@
 ADMINISTRATOR
 ===================================================================
 > Fitur verifikator terbanyak (Administrator)
-> Rekap pendaftar per-prodi
+> Fitur kelulusan seleksi TPA
+> Fitur pendaftaran surveyor
+> Fitur penentuan pendaftar ke petugas survei
+> Fitur isian survei oleh surveyor
+> Fitur penentuan penerima beasiswa
 
 VERIFIKATOR
 ===================================================================
-
+> 
 
 PENDAFTAR
 ===================================================================

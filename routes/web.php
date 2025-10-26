@@ -19,7 +19,8 @@ use App\Http\Controllers\Pendaftar\{
     DashboardController,
     PemberkasanController,
     RiwayatController,
-    SeleksiAdministrasiController as PendaftarSeleksiAdministrasiController
+    SeleksiAdministrasiController as PendaftarSeleksiAdministrasiController,
+    TesPotensiAkademikController as PendaftarTesPotensiAkademikController
 };
 use App\Http\Controllers\Verifikator\{
     DashboardController as DashboardVerifikator,
@@ -147,6 +148,8 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
         Route::get('/pemberkasan', [PemberkasanController::class, 'index'])->name('pendaftar.pemberkasan');
         Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
         Route::get('/seleksi-administrasi', [PendaftarSeleksiAdministrasiController::class, 'index'])->name('pendaftar.seleksi-administrasi');
+
+        Route::post('/seleksi-tpa/kartu-peserta', [PendaftarTesPotensiAkademikController::class, 'generate_kartu'])->name('pendaftar.seleksi-tpa.kartu-ujian');
     });
 
     Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('pendaftar.notifikasi.show');

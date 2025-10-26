@@ -77,4 +77,76 @@
             });
         }
     </script>
+
+    <script>
+        $('#unduhKartuPesertaTPA').click(function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Sedang memproses...',
+                showCancelButton: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ route('pendaftar.seleksi-tpa.kartu-ujian') }}",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            flt_tahun: $('#flt_tahun').val(),
+                            flt_beasiswa: $('#flt_beasiswa').val()
+                        },
+                        xhr: function() {
+                            var xhr = new XMLHttpRequest();
+                            xhr.onreadystatechange = function() {
+                                if (xhr.readyState === 2) { // Headers received
+                                    if (xhr.status === 200) {
+                                        xhr.responseType = 'blob';
+                                    } else {
+                                        xhr.responseType = 'text'; // For error messages
+                                    }
+                                }
+                            };
+                            return xhr;
+                        },
+                        success: function(response, status, xhr) {
+                            var disposition = xhr.getResponseHeader(
+                                'content-disposition');
+                            var matches = /"([^""]*)"/.exec(disposition);
+                            var filename = (matches != null && matches[1] ? matches[1] :
+                                'kartu peserta tes.pdf');
+
+                            var blob = new Blob([response]);
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = filename;
+                            link.click();
+                            link.remove();
+
+                            Swal.close();
+                        },
+                        error: function(error) {
+                            const msg = JSON.parse(error.responseText);
+                            Swal.fire({
+                                title: 'Gagal',
+                                text: error && error.status === 404 ?
+                                    msg.message :
+                                    'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                                icon: 'error',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                customClass: {
+                                    timerProgressBar: 'bg-danger'
+                                }
+                            });
+                        }
+                    });
+                    return false;
+                },
+                allowOutsideClick: false
+            });
+        });
+    </script>
 @endpush
