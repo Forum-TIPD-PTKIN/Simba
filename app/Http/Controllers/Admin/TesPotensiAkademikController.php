@@ -224,4 +224,51 @@ class TesPotensiAkademikController extends Controller
             ], 419);
         }
     }
+
+    public function daftar_hadir(Request $request)
+    {
+        $tahun = TahunKegiatan::orderBy('tahun', 'desc')->get();
+        $beasiswa = Beasiswa::where('status', 1)->get();
+        $sesi = MapUjian::selectRaw('sesi')
+            ->groupBy('sesi')
+            ->pluck('sesi');
+        $ruang = MapUjian::selectRaw('ruang')
+            ->groupBy('ruang')
+            ->pluck('ruang');
+
+        $peserta = MapUjian::with(['pendaftar.mahasiswa', 'pendaftar.beasiswa'])
+            ->whereHas('pendaftar', function ($query) use ($request, $tahun, $beasiswa) {
+                $query->where(function ($q) use ($request, $tahun, $beasiswa) {
+                    if ($request->flt_tahun) {
+                        $q->where('tahun_kegiatan_id', $request->flt_tahun);
+                    } else {
+                        $q->where('tahun_kegiatan_id', count($tahun) ? $tahun[0]->id : null);
+                    }
+
+                    if ($request->flt_beasiswa) {
+                        $q->where('beasiswa_id', $request->flt_beasiswa);
+                    } else {
+                        $q->where('beasiswa_id', count($beasiswa) ? $beasiswa[0]->id : null);
+                    }
+                });
+            })
+            ->where(function ($query) use ($request, $sesi) {
+                if ($request->flt_sesi) {
+                    $query->where('sesi', $request->flt_sesi);
+                } else {
+                    $query->where('sesi', count($sesi) ? $sesi[0] : null);
+                }
+            })
+            ->where(function ($query) use ($request, $ruang) {
+                if ($request->flt_ruang) {
+                    $query->where('ruang', $request->flt_ruang);
+                } else {
+                    $query->where('ruang', count($ruang) ? $ruang[0] : null);
+                }
+            })
+            ->orderBy('sesi')
+            ->orderBy('ruang')
+            ->get();
+        return dd($peserta);
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
 use App\Models\Pendaftar;
 use App\Models\TahunKegiatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,7 +48,12 @@ class SeleksiAdministrasiController extends Controller
         ]);
 
         $is_pengumuman_seleksi_administrasi = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true);
-        $is_pengumuman_pasca_sanggah = cek_jadwal($pendaftar->tahun_kegiatan_id, $pendaftar->beasiswa_id, 'PENGUMUMAN_PASCA_SANGGAH_SELEKSI_ADMINISTRASI', false, true);
+        $jadwal_tpa = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
+            ->whereBeasiswaId($pendaftar->beasiswa_id)
+            ->whereRole('TES_POTENSI_AKADEMIK')
+            ->first();
+        // ! Jadwal cetak kartu sehari sebelum TPA
+        $is_jadwal_cetak_kartu = Carbon::now()->isSameDay(Carbon::parse($jadwal_tpa->tanggal_mulai)->copy()->subDay());
         $jadwal_pengumuman_seleksi_admnistrasi = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
             ->whereBeasiswaId($pendaftar->beasiswa_id)
             ->whereRole('PENGUMUMAN_SELEKSI_ADMINISTRASI')
@@ -56,7 +62,7 @@ class SeleksiAdministrasiController extends Controller
         $hasil_seleksi = view('pendaftar.hasil-seleksi-administrasi', [
             'pendaftar' => $pendaftar,
             'is_pengumuman_seleksi_administrasi' => $is_pengumuman_seleksi_administrasi,
-            'is_pengumuman_pasca_sanggah' => $is_pengumuman_pasca_sanggah,
+            'is_jadwal_cetak_kartu' => $is_jadwal_cetak_kartu,
             'jadwal_pengumuman_seleksi_administrasi' => $jadwal_pengumuman_seleksi_admnistrasi
         ])->render();
 

@@ -91,15 +91,23 @@
                     </ul>
                 </li>
 
-                <li class="pc-item">
-                    <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
+                <li class="pc-item pc-hasmenu">
+                    <a href="#!" class="pc-link">
                         <span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-layer"></use>
-                            </svg>
-                        </span>
+                            </svg> </span>
                         <span class="pc-mtext">Seleksi TPA</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item">
+                            <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">Data Peserta</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.seleksi-tpa.daftar-hadir') }}" class="pc-link">Daftar Hadir</a>
+                        </li>
+                    </ul>
                 </li>
 
                 <li class="pc-item pc-caption">

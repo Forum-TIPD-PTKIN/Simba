@@ -10,7 +10,7 @@
             <p class="mb-0">Anda dinyatakan <span class="fw-bold fs-5">LOLOS SELEKSI
                     ADMINISTRASI</span>, silakan lihat jadwal kegiatan selanjutnya.</p>
         </div>
-        @if ($is_pengumuman_pasca_sanggah)
+        @if ($is_jadwal_cetak_kartu)
             <button class="btn btn-success" id="unduhKartuPesertaTPA"><i class="ti ti-file-text"></i> Download Kartu
                 Peserta
                 Tes Potensi Akademik</button>
@@ -18,9 +18,9 @@
             <div class="alert alert-warning">
                 <h4><i class="ti ti-alert-triangle"></i> Cetak Kartu Peserta Tes Potensi Akademik!</h4>
                 <p class="mb-0">Proses cetak kartu peserta Tes Potensi Akademik dapat dilakukan <span
-                        class="fw-bold fs-5">setelah PENGUMUMAN PASCA SANGGAH SELEKSI ADMINISTRASI</span>.
+                        class="fw-bold fs-5">sehari sebelum TES POTENSI AKADEMIK</span>.
                 </p>
-                <p class="fs-6 fst-italic">Lihat <a class="fw-bold"
+                <p class="fs-6 mb-0 fst-italic">Lihat <a class="fw-bold"
                         href="{{ route('pendaftar.jadwal-kegiatan') }}">Jadwal
                         Kegiatan</a></p>
             </div>
