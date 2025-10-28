@@ -90,7 +90,6 @@
                         </li>
                     </ul>
                 </li>
-
                 <li class="pc-item">
                     <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
                         <span class="pc-micon">
@@ -112,9 +111,8 @@
                         <span class="pc-mtext">Surveyor</span>
                     </a>
                 </li>
-
                 <li class="pc-item pc-caption">
-                    <label>Laporan</label>
+                    <label>Seleksi</label>
                     <svg class="pc-icon">
                         <use xlink:href="#custom-box-1"></use>
                     </svg>
@@ -127,6 +125,23 @@
                             </svg> </span><span class="pc-mtext">Seleksi Administrasi
                         </span>
                     </a>
+                </li>
+
+                <li class="pc-item">
+                    <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-layer"></use>
+                            </svg> </span><span class="pc-mtext">Seleksi TPA
+                        </span>
+                    </a>
+                </li>
+
+                <li class="pc-item pc-caption">
+                    <label>Laporan</label>
+                    <svg class="pc-icon">
+                        <use xlink:href="#custom-box-1"></use>
+                    </svg>
                 </li>
                 <li class="pc-item">
                     <a href="{{ route('admin.laporan.rekap') }}" class="pc-link">

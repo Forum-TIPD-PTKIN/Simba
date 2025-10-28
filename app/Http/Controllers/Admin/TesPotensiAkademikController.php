@@ -11,34 +11,71 @@ use App\Models\Pendaftar;
 use App\Models\PesertaCbt;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
 class TesPotensiAkademikController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
         $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
 
+        $tahun_selected = isset($request->flt_tahun) && $request->flt_tahun ? $request->flt_tahun : $tahun_kegiatan->first()->id;
+        $beasiswa_selected = isset($request->flt_beasiswa) && $request->flt_beasiswa ? $request->flt_beasiswa : $beasiswa->first()->id;
+
+        $tanggal_ujian = MapUjian::selectRaw('DATE(tanggal_mulai) AS tanggal')
+            ->whereHas('pendaftar', function ($query) use ($tahun_selected, $beasiswa_selected) {
+                $query->where('tahun_kegiatan_id', $tahun_selected)
+                    ->where('beasiswa_id', $beasiswa_selected);
+            })
+            ->groupBy('tanggal')
+            ->pluck('tanggal');
+        $sesi = MapUjian::selectRaw('sesi')
+            ->whereHas('pendaftar', function ($query) use ($tahun_selected, $beasiswa_selected) {
+                $query->where('tahun_kegiatan_id', $tahun_selected)
+                    ->where('beasiswa_id', $beasiswa_selected);
+            })
+            ->groupBy('sesi')
+            ->pluck('sesi');
+        $ruang = MapUjian::selectRaw('ruang')
+            ->whereHas('pendaftar', function ($query) use ($tahun_selected, $beasiswa_selected) {
+                $query->where('tahun_kegiatan_id', $tahun_selected)
+                    ->where('beasiswa_id', $beasiswa_selected);
+            })
+            ->groupBy('ruang')
+            ->pluck('ruang');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'tanggal_ujian' => $tanggal_ujian,
+                'sesi' => $sesi,
+                'ruang' => $ruang
+            ]);
+        }
+
         return view('admin.tes-potensi-akademik', [
             'tahun_kegiatan' => $tahun_kegiatan,
             'beasiswa' => $beasiswa,
+            'tanggal_ujian' => $tanggal_ujian,
+            'sesi' => $sesi,
+            'ruang' => $ruang
         ]);
     }
 
     public function data(Request $request)
     {
         if ($request->ajax()) {
-            $data = MapUjian::with(['pendaftar', 'pendaftar.mahasiswa', 'pendaftar.beasiswa'])
-                ->selectRaw('map_ujians.*')
-                ->join('pendaftars', 'pendaftars.id', 'map_ujians.pendaftar_id')
-                ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
-                ->whereHas('pendaftar', function ($query) use ($request) {
-                    $query->where('tahun_kegiatan_id', $request->flt_tahun)
-                        ->where('beasiswa_id', $request->flt_beasiswa);
-                });
+            $data = $this->getDataPesertaTes(
+                $request->flt_tahun,
+                $request->flt_beasiswa,
+                $request->flt_tanggal_ujian,
+                $request->flt_sesi,
+                $request->flt_ruang,
+                true, // jika true, tidak get() langsung
+            );
 
             return DataTables::of($data)
                 ->editColumn('beasiswa', function ($data) {
@@ -80,25 +117,6 @@ class TesPotensiAkademikController extends Controller
                 ->rawColumns(['prodi', 'beasiswa', 'tanggal_ujian'])
                 ->make(true);
         }
-    }
-
-    public static function getDataPendaftar(string $tahun, string $beasiswa, ?int $skip = null, ?int $take = null)
-    {
-        $query = Pendaftar::with(['mahasiswa', 'beasiswa'])
-            ->select('pendaftars.*')
-            ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
-            ->where('tahun_kegiatan_id', $tahun)
-            ->where('beasiswa_id', $beasiswa)
-            ->whereHas(
-                'latestStatus',
-                fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
-            )
-            ->whereDoesntHave('map_ujian')
-            ->orderBy('mahasiswas.nama');
-
-        if (!is_null($skip) && !is_null($take)) $query->skip($skip)->take($take);
-
-        return $query->get();
     }
 
     public function show(string $tahun, string $beasiswa)
@@ -223,5 +241,94 @@ class TesPotensiAkademikController extends Controller
                 'message' => 'Kuota peserta per-ruang sudah penuh.'
             ], 419);
         }
+    }
+
+    public function daftar_hadir(Request $request)
+    {
+        $request->validate([
+            'tahun' => 'required',
+            'beasiswa' => 'required',
+            'tanggal_ujian' => 'required',
+            'sesi' => 'required',
+            'ruang' => 'required'
+        ]);
+
+        $style = public_path('assets/admin/css/style.css');
+
+        $data = $this->getDataPesertaTes(
+            $request->tahun,
+            $request->beasiswa,
+            $request->tanggal_ujian,
+            $request->sesi,
+            $request->ruang
+        );
+
+        $beasiswa = Beasiswa::where('id', $request->beasiswa)->pluck('nama')->first();
+        $tahun = TahunKegiatan::where('id', $request->tahun)->pluck('tahun')->first();
+        $tanggal_ujian = collect($data)->map(fn($value) => \Carbon\Carbon::parse($value['tanggal_mulai'])->format('Y-m-d'))
+            ->unique()->first();
+        $sesi = collect($data)->pluck('sesi')->unique()->first();
+        $ruang = collect($data)->pluck('ruang')->unique()->first();
+
+        $filename = 'DAFTAR_HADIR_PESERTA_TES_POTENSI_AKADEMIK_BEASISWA_' . strtoupper(str_replace(' ', '_', $beasiswa)) . '_' . $tahun . '.pdf';
+
+        set_time_limit(300);
+        $html = view('admin.cetak.daftar-hadir', [
+            'data' => $data,
+            'beasiswa' => $beasiswa,
+            'tahun' => $tahun,
+            'tanggal_ujian' => $tanggal_ujian,
+            'sesi' => $sesi,
+            'ruang' => $ruang,
+            'style' => $style,
+        ])->render();
+
+        $pdf = SnappyPdf::loadHTML($html);
+        return $pdf->download($filename);
+    }
+
+    public static function getDataPendaftar(string $tahun, string $beasiswa, ?int $skip = null, ?int $take = null)
+    {
+        $query = Pendaftar::with(['mahasiswa', 'beasiswa'])
+            ->select('pendaftars.*')
+            ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
+            ->where('tahun_kegiatan_id', $tahun)
+            ->where('beasiswa_id', $beasiswa)
+            ->whereHas(
+                'latestStatus',
+                fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
+            )
+            ->whereDoesntHave('map_ujian')
+            ->orderBy('mahasiswas.nama');
+
+        if (!is_null($skip) && !is_null($take)) $query->skip($skip)->take($take);
+
+        return $query->get();
+    }
+
+    public static function getDataPesertaTes(string $tahun, string $beasiswa, ?string $tanggal_ujian, ?string $sesi, ?string $ruang, bool $is_query = false)
+    {
+        $query = MapUjian::with(['pendaftar.mahasiswa', 'pendaftar.beasiswa'])
+            ->selectRaw('map_ujians.*')
+            ->join('pendaftars', 'pendaftars.id', 'map_ujians.pendaftar_id')
+            ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
+            ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                $query->whereHas(
+                    'latestStatus',
+                    fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
+                )
+                    ->where(function ($q) use ($tahun, $beasiswa) {
+                        $q->where('tahun_kegiatan_id', $tahun)
+                            ->where('beasiswa_id', $beasiswa);
+                    });
+            })
+            ->whereRaw('DATE(tanggal_mulai) = ?', [$tanggal_ujian])
+            ->where('sesi', $sesi)
+            ->where('ruang', $ruang)
+            ->orderBy('mahasiswas.nama');
+
+        if (!$is_query) $query = $query->get();
+
+        return $query;
     }
 }

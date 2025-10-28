@@ -58,15 +58,12 @@
                                                 <td>{{ $item->beasiswa->nama }}</td>
                                                 <td>{{ $item->tahun_kegiatan->tahun }}</td>
                                                 <td>
-                                                    @switch($item->latest_status?->status)
-                                                        @case(in_array($item->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
-                                                        @case(cek_jadwal($item->tahun_kegiatan?->id, $item->beasiswa?->id, false, true))
-                                                            -
-                                                        @break
-
-                                                        @default
-                                                            {{ $item->latest_status?->status }}
-                                                    @endswitch
+                                                    @if (in_array($item->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']) &&
+                                                            !cek_jadwal($item->tahun_kegiatan?->id, $item->beasiswa?->id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true))
+                                                        -
+                                                    @else
+                                                        {{ $item->latest_status?->status }}
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('pendaftar.daftar', ['id' => $item->beasiswa->id, 'step' => 1]) }}"

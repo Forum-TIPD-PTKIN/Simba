@@ -56,6 +56,27 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <select class="form-select form-select-sm" aria-label="Filter tanggal ujian"
+                                    id="flt_tanggal_ujian">
+                                    @foreach ($tanggal_ujian as $item)
+                                        <option value="{{ $item }}" @selected($loop->first)>
+                                            {{ \Carbon\Carbon::parse($item)->translatedFormat('d-m-Y') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select class="form-select form-select-sm" aria-label="Filter sesi" id="flt_sesi">
+                                    @foreach ($sesi as $item)
+                                        <option value="{{ $item }}" @selected($loop->first)>{{ $item }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select class="form-select form-select-sm" aria-label="Filter ruang" id="flt_ruang">
+                                    @foreach ($ruang as $item)
+                                        <option value="{{ $item }}" @selected($loop->first)>
+                                            {{ $item }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
                             </div>
                         </div>
@@ -65,6 +86,9 @@
                                 <button type="button" class="btn btn-sm btn-primary" id="generateDataPesertaCBT"><span
                                         class="ti ti-file-import"></span>
                                     Generate Data Peserta CBT</button>
+                                <button type="button" class="btn btn-sm btn-secondary" id="cetakDaftarHadirPeserta"><span
+                                        class="ti ti-id"></span>
+                                    Cetak Daftar Hadir Peserta</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle text-center" id="tablePendaftar">
@@ -133,6 +157,9 @@
                     data._token = "{{ csrf_token() }}";
                     data.flt_tahun = $('#flt_tahun').val();
                     data.flt_beasiswa = $('#flt_beasiswa').val();
+                    data.flt_tanggal_ujian = $('#flt_tanggal_ujian').val();
+                    data.flt_sesi = $('#flt_sesi').val();
+                    data.flt_ruang = $('#flt_ruang').val();
                 }
             },
             columns: [{
@@ -249,7 +276,6 @@
         });
     </script>
 
-
     <script>
         $('#modalDataPendaftar button[type="submit"]').on('click', function(e) {
             e.preventDefault();
@@ -272,17 +298,6 @@
                 if (result.isConfirmed) {
                     // recursive function
                     processData(tahun, beasiswa, start, total_batch, per_process);
-
-                    // Loop per batch
-                    // for (let i = 0; i < total_batch; i++) {
-                    //     const start = i * per_process;
-                    //     const end = Math.min(start + per_process, count_data);
-
-                    //     console.log(`Batch ${i + 1}: Proses dari index ${start} sampai ${end - 1}`);
-
-                    //     // Lakukan proses di sini, misalnya:
-                    //     // processData(start, end);
-                    // }
                 }
             });
         });
@@ -336,5 +351,147 @@
                 return false;
             }
         }
+    </script>
+
+    <script>
+        $('#flt_tahun, #flt_beasiswa').on('change', function() {
+            $.ajax({
+                url: "{{ route('admin.seleksi-tpa') }}",
+                type: 'GET',
+                data: {
+                    flt_tahun: $('#flt_tahun').val(),
+                    flt_beasiswa: $('#flt_beasiswa').val(),
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil informasi ujian...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    $('#flt_tanggal_ujian').empty();
+                    res.tanggal_ujian.forEach(opt => {
+                        const date = new Date(opt);
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+
+                        const formatted = `${day}-${month}-${year}`;
+
+                        $('#flt_tanggal_ujian').append($('<option>', {
+                            value: opt,
+                            text: formatted
+                        }));
+                    });
+
+                    $('#flt_sesi').empty();
+                    res.sesi.forEach(opt => {
+                        $('#flt_sesi').append($('<option>', {
+                            value: opt,
+                            text: opt
+                        }));
+                    });
+
+                    $('#flt_ruang').empty();
+                    res.ruang.forEach(opt => {
+                        $('#flt_ruang').append($('<option>', {
+                            value: opt,
+                            text: opt
+                        }));
+                    });
+                    Swal.close();
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: xhr.responseJSON.message ??
+                            'Terdapat kesalahan server, periksa lebih lanjut!',
+                    });
+                }
+            });
+        });
+
+        $(document).on('click', '#cetakDaftarHadirPeserta', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val(),
+                tanggal_ujian = $('#flt_tanggal_ujian').val(),
+                sesi = $('#flt_sesi').val(),
+                ruang = $('#flt_ruang').val();
+
+            $.ajax({
+                url: "{{ route('admin.seleksi-tpa.daftar-hadir') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa,
+                    tanggal_ujian: tanggal_ujian,
+                    sesi: sesi,
+                    ruang: ruang
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Daftar hadir peserta TPA.pdf');
+
+                    var blob = new Blob([response]);
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status === 404 ?
+                            msg.message :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endpush

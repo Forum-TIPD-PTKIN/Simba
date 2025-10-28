@@ -115,7 +115,7 @@
                                 'content-disposition');
                             var matches = /"([^""]*)"/.exec(disposition);
                             var filename = (matches != null && matches[1] ? matches[1] :
-                                'kartu peserta tes.pdf');
+                                'Kartu tes peserta.pdf');
 
                             var blob = new Blob([response]);
                             var link = document.createElement('a');
