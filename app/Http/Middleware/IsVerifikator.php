@@ -22,6 +22,9 @@ class IsVerifikator
         if (session()->get('level') === 2) {
             // mahasiswa
             return redirect()->route('pendaftar.dashboard');
+        } else if (session()->get('level') === 3) {
+            // surveyor
+            return redirect()->route('surveyor.dashboard');
         } else if (session()->get('level') === 0) {
             // admin
             return redirect()->route('admin.dashboard');

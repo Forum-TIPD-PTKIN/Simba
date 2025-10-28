@@ -22,6 +22,9 @@ class IsAdmin
         if (session()->get('level') === 1) {
             // verifikator
             return redirect()->route('verifikator.dashboard');
+        } else if (session()->get('level') === 3) {
+            // surveyor
+            return redirect()->route('surveyor.dashboard');
         } else if (session()->get('level') === 2) {
             // mahasiswa
             return redirect()->route('pendaftar.dashboard');

@@ -96,7 +96,7 @@
 <script>
     $('.notification-item').on('click', function() {
         const id = $(this).data('id');
-        let url = "{{ route('admin.notifikasi.show', ':id') }}";
+        let url = "{{ route('notifikasi.show', ':id') }}";
         url = url.replace(':id', id);
 
         $.ajax({
@@ -133,7 +133,7 @@
 
     $('.mark-all-read, .clear-notification').on('click', function() {
         $.ajax({
-            url: "{{ route('admin.notifikasi.destroy') }}",
+            url: "{{ route('notifikasi.destroy') }}",
             type: "DELETE",
             data: {
                 "_token": "{{ csrf_token() }}"

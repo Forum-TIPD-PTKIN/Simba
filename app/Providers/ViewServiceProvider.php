@@ -17,13 +17,14 @@ class ViewServiceProvider extends ServiceProvider
         View::composer([
             'admin.template.header',
             'pendaftar.template.header',
-            'verifikator.template.header'
+            'verifikator.template.header',
+            'surveyor.template.header',
         ], function ($view) {
             $notifikasi = [];
             if (Auth::check()) {
                 $query_notif = Notifikasi::where('user_id', Auth::id())->where('dibaca', 0);
-                $notifikasi = $query_notif->get();
-                $notifikasi_counter = $query_notif->count();
+                $notifikasi = Notifikasi::where('user_id', Auth::id())->limit(10)->get();
+                $notifikasi_counter = Notifikasi::where('user_id', Auth::id())->where('dibaca', 0)->count();
             }
             $view->with([
                 'notifikasi_counter' => $notifikasi_counter,

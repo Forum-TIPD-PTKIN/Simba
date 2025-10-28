@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\LatestCreated;
+use App\Models\Scopes\NotifikasiOrder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +17,27 @@ class Notifikasi extends Uuid
         'dibaca',
     ];
 
-    protected $appends = ['time_ago'];
+    protected $appends = ['time_ago', 'tag', 'title'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getTitleAttribute()
+    {
+        switch ($this->key) {
+            case 'ASSIGN_SURVEYOR':
+                return 'Undangan Surveyor';
+            default:
+                return $this->key;
+        }
+    }
+
+    public function getTagAttribute()
+    {
+        return substr($this->pesan, 0, 60) . '...';
+    }
 
     public function getTimeAgoAttribute()
     {
@@ -62,20 +83,8 @@ class Notifikasi extends Uuid
         }
     }
 
-    public function getReferensiAttribute($val)
-    {
-        $url = url($val);
-        if (!filter_var($url, FILTER_VALIDATE_URL)) return;
-        if (parse_url($url, PHP_URL_QUERY)) {
-            return $url . '&id=' . $this->id;
-        } else {
-            return $url . '?id=' . $this->id;
-        }
-    }
-
-
     protected static function booted(): void
     {
-        static::addGlobalScope(new LatestCreated);
+        static::addGlobalScope(new NotifikasiOrder);
     }
 }

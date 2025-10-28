@@ -33,56 +33,7 @@
         <!-- [Mobile Media Block end] -->
         <div class="ms-auto">
             <ul class="list-unstyled">
-                <li class="dropdown pc-h-item">
-                    <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="false" aria-expanded="false">
-                        <svg class="pc-icon">
-                            <use xlink:href="#custom-notification"></use>
-                        </svg>
-                        @if ($notifikasi_counter > 0)
-                            <span class="badge bg-success pc-h-badge">{{ $notifikasi_counter }}</span>
-                        @endif
-                    </a>
-                    <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown">
-                        <div class="dropdown-header d-flex align-items-center justify-content-between">
-                            <h5 class="m-0">Notifications</h5>
-                            @if (count($notifikasi))
-                                <a href="#!" class="btn btn-link btn-sm mark-all-read">Mark all read</a>
-                            @endif
-                        </div>
-                        <div class="dropdown-body text-wrap header-notification-scroll position-relative"
-                            style="max-height: calc(100vh - 215px)">
-                            @if (count($notifikasi))
-                                @foreach ($notifikasi as $item)
-                                    <div class="card mb-2 notification-item" data-id="{{ $item->id }}">
-                                        <div class="card-body">
-                                            <div class="d-flex">
-                                                <div class="flex-shrink-0">
-                                                    <svg class="pc-icon text-primary">
-                                                        <use xlink:href="#custom-sms"></use>
-                                                    </svg>
-                                                </div>
-                                                <div class="flex-grow-1 ms-3">
-                                                    <span
-                                                        class="float-end text-sm text-muted">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
-                                                    <h5 class="text-body mb-2">Pesan</h5>
-                                                    <p class="mb-0">{!! Str::words(strip_tags($item->pesan), 10, '...') !!}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="alert alert-info">Tidak ada notifikasi</div>
-                            @endif
-                        </div>
-                        @if (count($notifikasi))
-                            <div class="text-center py-2 clear-notification">
-                                <a href="#!" class="link-danger">Clear all Notifications</a>
-                            </div>
-                        @endif
-                    </div>
-                </li>
+                @include('notification-control')
                 <li class="dropdown pc-h-item header-user-profile">
                     <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">

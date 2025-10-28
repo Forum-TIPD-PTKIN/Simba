@@ -17,11 +17,12 @@ return new class extends Migration
             0 = admin
             1 = verifikator
             2 = mahasiswa
-
+            3 = surveyor
+            
             ** jika banya akses dalam 1 user maka pisah dengan tanda koma, ex: 0,1,2
             ** jika null maka itu adalah admin
             */
-            $table->string("access")->nullable()->after("remember_token");
+            $table->string("access")->nullable()->after("remember_token")->comment("akses berupa angka, 0 = admin, 1 = verifikator, 2 = mahasiswa, 3 = surveyor");
         });
     }
 

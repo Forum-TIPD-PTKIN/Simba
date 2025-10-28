@@ -7,8 +7,6 @@ use App\Models\Beasiswa;
 use App\Models\Pendaftar;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use PhpParser\Node\Stmt\Return_;
 
 class DashboardController extends Controller
 {

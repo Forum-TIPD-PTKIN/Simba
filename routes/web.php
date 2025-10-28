@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\{
     LaporanController,
     PenggunaController,
     RekapController,
+    SurveyorController,
     TahunKegiatanController,
     TesPotensiAkademikController,
 };
@@ -30,9 +31,11 @@ use App\Http\Controllers\Verifikator\{
 use App\Http\Controllers\Penguji\Kip\{
     DashboardController as DashboardPengujiKip,
 };
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Surveyor\{
+    DashboardController as DashboardSurveyor,
+    PersetujuanController,
+};
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 use function Livewire\store;
 
@@ -47,6 +50,11 @@ Route::get("/logout", [LoginController::class, 'logout'])->name('logout');
 Route::get("/akses/{access}", [LoginController::class, 'change_access'])->middleware(['auth'])->name('akses.ganti');
 
 Route::post("/view-control", [LoginController::class, 'view_control'])->name('view.control');
+
+Route::group(['prefix' => 'notifikasi', 'middleware' => ['auth']], function () {
+    Route::get('/read/{id}', [NotifikasiController::class, 'read'])->name('notifikasi.read');
+    Route::get('/destroy', [NotifikasiController::class, 'destroy'])->name('notifikasi.destroy');
+});
 
 // administrator
 Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']], function () {
@@ -110,9 +118,6 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
         ]
     ]);
 
-    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('admin.notifikasi.show');
-    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('admin.notifikasi.destroy');
-
     Route::get('/seleksi-tpa', [TesPotensiAkademikController::class, 'index'])->name('admin.seleksi-tpa');
     Route::post('/seleksi-tpa', [TesPotensiAkademikController::class, 'store'])->name('admin.seleksi-tpa.store');
     Route::post('/seleksi-tpa/data', [TesPotensiAkademikController::class, 'data'])->name('admin.seleksi-tpa.data');
@@ -129,6 +134,41 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
         Route::get('/verifikasi/{id}/edit', [LaporanController::class, 'edit'])->name('admin.laporan.verifikasi.edit');
         Route::put('/verifikasi/{id}', [LaporanController::class, 'update'])->name('admin.laporan.verifikasi.update');
     });
+
+
+    Route::resource('/surveyor', SurveyorController::class, [
+        'names' => [
+            'index'   => 'admin.surveyor',
+            'store'   => 'admin.surveyor.store',
+            'edit'    => 'admin.surveyor.edit',
+            'update'  => 'admin.surveyor.update',
+            'destroy' => 'admin.surveyor.destroy'
+        ]
+    ]);
+    Route::post('/surveyor/assign', [SurveyorController::class, 'assign'])->name('admin.surveyor.assign');
+});
+
+// Surveyor
+Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], function () {
+    Route::resource('/dashboard', DashboardSurveyor::class, [
+        'names' => [
+            'index'   => 'surveyor.dashboard',
+            'store'   => 'surveyor.dashboard.store',
+            'edit'    => 'surveyor.dashboard.edit',
+            'update'  => 'surveyor.dashboard.update',
+            'destroy' => 'surveyor.dashboard.destroy'
+        ]
+    ]);
+
+    Route::resource('/persetujuan', PersetujuanController::class, [
+        'names' => [
+            'index'   => 'surveyor.persetujuan',
+            'store'   => 'surveyor.persetujuan.store',
+            'edit'    => 'surveyor.persetujuan.edit',
+            'update'  => 'surveyor.persetujuan.update',
+            'destroy' => 'surveyor.persetujuan.destroy'
+        ]
+    ]);
 });
 
 // Pendaftar
@@ -151,9 +191,6 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 
         Route::post('/seleksi-tpa/kartu-peserta', [PendaftarTesPotensiAkademikController::class, 'generate_kartu'])->name('pendaftar.seleksi-tpa.kartu-ujian');
     });
-
-    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('pendaftar.notifikasi.show');
-    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('pendaftar.notifikasi.destroy');
 });
 
 // Verifikator
@@ -169,9 +206,6 @@ Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator
 
     Route::get('/hasil-seleksi-administrasi', [SeleksiAdministrasiController::class, 'rekap'])->name('verifikator.seleksi-administrasi.rekap');
     Route::get('/hasil-seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'rekap_data'])->name('verifikator.seleksi-administrasi.rekap.data');
-
-    Route::get('/notifikasi/{id}/show', [NotifikasiController::class, 'show'])->name('verifikator.notifikasi.show');
-    Route::delete('/notifikasi', [NotifikasiController::class, 'destroy'])->name('verifikator.notifikasi.destroy');
 });
 
 // penguji

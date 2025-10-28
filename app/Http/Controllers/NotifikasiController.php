@@ -3,20 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notifikasi;
+use App\Models\Surveyor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotifikasiController extends Controller
 {
-    public function show(string $id)
+    public function read(Request $request, $id)
     {
-        $notif = Notifikasi::find($id);
-        $notif->dibaca = 1;
-        $notif->update();
-
-        return view('modal-notifikasi', [
-            'notif' => $notif
-        ])->render();
+        $notifikasi = Notifikasi::find($id);
+        if ($notifikasi->user_id == Auth::id()) {
+            $notifikasi->dibaca = 1;
+            $notifikasi->update();
+        }
+        if ($notifikasi->key === 'ASSIGN_SURVEYOR') {
+            session()->put('level', 3);
+        }
+        return redirect()->to($notifikasi->referensi);
     }
 
     public function destroy(Request $request)

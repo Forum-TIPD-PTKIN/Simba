@@ -102,6 +102,17 @@
                     </a>
                 </li>
 
+                <li class="pc-item">
+                    <a href="{{ route('admin.surveyor') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-user"></use>
+                            </svg>
+                        </span>
+                        <span class="pc-mtext">Surveyor</span>
+                    </a>
+                </li>
+
                 <li class="pc-item pc-caption">
                     <label>Laporan</label>
                     <svg class="pc-icon">

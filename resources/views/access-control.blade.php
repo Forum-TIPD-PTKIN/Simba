@@ -21,13 +21,20 @@
                             Verifikator
                         @break
 
+                        @case(3)
+                            Surveyor
+                        @break
+
                         @case(2)
                             Mahasiswa
                         @break
-                    @endswitch
-                </span>
+
+
+                    @break
+                @endswitch
             </span>
-        </a>
-    @endforeach
-    <hr class="border-secondary border-opacity-50" />
+        </span>
+    </a>
+@endforeach
+<hr class="border-secondary border-opacity-50" />
 @endif

@@ -3,6 +3,7 @@
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsMahasiswa;
 use App\Http\Middleware\IsMendaftar;
+use App\Http\Middleware\IsSurveyor;
 use App\Http\Middleware\IsVerifikator;
 use App\Http\Middleware\ZonaPendaftar;
 use Illuminate\Foundation\Application;
@@ -24,7 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'zonaPendaftar' => ZonaPendaftar::class,
             'isAdmin' => IsAdmin::class,
             'isMahasiswa' => IsMahasiswa::class,
-            'isVerifikator' => IsVerifikator::class
+            'isVerifikator' => IsVerifikator::class,
+            'isSurveyor' => IsSurveyor::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

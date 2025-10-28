@@ -48,6 +48,8 @@ if (!function_exists('userAccessName')) {
                 return 'Verifikator';
             case 2:
                 return 'Mahasiswa';
+            case 3:
+                return 'Surveyor';
             default:
                 return 'Unknown';
         }
@@ -129,6 +131,8 @@ if (!function_exists('formPemberkasan')) {
                 return 'Verifikator';
             case 2:
                 return 'Mahasiswa';
+            case 3:
+                return 'Surveyor';
             default:
                 return 'Unknown';
         }

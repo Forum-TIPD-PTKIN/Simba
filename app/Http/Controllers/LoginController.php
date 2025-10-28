@@ -156,6 +156,9 @@ class LoginController extends Controller
             } else if (session()->get('level') === 2) {
                 // mahasiswa
                 return redirect()->route('pendaftar.dashboard');
+            } else if (session()->get('level') === 3) {
+                // mahasiswa
+                return redirect()->route('surveyor.dashboard');
             }
         }
 
