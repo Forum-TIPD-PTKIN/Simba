@@ -105,7 +105,7 @@
                         </a>
                     </li>
 
-                    <li class="pc-item">
+                    {{-- <li class="pc-item">
                         <a href="{{ route('pendaftar.pemberkasan') }}" class="pc-link">
                             <span class="pc-micon">
                                 <svg class="pc-icon">
@@ -114,7 +114,7 @@
                             </span>
                             <span class="pc-mtext">Pemberkasan</span>
                         </a>
-                    </li>
+                    </li> --}}
 
                     <li class="pc-item">
                         <a href="{{ route('pendaftar.seleksi-administrasi') }}" class="pc-link">

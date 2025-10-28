@@ -91,27 +91,8 @@
                     </ul>
                 </li>
 
-                <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link">
-                        <span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-layer"></use>
-                            </svg> </span>
-                        <span class="pc-mtext">Seleksi TPA</span>
-                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                    </a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item">
-                            <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">Data Peserta</a>
-                        </li>
-                        <li class="pc-item">
-                            <a href="{{ route('admin.seleksi-tpa.daftar-hadir') }}" class="pc-link">Daftar Hadir</a>
-                        </li>
-                    </ul>
-                </li>
-
                 <li class="pc-item pc-caption">
-                    <label>Laporan</label>
+                    <label>Seleksi</label>
                     <svg class="pc-icon">
                         <use xlink:href="#custom-box-1"></use>
                     </svg>
@@ -124,6 +105,23 @@
                             </svg> </span><span class="pc-mtext">Seleksi Administrasi
                         </span>
                     </a>
+                </li>
+
+                <li class="pc-item">
+                    <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <svg class="pc-icon">
+                                <use xlink:href="#custom-layer"></use>
+                            </svg> </span><span class="pc-mtext">Seleksi TPA
+                        </span>
+                    </a>
+                </li>
+
+                <li class="pc-item pc-caption">
+                    <label>Laporan</label>
+                    <svg class="pc-icon">
+                        <use xlink:href="#custom-box-1"></use>
+                    </svg>
                 </li>
                 <li class="pc-item">
                     <a href="{{ route('admin.laporan.rekap') }}" class="pc-link">

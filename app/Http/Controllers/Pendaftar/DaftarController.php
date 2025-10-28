@@ -48,18 +48,15 @@ class DaftarController extends Controller
             ->whereUserId($user->id)
             ->first();
 
-        if ($pendaftar && in_array($pendaftar->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'])) return redirect()->to(route('pendaftar.seleksi-administrasi'));
-
-        if (!$beasiswa) {
+        if (!$beasiswa && !$pendaftar) {
             return view('pendaftar.no-page', [
                 'message' => 'Beasiswa yang dimaksud tidak tersedia',
                 'title' => 'Opz..',
                 'bg' => 'danger'
             ]);
         }
-        if ($pendaftar && in_array($pendaftar->latest_status?->status, [
-            'PENGAJUAN'
-        ])) {
+
+        if ($pendaftar && $pendaftar->latest_status?->status !== 'DAFTAR') {
             $key_pmb = env('PMB_KEY_API');
             $_pendaftar = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             $jalur = null;
