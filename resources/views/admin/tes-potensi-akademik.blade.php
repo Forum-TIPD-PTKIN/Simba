@@ -42,53 +42,77 @@
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
                             <h5 class="mb-3 mb-sm-0">Data Peserta Tes Potensi Akademik</h5>
-                            <div class="d-flex gap-1">
-                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
-                                    id="flt_tahun">
-                                    @foreach ($tahun_kegiatan as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
-                                    @foreach ($beasiswa as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select class="form-select form-select-sm" aria-label="Filter tanggal ujian"
-                                    id="flt_tanggal_ujian">
-                                    @foreach ($tanggal_ujian as $item)
-                                        <option value="{{ $item }}" @selected($loop->first)>
-                                            {{ \Carbon\Carbon::parse($item)->translatedFormat('d-m-Y') }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select class="form-select form-select-sm" aria-label="Filter sesi" id="flt_sesi">
-                                    @foreach ($sesi as $item)
-                                        <option value="{{ $item }}" @selected($loop->first)>{{ $item }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select class="form-select form-select-sm" aria-label="Filter ruang" id="flt_ruang">
-                                    @foreach ($ruang as $item)
-                                        <option value="{{ $item }}" @selected($loop->first)>
-                                            {{ $item }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
+                            <div class="d-flex gap-1 align-items-start flex-wrap">
+                                <div>
+                                    <label for="flt_tahun" class="form-label small">Tahun</label>
+                                    <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
+                                        id="flt_tahun">
+                                        @foreach ($tahun_kegiatan as $item)
+                                            <option value="{{ $item->id }}" @selected($loop->first)>
+                                                {{ $item->tahun }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="flt_beasiswa" class="form-label small">Beasiswa</label>
+                                    <select class="form-select form-select-sm" aria-label="Filter beasiswa"
+                                        id="flt_beasiswa">
+                                        @foreach ($beasiswa as $item)
+                                            <option value="{{ $item->id }}" @selected($loop->first)>
+                                                {{ $item->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="flt_tanggal_ujian" class="form-label small">Tanggal</label>
+                                    <select class="form-select form-select-sm" aria-label="Filter tanggal ujian"
+                                        id="flt_tanggal_ujian">
+                                        @foreach ($tanggal_ujian as $item)
+                                            <option value="{{ $item }}" @selected($loop->first)>
+                                                {{ \Carbon\Carbon::parse($item)->translatedFormat('d-m-Y') }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="flt_sesi" class="form-label small">Sesi</label>
+                                    <select class="form-select form-select-sm" aria-label="Filter sesi" id="flt_sesi">
+                                        @foreach ($sesi as $item)
+                                            <option value="{{ $item }}" @selected($loop->first)>
+                                                {{ $item }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="flt_ruang" class="form-label small">Ruang</label>
+                                    <select class="form-select form-select-sm" aria-label="Filter ruang" id="flt_ruang">
+                                        @foreach ($ruang as $item)
+                                            <option value="{{ $item }}" @selected($loop->first)>
+                                                {{ $item }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="align-self-end">
+                                    <button class="btn btn-sm btn-primary" onclick="reloadData()">Filter</button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="card-body">
-                            <div class="btn-group mb-3" role="group" aria-label="Button Generate Peserta CBT">
-                                <button type="button" class="btn btn-sm btn-primary" id="generateDataPesertaCBT"><span
+                            <div class="btn-group mb-3" role="group" aria-label="Button Generate Peserta Tes">
+                                <button type="button" class="btn btn-sm btn-primary" id="generateDataPesertaTes"><span
                                         class="ti ti-file-import"></span>
-                                    Generate Data Peserta CBT</button>
+                                    Generate Data Peserta Tes</button>
                                 <button type="button" class="btn btn-sm btn-secondary" id="cetakDaftarHadirPeserta"><span
                                         class="ti ti-id"></span>
                                     Cetak Daftar Hadir Peserta</button>
+                                <button type="button" class="btn btn-sm btn-success" id="unduhDataPesertaTes"><span
+                                        class="far fa-file-excel"></span>
+                                    Unduh Data Peserta Tes</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle text-center" id="tablePendaftar">
@@ -120,7 +144,7 @@
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalDataPendaftarLabel">Generate Data Peserta CBT</h1>
+                            <h1 class="modal-title fs-5" id="modalDataPendaftarLabel">Generate Data Peserta Tes</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -224,7 +248,7 @@
     </script>
 
     <script>
-        $(document).on('click', '#generateDataPesertaCBT', function() {
+        $(document).on('click', '#generateDataPesertaTes', function() {
             const tahun = $('#flt_tahun').val(),
                 beasiswa = $('#flt_beasiswa').val();
 
@@ -288,7 +312,7 @@
 
             Swal.fire({
                 title: 'Apa Anda Yakin?',
-                html: `Anda akan melakukan generate data peserta CBT sebanyak : <span class="fw-bold fst-italic">${count_data} pendaftar</span>`,
+                html: `Anda akan melakukan generate data peserta tes sebanyak : <span class="fw-bold fst-italic">${count_data} pendaftar</span>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Lanjut!',
@@ -316,7 +340,7 @@
                     },
                     beforeSend: () => {
                         Swal.fire({
-                            title: 'Proses generate data CBT...',
+                            title: 'Proses generate data tes...',
                             showCancelButton: false,
                             showConfirmButton: false,
                             didOpen: () => {
@@ -343,7 +367,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Sukses',
-                    text: 'Proses generate data peserta CBT selesai',
+                    text: 'Proses generate data peserta tes selesai',
                     timer: 1500,
                     timerProgressBar: true,
                 });
@@ -479,8 +503,84 @@
                     const msg = JSON.parse(error.responseText);
                     Swal.fire({
                         title: 'Gagal',
-                        text: error && error.status === 404 ?
-                            msg.message :
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '#unduhDataPesertaTes', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            $.ajax({
+                url: "{{ route('admin.seleksi-tpa.unduh') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Data peserta TPA.xlsx');
+
+                    var blob = new Blob([response], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
                             'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
                         icon: 'error',
                         showConfirmButton: false,

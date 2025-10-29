@@ -153,7 +153,11 @@ class TesPotensiAkademikController extends Controller
                 'style_kartu' => $style_kartu,
             ])->render();
 
-            $pdf = SnappyPdf::loadHTML($html);
+            $pdf = SnappyPdf::loadHTML($html)
+                ->setOption('page-width', '215mm')
+                ->setOption('page-height', '330mm')
+                ->setOption('no-background', false)
+                ->setOption('print-media-type', true);
             return $pdf->download($filename);
         }
     }

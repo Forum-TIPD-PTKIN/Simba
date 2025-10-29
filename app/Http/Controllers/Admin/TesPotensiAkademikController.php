@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Admin\PesertaCBTExport;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalCbt;
@@ -14,6 +15,7 @@ use App\Models\TahunKegiatan;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class TesPotensiAkademikController extends Controller
@@ -251,6 +253,12 @@ class TesPotensiAkademikController extends Controller
             'tanggal_ujian' => 'required',
             'sesi' => 'required',
             'ruang' => 'required'
+        ], [
+            'tahun.required' => 'Tahun kegiatan tidak ditentukan',
+            'beasiswa.required' => 'Beasiswa tidak ditentukan',
+            'tanggal_ujian.required' => 'Tanggal ujian tidak ditentukan',
+            'sesi.required' => 'Sesi tidak ditentukan',
+            'ruang.required' => 'Ruang tidak ditentukan'
         ]);
 
         $style = public_path('assets/admin/css/style.css');
@@ -262,6 +270,8 @@ class TesPotensiAkademikController extends Controller
             $request->sesi,
             $request->ruang
         );
+
+        if (!count($data)) return response()->json('Data peserta tes tidak ditemukan', 404);
 
         $beasiswa = Beasiswa::where('id', $request->beasiswa)->pluck('nama')->first();
         $tahun = TahunKegiatan::where('id', $request->tahun)->pluck('tahun')->first();
@@ -283,8 +293,25 @@ class TesPotensiAkademikController extends Controller
             'style' => $style,
         ])->render();
 
-        $pdf = SnappyPdf::loadHTML($html);
+        $pdf = SnappyPdf::loadHTML($html)
+            ->setOption('page-width', '215mm')
+            ->setOption('page-height', '330mm')
+            ->setOption('no-background', false)
+            ->setOption('print-media-type', true);
         return $pdf->download($filename);
+    }
+
+    public function unduh(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+
+        return Excel::download(new PesertaCBTExport($tahun, $beasiswa), "Data Peserta Test Potensi Akademik Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
     }
 
     public static function getDataPendaftar(string $tahun, string $beasiswa, ?int $skip = null, ?int $take = null)

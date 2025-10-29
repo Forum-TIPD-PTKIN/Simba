@@ -130,8 +130,8 @@
                             const msg = JSON.parse(error.responseText);
                             Swal.fire({
                                 title: 'Gagal',
-                                text: error && error.status === 404 ?
-                                    msg.message :
+                                text: error && error.status !== 200 ?
+                                    (typeof msg === 'string' ? msg : msg.message) :
                                     'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
                                 icon: 'error',
                                 showConfirmButton: false,

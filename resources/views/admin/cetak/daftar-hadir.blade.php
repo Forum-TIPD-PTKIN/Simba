@@ -120,11 +120,11 @@
     <table class="table data-peserta" cellspacing="0" cellpadding="0" style="width: 100%">
         <thead class="bg-secondary">
             <tr>
-                <th scope="col">No</th>
-                <th scope="col">NIM</th>
-                <th scope="col">Nama</th>
-                <th scope="col">Program Studi</th>
-                <th scope="col">Tanda Tangan</th>
+                <th scope="col" class="text-center text-white">No</th>
+                <th scope="col" class="text-center text-white">NIM</th>
+                <th scope="col" class="text-center text-white">Nama</th>
+                <th scope="col" class="text-center text-white">Program Studi</th>
+                <th scope="col" class="text-center text-white">Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
