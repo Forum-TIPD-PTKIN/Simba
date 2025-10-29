@@ -143,10 +143,13 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
             'store'   => 'admin.surveyor.store',
             'edit'    => 'admin.surveyor.edit',
             'update'  => 'admin.surveyor.update',
-            'destroy' => 'admin.surveyor.destroy'
+            'destroy' => 'admin.surveyor.destroy',
         ]
     ]);
     Route::post('/surveyor/assign', [SurveyorController::class, 'assign'])->name('admin.surveyor.assign');
+    Route::post('/surveyor/plot-mahasiswa', [SurveyorController::class, 'plotMahasiswa'])->name('admin.surveyor.plot');
+    Route::post('/admin/surveyor/plot-multi-mahasiswa', [SurveyorController::class, 'plotMutliMahasiswa'])->name('admin.surveyor.plot_multi');
+    Route::post('/admin/surveyor/remove-mahasiswa', [SurveyorController::class, 'removeMahasiswa'])->name('admin.surveyor.remove');
 });
 
 // Surveyor
@@ -161,11 +164,13 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
         ]
     ]);
 
+    Route::get('persetujuan/data', [PersetujuanController::class, 'data'])->name('surveyor.persetujuan.data');
     Route::resource('/persetujuan', PersetujuanController::class, [
         'names' => [
             'index'   => 'surveyor.persetujuan',
             'store'   => 'surveyor.persetujuan.store',
             'edit'    => 'surveyor.persetujuan.edit',
+            'show'    => 'surveyor.persetujuan.show',
             'update'  => 'surveyor.persetujuan.update',
             'destroy' => 'surveyor.persetujuan.destroy'
         ]

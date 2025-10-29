@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Surveyor;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class IsSurveyor
@@ -16,7 +18,12 @@ class IsSurveyor
     public function handle(Request $request, Closure $next): Response
     {
         if (session()->has('level') && session()->get('level') === 3) {
-            return $next($request);
+            $cek = Surveyor::whereUserId(Auth::id())->count();
+            if ($cek) {
+                return $next($request);
+            } else {
+                return redirect()->route('login');
+            }
         }
 
         if (session()->get('level') === 1) {

@@ -63,6 +63,13 @@ class Pendaftar extends Uuid
         return json_decode($val);
     }
 
+    public function scopeSomeStatus($query, $status)
+    {
+        return $query->when($status, function ($query, $status) {
+            $query->whereHas('latestStatus', fn($q) => $q->where('status', $status));
+        });
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope(new PendaftarStatusLates);

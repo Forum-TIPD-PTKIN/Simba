@@ -94,43 +94,6 @@
 </script>
 
 <script>
-    $('.notification-item').on('click', function() {
-        const id = $(this).data('id');
-        let url = "{{ route('notifikasi.show', ':id') }}";
-        url = url.replace(':id', id);
-
-        $.ajax({
-            url: url,
-            beforeSend: () => {
-                Swal.fire({
-                    title: 'Mengambil data...',
-                    showCancelButton: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                    allowOutsideClick: false
-                });
-            },
-            success: (res) => {
-                let badgeNotif = $(this).closest('li.dropdown').find('span.pc-h-badge'),
-                    notifContent = $(this).parent(),
-                    counterNotif = parseInt(badgeNotif.text()) - 1;
-
-                $(this).hide();
-                badgeNotif.text(counterNotif);
-                if (counterNotif === 0) {
-                    notifContent.append(`<div class="alert alert-info">Tidak ada notifikasi</div>`);
-                    $('.mark-all-read, .clear-notification').hide();
-                }
-                $('#modalNotifikasi .modal-content').html(res);
-
-                $('#modalNotifikasi').modal('show');
-                Swal.close();
-            }
-        });
-    });
-
     $('.mark-all-read, .clear-notification').on('click', function() {
         $.ajax({
             url: "{{ route('notifikasi.destroy') }}",

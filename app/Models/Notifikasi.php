@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\LatestCreated;
 use App\Models\Scopes\NotifikasiOrder;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 class Notifikasi extends Uuid
 {

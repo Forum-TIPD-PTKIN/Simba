@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Surveyor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\DataTables;
 
 class PersetujuanController extends Controller
 {
@@ -15,6 +16,33 @@ class PersetujuanController extends Controller
     public function index()
     {
         return view('surveyor.persetujuan');
+    }
+
+    public function data()
+    {
+        $query = Surveyor::with(['beasiswa', 'tahun_kegiatan'])
+            ->where('user_id', Auth::id());
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('status', function ($row) {
+                if (is_null($row->bersedia)) {
+                    return '<span class="badge bg-light-warning">Menunggu Persetujuan</span>';
+                }
+                if ($row->bersedia == 1) {
+                    return '<span class="badge bg-light-success">Bersedia</span>';
+                }
+                return '<span class="badge bg-light-danger">Tidak Bersedia</span>';
+            })
+            ->addColumn('action', function ($row) {
+                if (is_null($row->bersedia)) {
+                    return '<a href="' . route('surveyor.persetujuan.show', ['persetujuan' => $row->id]) . '" class="btn btn-primary btn-sm">Detail</a>';
+                } else if ($row->bersedia === 0 && $row->alasan) {
+                    return '<i><strong>Alasan : </strong> ' . $row->alasan . '</i>';
+                }
+            })
+            ->rawColumns(['status', 'action'])
+            ->make(true);
     }
 
     /**
@@ -70,7 +98,7 @@ class PersetujuanController extends Controller
         ]);
 
         try {
-            $surveyor = Surveyor::findOrFail($id);
+            $surveyor = Surveyor::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
             // Prevent re-submission
             if ($surveyor->bersedia !== null) {
