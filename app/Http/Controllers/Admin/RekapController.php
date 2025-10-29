@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Admin\RekapPendaftarExport;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\Pendaftar;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class RekapController extends Controller
@@ -74,5 +76,19 @@ class RekapController extends Controller
                 ->rawColumns(['beasiswa', 'status'])
                 ->make(true);
         }
+    }
+
+    public function unduh(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+        $status = $request->status;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+
+        return Excel::download(new RekapPendaftarExport($tahun, $beasiswa, $status), "Rekapitulasi Data Pendaftar Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
     }
 }

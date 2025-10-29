@@ -5,7 +5,8 @@ ADMINISTRATOR
 > Fitur pendaftaran surveyor
 > Fitur penentuan pendaftar ke petugas survei
 > Fitur isian survei oleh surveyor
-> Fitur penentuan penerima beasiswa
+> Fitur penentuan penerima beasiswa.
+> 
 
 VERIFIKATOR
 ===================================================================
@@ -13,4 +14,4 @@ VERIFIKATOR
 
 PENDAFTAR
 ===================================================================
-> Cetak Kartu
+> 

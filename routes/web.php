@@ -122,12 +122,14 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-tpa', [TesPotensiAkademikController::class, 'store'])->name('admin.seleksi-tpa.store');
     Route::post('/seleksi-tpa/data', [TesPotensiAkademikController::class, 'data'])->name('admin.seleksi-tpa.data');
     Route::post('/seleksi-tpa/daftar-hadir', [TesPotensiAkademikController::class, 'daftar_hadir'])->name('admin.seleksi-tpa.daftar-hadir');
+    Route::post('/seleksi-tpa/unduh', [TesPotensiAkademikController::class, 'unduh'])->name('admin.seleksi-tpa.unduh');
     Route::get('/seleksi-tpa/{tahun}/{beasiswa}/show', [TesPotensiAkademikController::class, 'show'])->name('admin.seleksi-tpa.show');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
         Route::get('/rekap', [RekapController::class, 'index'])->name('admin.laporan.rekap');
         Route::post('/rekap/data', [RekapController::class, 'data'])->name('admin.laporan.rekap.data');
+        Route::post('/rekap/unduh', [RekapController::class, 'unduh'])->name('admin.laporan.rekap.unduh');
 
         Route::get('/verifikasi', [LaporanController::class, 'verifikasi'])->name('admin.laporan.verifikasi');
         Route::get('/verifikasi/data', [LaporanController::class, 'data'])->name('admin.laporan.verifikasi.data');
