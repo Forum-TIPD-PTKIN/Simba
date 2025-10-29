@@ -156,6 +156,54 @@
                 </div>
             </div>
 
+            <!-- Modal Assign Surveyor -->
+            <div class="modal fade" id="modalAssignSurveyor" aria-labelledby="modalAssignSurveyorLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalAssignSurveyorLabel">Pilih Calon Surveyor
+                                @{{ titleKip }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="sticky-top bg-white py-2 mb-3"
+                                style="top: -1rem; /* Sesuaikan dengan padding modal-body */">
+                                <input type="text" class="form-control" v-model="searchQuery"
+                                    placeholder="Cari nama pegawai...">
+                            </div>
+                            <ul class="list-group">
+                                <li v-for="pegawai in filteredPegawai" :key="pegawai.id"
+                                    @click="toggleSelection(pegawai.id)" style="cursor: pointer;"
+                                    class="list-group-item d-flex justify-content-between align-items-center list-group-item-action"
+                                    :class="{ 'active': selectedPegawai.includes(pegawai.id) }">
+                                    <div>
+                                        @{{ pegawai.nama }}
+                                        <div class="small">@{{ pegawai.nip }}</div>
+                                    </div>
+                                    <input class="form-check-input" type="checkbox" :value="pegawai.id"
+                                        v-model="selectedPegawai">
+                                </li>
+                                <li v-if="filteredPegawai.length === 0" class="list-group-item text-center">
+                                    Data tidak ditemukan.
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                :disabled="isLoading">Batal</button>
+                            <button type="button" class="btn btn-primary" @click="saveSurveyors"
+                                :disabled="isLoading">
+                                <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status"
+                                    aria-hidden="true"></span>
+                                <span v-if="isLoading">Menyimpan...</span>
+                                <span v-else>Simpan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -436,6 +484,16 @@
                         this.selectedPegawai.push(pegawaiId); // Tambah jika belum ada
                     }
                 },
+
+                toggleSelection(pegawaiId) {
+                    const index = this.selectedPegawai.indexOf(pegawaiId);
+                    if (index > -1) {
+                        this.selectedPegawai.splice(index, 1); // Hapus jika sudah ada
+                    } else {
+                        this.selectedPegawai.push(pegawaiId); // Tambah jika belum ada
+                    }
+                },
+
                 saveSurveyors() {
                     if (this.selectedPegawai.length === 0) {
                         Swal.fire({
