@@ -100,16 +100,20 @@
                         <span class="pc-mtext">Seleksi TPA</span>
                     </a>
                 </li>
-
-                <li class="pc-item">
-                    <a href="{{ route('admin.surveyor') }}" class="pc-link">
-                        <span class="pc-micon">
+                <li class="pc-item pc-hasmenu">
+                    <a href="#!" class="pc-link"><span class="pc-micon">
                             <svg class="pc-icon">
                                 <use xlink:href="#custom-user"></use>
-                            </svg>
-                        </span>
-                        <span class="pc-mtext">Surveyor</span>
-                    </a>
+                            </svg> </span><span class="pc-mtext">Surveyor</span><span class="pc-arrow"><i
+                                data-feather="chevron-right"></i></span></a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item">
+                            <a href="{{ route('admin.surveyor') }}" class="pc-link">Assign</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.surveyor.rekap') }}" class="pc-link">Rekap</a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="pc-item pc-caption">
                     <label>Seleksi</label>

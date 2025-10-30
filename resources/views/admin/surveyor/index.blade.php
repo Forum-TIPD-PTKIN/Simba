@@ -625,4 +625,12 @@
             window.location.href = `{{ route('admin.surveyor') }}?tahun=${tahunId}&beasiswa=${beasiswaId}`;
         }
     </script>
+
+    @if (request()->get('assign') == '1')
+        <script>
+            $(document).ready(function() {
+                $('#modalAssignSurveyor').modal('show');
+            });
+        </script>
+    @endif
 @endpush

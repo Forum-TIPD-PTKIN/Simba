@@ -12,9 +12,73 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class SurveyorController extends Controller
 {
+    public function detail(Request $request, $id)
+    {
+        $detailSurveyor = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan', 'surveyor_detail.pendaftar.mahasiswa', 'surveyor_detail.pendaftar.biodata_pendaftar'])->where('id', $id)->first();
+        return view('admin.surveyor.detail', compact('detailSurveyor'));
+    }
+
+    public function rekap(Request $request)
+    {
+        $status_surveyor = ['Publish', 'Draft'];
+
+        $master_tahun = TahunKegiatan::where('status', 1)
+            ->orderBy('tahun', 'desc')
+            ->get();
+        $master_beasiswa = Beasiswa::where('status', 1)
+            ->get();
+
+        if ($request->beasiswa) {
+            $kip_select = Beasiswa::find($request->beasiswa);
+        } else {
+            $kip_select = $master_beasiswa->first();
+        }
+        if ($request->tahun) {
+            $tahun_select = TahunKegiatan::find($request->tahun);
+        } else {
+            $tahun_select = $master_tahun->first();
+        }
+
+        if ($request->ajax()) {
+            $data = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan'])
+                ->where('bersedia', 1)
+                ->withCount('surveyor_detail as details_count')
+                ->withCount(['surveyor_detail as selesai_count' => function ($query) {
+                    $query->whereHas('pendaftar.latestStatus', function ($q) {
+                        $q->where('status', 'SUDAH SURVEY');
+                    });
+                }]);
+
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('name', function ($row) {
+                    return $row->user->name;
+                })
+                ->addColumn('beasiswa', function ($row) {
+                    return $row->beasiswa->nama . ' ' . $row->tahun_kegiatan->tahun;
+                })
+                ->addColumn('belum_selesai_count', function ($row) {
+                    return $row->details_count - $row->selesai_count;
+                })
+                ->addColumn('action', function ($row) {
+                    $btn = '<button onclick="openDetal(event)" data-id="' . $row->id . '" class="btn btn-info btn-sm"><i class="ti ti-eye"></i></button>';
+                    return $btn;
+                })
+                ->addColumn('status', function ($row) {
+                    if (!$row->publish)
+                        return '<span class="badge text-bg-warning">Draft</span>';
+                    else return '<span class="badge text-bg-success">Publish</span>';
+                })
+                ->rawColumns(['action', 'status', 'name'])
+                ->make(true);
+        }
+
+        return view('admin.surveyor.rekap', compact('master_tahun', 'master_beasiswa', 'status_surveyor', 'kip_select', 'tahun_select'));
+    }
     /**
      * Display a listing of the resource.
      */
@@ -138,6 +202,11 @@ class SurveyorController extends Controller
                     ->get(),
             ]);
         }
+        SurveyorDetail::whereHas('surveyor', function ($query) {
+            $query->where('bersedia', '!=', 1);
+        })
+            ->whereIn('id', collect($pendaftarIds)->pluck('id')->toArray())
+            ->delete();
         return response()->json([
             'icon' => 'warning',
             'title' => 'Perhatian',
