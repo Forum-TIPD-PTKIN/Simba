@@ -102,6 +102,7 @@ class TesPotensiAkademikController extends Controller
                             // Menambah data peserta pada tabel Map Ujian
                             $map_ujian = new MapUjian();
                             $map_ujian->pendaftar_id = $pendaftar->id;
+                            $map_ujian->cbt_jenis_tes = $jenis_tes->id_jenis_tes;
                             $map_ujian->tanggal_mulai = date('Y-m-d H:i:s', strtotime($jadwal->tgl_ujian . ' ' . $jadwal->jam_mulai));
                             $map_ujian->tanggal_selesai = date('Y-m-d H:i:s', strtotime($jadwal->tgl_ujian . ' ' . $jadwal->jam_selesai));
                             $map_ujian->sesi = $jadwal->sesi;

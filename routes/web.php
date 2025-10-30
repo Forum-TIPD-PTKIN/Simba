@@ -124,6 +124,8 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-tpa/daftar-hadir', [TesPotensiAkademikController::class, 'daftar_hadir'])->name('admin.seleksi-tpa.daftar-hadir');
     Route::post('/seleksi-tpa/unduh', [TesPotensiAkademikController::class, 'unduh'])->name('admin.seleksi-tpa.unduh');
     Route::get('/seleksi-tpa/{tahun}/{beasiswa}/show', [TesPotensiAkademikController::class, 'show'])->name('admin.seleksi-tpa.show');
+    Route::get('/seleksi-tpa/{tahun}/{beasiswa}/sinkron-nilai', [TesPotensiAkademikController::class, 'sinkron_nilai'])->name('admin.seleksi-tpa.sinkron-nilai');
+    Route::delete('/seleksi-tpa', [TesPotensiAkademikController::class, 'destroy'])->name('admin.seleksi-tpa.destroy');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {

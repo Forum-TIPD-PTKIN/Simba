@@ -90,16 +90,6 @@
                         </li>
                     </ul>
                 </li>
-                <li class="pc-item">
-                    <a href="{{ route('admin.seleksi-tpa') }}" class="pc-link">
-                        <span class="pc-micon">
-                            <svg class="pc-icon">
-                                <use xlink:href="#custom-layer"></use>
-                            </svg>
-                        </span>
-                        <span class="pc-mtext">Seleksi TPA</span>
-                    </a>
-                </li>
 
                 <li class="pc-item">
                     <a href="{{ route('admin.surveyor') }}" class="pc-link">

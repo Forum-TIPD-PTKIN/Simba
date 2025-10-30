@@ -15,6 +15,7 @@ use App\Models\TahunKegiatan;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -34,6 +35,7 @@ class TesPotensiAkademikController extends Controller
                     ->where('beasiswa_id', $beasiswa_selected);
             })
             ->groupBy('tanggal')
+            ->orderByRaw('DATE(tanggal_mulai) ASC')
             ->pluck('tanggal');
         $sesi = MapUjian::selectRaw('sesi')
             ->whereHas('pendaftar', function ($query) use ($tahun_selected, $beasiswa_selected) {
@@ -41,6 +43,7 @@ class TesPotensiAkademikController extends Controller
                     ->where('beasiswa_id', $beasiswa_selected);
             })
             ->groupBy('sesi')
+            ->orderByRaw('CAST(sesi AS UNSIGNED) ASC')
             ->pluck('sesi');
         $ruang = MapUjian::selectRaw('ruang')
             ->whereHas('pendaftar', function ($query) use ($tahun_selected, $beasiswa_selected) {
@@ -48,6 +51,7 @@ class TesPotensiAkademikController extends Controller
                     ->where('beasiswa_id', $beasiswa_selected);
             })
             ->groupBy('ruang')
+            ->orderByRaw('CAST(ruang AS UNSIGNED) ASC')
             ->pluck('ruang');
 
         if ($request->ajax()) {
@@ -155,8 +159,8 @@ class TesPotensiAkademikController extends Controller
         $data = $this->getDataPendaftar(
             $request->tahun,
             $request->beasiswa,
-            is_numeric($request->start) ? (int) $request->start : null,
-            is_numeric($request->per_process) ? (int) $request->per_process : null
+            is_numeric($request->start) ? (int) $request->start : 0,
+            is_numeric($request->per_process) ? (int) $request->per_process : 50
         );
 
         foreach ($data as $key => $value) {
@@ -223,6 +227,7 @@ class TesPotensiAkademikController extends Controller
                             // Menambah atau ubah data peserta pada tabel Map Ujian (DB PMB)
                             $map_ujian = new MapUjian();
                             $map_ujian->pendaftar_id = $value->id;
+                            $map_ujian->cbt_jenis_tes = $jenis_tes->id_jenis_tes;
                             $map_ujian->tanggal_mulai = date('Y-m-d H:i:s', strtotime($jadwal->tgl_ujian . ' ' . $jadwal->jam_mulai));
                             $map_ujian->tanggal_selesai = date('Y-m-d H:i:s', strtotime($jadwal->tgl_ujian . ' ' . $jadwal->jam_selesai));
                             $map_ujian->sesi = $jadwal->sesi;
@@ -280,7 +285,7 @@ class TesPotensiAkademikController extends Controller
         $sesi = collect($data)->pluck('sesi')->unique()->first();
         $ruang = collect($data)->pluck('ruang')->unique()->first();
 
-        $filename = 'DAFTAR_HADIR_PESERTA_TES_POTENSI_AKADEMIK_BEASISWA_' . strtoupper(str_replace(' ', '_', $beasiswa)) . '_' . $tahun . '.pdf';
+        $filename = 'DAFTAR_HADIR_PESERTA_TES_POTENSI_AKADEMIK_BEASISWA_' . strtoupper(str_replace(' ', '_', $beasiswa)) . '_' . $tahun . '_' . $tanggal_ujian . '_' . $sesi . '_' . $ruang . '.pdf';
 
         set_time_limit(300);
         $html = view('admin.cetak.daftar-hadir', [
@@ -312,6 +317,85 @@ class TesPotensiAkademikController extends Controller
         $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
 
         return Excel::download(new PesertaCBTExport($tahun, $beasiswa), "Data Peserta Test Potensi Akademik Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
+    }
+
+    public function sinkron_nilai(string $tahun, string $beasiswa)
+    {
+        set_time_limit(60 * 60);
+
+        $query_map_ujian = MapUjian::with(['pendaftar.mahasiswa'])
+            ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                $query->where('tahun_kegiatan_id', $tahun)
+                    ->where('beasiswa_id', $beasiswa);
+            });
+
+        $jenis_tes_cbt = $query_map_ujian
+            ->select('cbt_jenis_tes')
+            ->distinct()
+            ->pluck('cbt_jenis_tes')
+            ->first();
+
+        $data_hasil_cbt = PesertaCbt::selectRaw('peserta.no_test, COUNT(peserta.no_test) AS nilai')
+            ->join(DB::raw('(SELECT * FROM soal_peserta) as sp'), 'sp.no_test', '=', 'peserta.no_test')
+            ->where('peserta.id_jenis_tes', $jenis_tes_cbt)
+            ->whereColumn('sp.kunci', 'sp.jawaban')
+            ->groupBy('peserta.no_test')
+            ->get();
+        if (!count($data_hasil_cbt)) return response()->json('Data hasil CBT tidak ditemukan', 404);
+
+        try {
+            foreach ($query_map_ujian->get() as $key => $value) {
+                $get_nilai = $data_hasil_cbt->filter(function ($item) use ($value) {
+                    return $item->no_test === $value->pendaftar?->mahasiswa?->nim;
+                })->first();
+
+                $value->nilai = $get_nilai?->nilai ?? 0;
+                $value->update();
+            }
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(), 500);
+        }
+
+        return response()->json([
+            'status' => true,
+            'icon' => 'success',
+            'title' => 'Sukses!',
+            'message' => 'Sinkronisasi nilai berhasil'
+        ], 200);
+    }
+
+    public function destroy(Request $request)
+    {
+        $query_map_ujian = MapUjian::with(['pendaftar.mahasiswa'])
+            ->whereHas('pendaftar', function ($query) use ($request) {
+                $query->where('tahun_kegiatan_id', $request->tahun)
+                    ->where('beasiswa_id', $request->beasiswa);
+            });
+
+        $jenis_tes_cbt = $query_map_ujian
+            ->select('cbt_jenis_tes')
+            ->distinct()
+            ->pluck('cbt_jenis_tes')
+            ->first();
+
+        try {
+            $query_map_ujian->delete();
+
+            PesertaCbt::where('id_jenis_tes', $jenis_tes_cbt)
+                ->delete();
+
+            JadwalCbt::where('id_jenis_tes', $jenis_tes_cbt)
+                ->update(['isi' => null]);
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(), 500);
+        }
+
+        return response()->json([
+            'status' => true,
+            'icon' => 'success',
+            'title' => 'Sukses!',
+            'message' => 'Data peserta tes berhasil dihapus'
+        ], 200);
     }
 
     public static function getDataPendaftar(string $tahun, string $beasiswa, ?int $skip = null, ?int $take = null)
@@ -349,9 +433,15 @@ class TesPotensiAkademikController extends Controller
                             ->where('beasiswa_id', $beasiswa);
                     });
             })
-            ->whereRaw('DATE(tanggal_mulai) = ?', [$tanggal_ujian])
-            ->where('sesi', $sesi)
-            ->where('ruang', $ruang)
+            ->when($tanggal_ujian, function ($query) use ($tanggal_ujian) {
+                $query->whereRaw('DATE(tanggal_mulai) = ?', [$tanggal_ujian]);
+            })
+            ->when($sesi, function ($query) use ($sesi) {
+                $query->where('sesi', $sesi);
+            })
+            ->when($ruang, function ($query) use ($ruang) {
+                $query->where('ruang', $ruang);
+            })
             ->orderBy('mahasiswas.nama');
 
         if (!$is_query) $query = $query->get();

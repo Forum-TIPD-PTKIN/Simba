@@ -69,8 +69,9 @@
                                     <label for="flt_tanggal_ujian" class="form-label small">Tanggal</label>
                                     <select class="form-select form-select-sm" aria-label="Filter tanggal ujian"
                                         id="flt_tanggal_ujian">
+                                        <option value="" selected>-- All --</option>
                                         @foreach ($tanggal_ujian as $item)
-                                            <option value="{{ $item }}" @selected($loop->first)>
+                                            <option value="{{ $item }}">
                                                 {{ \Carbon\Carbon::parse($item)->translatedFormat('d-m-Y') }}
                                             </option>
                                         @endforeach
@@ -79,8 +80,9 @@
                                 <div>
                                     <label for="flt_sesi" class="form-label small">Sesi</label>
                                     <select class="form-select form-select-sm" aria-label="Filter sesi" id="flt_sesi">
+                                        <option value="" selected>-- All --</option>
                                         @foreach ($sesi as $item)
-                                            <option value="{{ $item }}" @selected($loop->first)>
+                                            <option value="{{ $item }}">
                                                 {{ $item }}
                                             </option>
                                         @endforeach
@@ -89,8 +91,9 @@
                                 <div>
                                     <label for="flt_ruang" class="form-label small">Ruang</label>
                                     <select class="form-select form-select-sm" aria-label="Filter ruang" id="flt_ruang">
+                                        <option value="" selected>-- All --</option>
                                         @foreach ($ruang as $item)
-                                            <option value="{{ $item }}" @selected($loop->first)>
+                                            <option value="{{ $item }}">
                                                 {{ $item }}
                                             </option>
                                         @endforeach
@@ -103,16 +106,23 @@
                         </div>
 
                         <div class="card-body">
-                            <div class="btn-group mb-3" role="group" aria-label="Button Generate Peserta Tes">
+                            <div class="row row-cols-1 row-cols-md-auto g-2 gap-1 mb-3" role="group"
+                                aria-label="Button Generate Peserta Tes">
                                 <button type="button" class="btn btn-sm btn-primary" id="generateDataPesertaTes"><span
                                         class="ti ti-file-import"></span>
                                     Generate Data Peserta Tes</button>
                                 <button type="button" class="btn btn-sm btn-secondary" id="cetakDaftarHadirPeserta"><span
                                         class="ti ti-id"></span>
                                     Cetak Daftar Hadir Peserta</button>
+                                <button type="button" class="btn btn-sm btn-warning" id="sinkronNilaiCBT"><span
+                                        class="fas fa-sync-alt"></span>
+                                    Sinkron Nilai Tes</button>
                                 <button type="button" class="btn btn-sm btn-success" id="unduhDataPesertaTes"><span
                                         class="far fa-file-excel"></span>
                                     Unduh Data Peserta Tes</button>
+                                <button type="button" class="btn btn-sm btn-danger" id="hapusDataPesertaTes"><span
+                                        class="far fa-trash-alt"></span>
+                                    Hapus Data Peserta Tes</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle text-center" id="tablePendaftar">
@@ -126,6 +136,7 @@
                                             <th scope="col">Tanggal Ujian</th>
                                             <th scope="col">Sesi</th>
                                             <th scope="col">Ruang</th>
+                                            <th scope="col">Nilai</th>
                                         </tr>
                                     </thead>
                                     <tbody class="table-group-divider">
@@ -145,7 +156,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="modalDataPendaftarLabel">Generate Data Peserta Tes</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                         </div>
@@ -217,6 +229,9 @@
                 },
                 {
                     data: 'ruang'
+                },
+                {
+                    data: 'nilai'
                 }
             ],
             "columnDefs": [{
@@ -303,77 +318,98 @@
     <script>
         $('#modalDataPendaftar button[type="submit"]').on('click', function(e) {
             e.preventDefault();
-            const count_data = $('#count-data-pendaftar').val(),
-                per_process = 50,
-                total_batch = Math.ceil(count_data / per_process),
-                tahun = $('#tahun-kegiatan').val(),
-                beasiswa = $('#beasiswa').val();
-            let start = 0;
-
-            Swal.fire({
-                title: 'Apa Anda Yakin?',
-                html: `Anda akan melakukan generate data peserta tes sebanyak : <span class="fw-bold fst-italic">${count_data} pendaftar</span>`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Lanjut!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // recursive function
-                    processData(tahun, beasiswa, start, total_batch, per_process);
-                }
-            });
+            startBatchGenerate();
         });
 
-        function processData(tahun, beasiswa, start, total, per_process) {
-            if (start < total) {
+        function startBatchGenerate() {
+            const count = parseInt($('#count-data-pendaftar').val(), 10),
+                perBatch = 50,
+                totalBatch = Math.ceil(count / perBatch),
+                tahun = $('#tahun-kegiatan').val(),
+                beasiswa = $('#beasiswa').val();
+
+            Swal.fire({
+                title: 'Konfirmasi',
+                html: `Anda akan memproses <strong>${count}</strong> data dalam <strong>${totalBatch}</strong> batch`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    runBatch(tahun, beasiswa, count, perBatch, totalBatch);
+                }
+            });
+        }
+
+        function runBatch(tahun, beasiswa, totalData, perBatch, totalBatch) {
+            let currentBatch = 0;
+
+            const execute = () => {
+                if (currentBatch >= totalBatch) {
+                    $('.modal').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Selesai!',
+                        text: 'Semua data berhasil diproses.',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    reloadData();
+                    return;
+                }
+
+                const offset = currentBatch * perBatch;
+                const limit = Math.min(perBatch, totalData - offset);
+
+                showProgress(currentBatch + 1, totalBatch);
+
                 $.ajax({
                     url: "{{ route('admin.seleksi-tpa.store') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        tahun: tahun,
-                        beasiswa: beasiswa,
-                        start: start,
-                        per_process: per_process
+                        tahun,
+                        beasiswa,
+                        start: offset,
+                        per_process: limit
                     },
-                    beforeSend: () => {
-                        Swal.fire({
-                            title: 'Proses generate data tes...',
-                            showCancelButton: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            },
-                            allowOutsideClick: false
-                        });
+                    success: () => {
+                        currentBatch++;
+                        setTimeout(() => {
+                            execute();
+                        }, 1000); // jeda 300ms antar batch
                     },
-                    success: (res) => {
-                        Swal.close();
-                        processData(tahun, beasiswa, start + 1, total, per_process);
-                    },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: xhr.responseJSON.message ??
-                                'Terdapat kesalahan server, periksa lebih lanjut!',
-                        });
+                    error: () => {
+                        retryBatch(currentBatch, execute);
                     }
                 });
-            } else {
-                $('.modal').modal('hide');
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sukses',
-                    text: 'Proses generate data peserta tes selesai',
-                    timer: 1500,
-                    timerProgressBar: true,
-                });
-                reloadData();
-                return false;
-            }
+            };
+
+            execute();
+        }
+
+        function showProgress(current, total) {
+            Swal.fire({
+                title: `Memproses batch ${current} dari ${total}`,
+                html: `<progress value="${current}" max="${total}" style="width:100%"></progress>`,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+        }
+
+        function retryBatch(batchIndex, retryCallback) {
+            Swal.fire({
+                icon: 'error',
+                title: `Batch ${batchIndex + 1} gagal`,
+                text: 'Mencoba ulang dalam 2 detik...',
+                showConfirmButton: false,
+                timer: 2000
+            }).then(() => {
+                retryCallback();
+            });
         }
     </script>
 
@@ -588,6 +624,124 @@
                         timerProgressBar: true,
                         customClass: {
                             timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '#sinkronNilaiCBT', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            let url =
+                "{{ route('admin.seleksi-tpa.sinkron-nilai', ['tahun' => ':tahun', 'beasiswa' => ':beasiswa']) }}";
+            url = url.replace(':tahun', tahun).replace(':beasiswa', beasiswa);
+
+            $.ajax({
+                url: url,
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    reloadData();
+                    Swal.fire({
+                        icon: res.icon,
+                        title: res.title,
+                        text: res.message,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan sinkron nilai dari aplikasi CBT. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '#hapusDataPesertaTes', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            Swal.fire({
+                title: 'Apa Anda Yakin?',
+                html: `Anda akan menghapus semua data peserta yang sudah generate kartu dan terdaftar di aplikasi CBT`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('admin.seleksi-tpa.destroy') }}",
+                        type: "DELETE",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            tahun: tahun,
+                            beasiswa: beasiswa
+                        },
+                        beforeSend: () => {
+                            Swal.fire({
+                                title: 'Memproses data...',
+                                showCancelButton: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                allowOutsideClick: false
+                            });
+                        },
+                        success: (res) => {
+                            reloadData();
+                            Swal.fire({
+                                icon: res.icon,
+                                title: res.title,
+                                text: res.message,
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        },
+                        error: function(error) {
+                            const msg = JSON.parse(error.responseText);
+                            Swal.fire({
+                                title: 'Gagal',
+                                text: error && error.status !== 200 ?
+                                    (typeof msg === 'string' ? msg : msg.message) :
+                                    'Tidak dapat menghapus data peserta tes. Terjadi kesalahan atau data tidak tersedia',
+                                icon: 'error',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                customClass: {
+                                    timerProgressBar: 'bg-danger'
+                                }
+                            });
                         }
                     });
                 }

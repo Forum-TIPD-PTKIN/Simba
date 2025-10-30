@@ -84,6 +84,9 @@ class LoginController extends Controller
             } else if (in_array(2, Auth::user()->access)) {
                 //pendaftar
                 return redirect(route('pendaftar.dashboard'));
+            } else if (in_array(3, Auth::user()->access)) {
+                //pendaftar
+                return redirect(route('surveyor.dashboard'));
             }
         }
 
