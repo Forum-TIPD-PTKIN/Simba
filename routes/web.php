@@ -140,7 +140,8 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
         Route::put('/verifikasi/{id}', [LaporanController::class, 'update'])->name('admin.laporan.verifikasi.update');
     });
 
-
+    Route::get('/surveyor/rekap', [SurveyorController::class, 'rekap'])->name('admin.surveyor.rekap');
+    Route::get('/surveyor/detail/{id}', [SurveyorController::class, 'detail'])->name('admin.surveyor.detail');
     Route::resource('/surveyor', SurveyorController::class, [
         'names' => [
             'index'   => 'admin.surveyor',
@@ -152,8 +153,8 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     ]);
     Route::post('/surveyor/assign', [SurveyorController::class, 'assign'])->name('admin.surveyor.assign');
     Route::post('/surveyor/plot-mahasiswa', [SurveyorController::class, 'plotMahasiswa'])->name('admin.surveyor.plot');
-    Route::post('/admin/surveyor/plot-multi-mahasiswa', [SurveyorController::class, 'plotMutliMahasiswa'])->name('admin.surveyor.plot_multi');
-    Route::post('/admin/surveyor/remove-mahasiswa', [SurveyorController::class, 'removeMahasiswa'])->name('admin.surveyor.remove');
+    Route::post('/surveyor/plot-multi-mahasiswa', [SurveyorController::class, 'plotMutliMahasiswa'])->name('admin.surveyor.plot_multi');
+    Route::post('/surveyor/remove-mahasiswa', [SurveyorController::class, 'removeMahasiswa'])->name('admin.surveyor.remove');
 });
 
 // Surveyor

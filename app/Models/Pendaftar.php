@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\PendaftarStatusLast;
 use App\Models\Scopes\PendaftarStatusLates;
 
 class Pendaftar extends Uuid

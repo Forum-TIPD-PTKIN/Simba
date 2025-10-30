@@ -9,6 +9,7 @@ class Surveyor extends Uuid
         'beasiswa_id',
         'tahun_kegiatan_id',
         'bersedia',
+        'publish',
         'alasan',
         'hp',
         'alamat',
