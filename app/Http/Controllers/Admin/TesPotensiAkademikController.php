@@ -316,7 +316,7 @@ class TesPotensiAkademikController extends Controller
         $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
         $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
 
-        return Excel::download(new PesertaCBTExport($tahun, $beasiswa), "Data Peserta Test Potensi Akademik Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
+        return Excel::download(new PesertaCBTExport($tahun, $beasiswa), "Data Peserta Tes Potensi Akademik Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
     }
 
     public function sinkron_nilai(string $tahun, string $beasiswa)
@@ -379,13 +379,15 @@ class TesPotensiAkademikController extends Controller
             ->first();
 
         try {
-            $query_map_ujian->delete();
+            if ($query_map_ujian->count() > 0) {
+                $query_map_ujian->delete();
 
-            PesertaCbt::where('id_jenis_tes', $jenis_tes_cbt)
-                ->delete();
+                PesertaCbt::where('id_jenis_tes', $jenis_tes_cbt)
+                    ->delete();
 
-            JadwalCbt::where('id_jenis_tes', $jenis_tes_cbt)
-                ->update(['isi' => null]);
+                JadwalCbt::where('id_jenis_tes', $jenis_tes_cbt)
+                    ->update(['isi' => null]);
+            }
         } catch (\Throwable $th) {
             return response()->json($th->getMessage(), 500);
         }

@@ -18,11 +18,11 @@
                             </div>
                         </div>
                         <div class="flex-grow-0 ms-3">
-                            <h6 class="mb-0">{{ $item['label'] }}</h6>
+                            <h6 class="mb-0">{{ $item->status }}</h6>
                         </div>
                     </div>
                     <div class="bg-body p-3 mt-3 rounded">
-                        <h3 class="mb-0 text-center">{{ $item['value'] }} <span class="h6">Peserta</span></h3>
+                        <h3 class="mb-0 text-center">{{ $item->jumlah }} <span class="h6">Peserta</span></h3>
                     </div>
                 </div>
             </div>

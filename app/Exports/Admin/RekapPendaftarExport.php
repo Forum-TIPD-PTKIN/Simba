@@ -15,7 +15,14 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class RekapPendaftarExport implements FromCollection, WithMapping, WithHeadings, WithStyles, WithTitle, ShouldAutoSize, WithEvents
+class RekapPendaftarExport implements
+    FromCollection,
+    WithMapping,
+    WithHeadings,
+    WithStyles,
+    WithTitle,
+    ShouldAutoSize,
+    WithEvents
 {
     /**
      * @return \Illuminate\Support\Collection

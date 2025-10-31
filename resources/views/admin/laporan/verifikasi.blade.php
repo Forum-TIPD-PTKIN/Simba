@@ -72,6 +72,11 @@
                         </div>
 
                         <div class="card-body">
+                            <div class="btn-group mb-3" role="group" aria-label="Button Modal Jadwal Kegiatan">
+                                <button type="button" class="btn btn-sm btn-success"
+                                    id="unduhHasilSeleksiAdministrasi"><span class="far fa-file-excel"></span>
+                                    Unduh data excel</button>
+                            </div>
                             <div
                                 class="alert {{ $jadwal_kegiatan ? 'alert-warning' : 'alert-danger' }} container-alert-jadwal">
                                 <h5><i class="ti ti-calendar-event"></i> Jadwal Kegiatan</h5>
@@ -363,5 +368,83 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        $(document).on('click', '#unduhHasilSeleksiAdministrasi', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val(),
+                status = $('#flt_status').val();
+
+            $.ajax({
+                url: "{{ route('admin.laporan.verifikasi.unduh') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa,
+                    status: status
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Rekap data pendaftar.xlsx');
+
+                    var blob = new Blob([response], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endpush

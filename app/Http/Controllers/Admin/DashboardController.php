@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\Pendaftar;
+use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -113,50 +115,37 @@ class DashboardController extends Controller
 
         switch ($label_filter) {
             case 'filter_status':
-                $rekap = Pendaftar::with('latestStatus')
-                    ->where('tahun_kegiatan_id', $tahun)
-                    ->where('beasiswa_id', $beasiswa)
-                    ->get()
-                    ->groupBy(fn($p) => $p->latest_status?->status ?? 'BELUM ADA STATUS')
-                    ->map(function ($group) {
-                        return [
-                            'label' => $group[0]->latest_status?->status ?? 'BELUM ADA STATUS',
-                            'value' => count($group)
-                        ];
+                $rekap = PendaftarStatus::selectRaw('status, COUNT(status) AS jumlah')
+                    ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                        $query->where('tahun_kegiatan_id', $tahun)
+                            ->where('beasiswa_id', $beasiswa);
                     })
-                    ->sortBy(fn($item) => $statusOrder[$item['label']] ?? PHP_INT_MAX)
+                    ->groupBy('status')
+                    ->get()
+                    ->sortBy(function ($item) use ($statusOrder) {
+                        return $statusOrder[$item->status] ?? PHP_INT_MAX;
+                    })
                     ->values();
                 break;
 
             case 'filter_prodi':
-                $rekap = Pendaftar::with(['latestStatus', 'mahasiswa'])
-                    ->where('tahun_kegiatan_id', $tahun)
-                    ->where('beasiswa_id', $beasiswa)
-                    ->get()
-                    ->filter(fn($p) => $p->latest_status->status && $p->mahasiswa)
-                    ->groupBy(function ($p) {
-                        return implode('|', [
-                            $p->mahasiswa->prodi,
-                            $p->latest_status?->status,
-                            $p->beasiswa_id,
-                            $p->tahun_kegiatan_id
-                        ]);
+                $rekap = PendaftarStatus::selectRaw('mahasiswas.prodi, pendaftar_statuses.status, COUNT(*) as jumlah')
+                    ->join('pendaftars', 'pendaftars.id', '=', 'pendaftar_statuses.pendaftar_id')
+                    ->join('mahasiswas', 'mahasiswas.pendaftar_id', '=', 'pendaftars.id')
+                    ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                        $query->where('tahun_kegiatan_id', $tahun)
+                            ->where('beasiswa_id', $beasiswa);
                     })
-                    ->map(function ($group, $key) {
-                        [$prodi, $prodi_name, $status] = explode('|', $key);
+                    ->groupBy('mahasiswas.prodi', 'pendaftar_statuses.status')
+                    ->orderBy('mahasiswas.prodi')
+                    ->get()
+                    ->sortBy(function ($item) use ($statusOrder) {
                         return [
-                            'prodi' => $prodi,
-                            'prodi_name' => $prodi_name,
-                            'status' => $status,
-                            'jumlah' => $group->count()
+                            $item->prodi,
+                            $statusOrder[$item->status] ?? PHP_INT_MAX
                         ];
                     })
-                    ->sortBy(fn($item) => [
-                        (int) $item['prodi'],
-                        $statusOrder[$item['status']] ?? PHP_INT_MAX
-                    ])
-                    ->groupBy('prodi_name')
-                    ->all();
+                    ->groupBy('prodi');
                 break;
 
             default:

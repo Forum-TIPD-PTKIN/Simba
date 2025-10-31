@@ -85,10 +85,15 @@ class SeleksiAdministrasiController extends Controller
         }
 
         try {
-            $status_pendaftar = PendaftarStatus::find($request->pendaftar_status_id);
-            if ($status_pendaftar?->status === 'PENGAJUAN') {
+            $status_pendaftar = PendaftarStatus::where('pendaftar_id', $pendaftar->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            if ($pendaftar->latest_status?->status === 'PENGAJUAN' && $status_pendaftar->status === 'PENGAJUAN') {
                 $status_pendaftar = new PendaftarStatus();
+            } else if (in_array($status_pendaftar->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']) && $status_pendaftar->deskripsi_json['verifikator'] !== Auth::user()->name) {
+                return response()->json('Pendaftar sudah diverifikasi oleh verifikator lain', 419);
             }
+
             $status_pendaftar->pendaftar_id = trim(strip_tags($request->pendaftar_id));
             $status_pendaftar->status = trim(strip_tags($request->status_verval)) === 'success' ? 'LOLOS ADMINISTRASI' : 'GAGAL ADMINISTRASI';
             $status_pendaftar->deskripsi = json_encode([

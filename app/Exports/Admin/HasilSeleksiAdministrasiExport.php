@@ -2,8 +2,8 @@
 
 namespace App\Exports\Admin;
 
+use App\Models\FormData;
 use App\Models\Pendaftar;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -16,7 +16,14 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, WithStyles, WithTitle, ShouldAutoSize, WithEvents
+class HasilSeleksiAdministrasiExport implements
+    FromCollection,
+    ShouldAutoSize,
+    WithMapping,
+    WithHeadings,
+    WithStyles,
+    WithTitle,
+    WithEvents
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -27,21 +34,33 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
     private $results;
     private $tahun;
     private $beasiswa;
+    private $status;
 
-    public function __construct($tahun, $beasiswa)
+    public function __construct($tahun, $beasiswa, $status)
     {
         $this->tahun = $tahun;
         $this->beasiswa = $beasiswa;
+        $this->status = $status;
     }
 
     public function collection()
     {
-        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'map_ujian'])
+        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'biodata_pendaftar'])
             ->selectRaw('pendaftars.*')
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
+            ->where(function ($query) {
+                if ($this->status === null) {
+                    $query->whereHas('pendaftar_status', function ($query) {
+                        $query->whereIn('status', ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']);
+                    });
+                } else {
+                    $query->whereHas('pendaftar_status', function ($query) {
+                        $query->where('status', $this->status);
+                    });
+                }
+            })
             ->where('tahun_kegiatan_id', $this->tahun)
             ->where('beasiswa_id', $this->beasiswa)
-            ->whereHas('map_ujian')
             ->orderBy('mahasiswas.prodi')
             ->orderBy('mahasiswas.nama')
             ->get();
@@ -51,7 +70,13 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
 
     public function map($data): array
     {
-        return [
+        $biodata = collect($data->biodata_pendaftar?->data?->biodata)
+            ->map(fn($item) => $item->value)
+            ->values();
+        $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption;
+        $catatan_verifikator = json_decode($data->latest_status?->deskripsi)->catatan;
+
+        $row = [
             $this->nomor++,
             $data->mahasiswa?->nim,
             $data->mahasiswa?->nama,
@@ -59,15 +84,31 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
             $data->mahasiswa?->fakultas_name,
             $data->beasiswa?->nama,
             $data->tahun_kegiatan?->tahun,
-            Carbon::parse($data->map_ujian?->tanggal_mulai)->translatedFormat('d-m-Y'),
-            $data->map_ujian?->sesi . '(' . Carbon::parse($data->map_ujian?->tanggal_mulai)->translatedFormat('H:i') . ' - ' . Carbon::parse($data->map_ujian?->tanggal_selesai)->translatedFormat('H:i') . ')',
-            $data->map_ujian?->ruang
+            $this->status,
+            preg_replace('/\x{00A0}/u', ' ', html_entity_decode(strip_tags($catatan_verifikator)))
         ];
+        array_push($row, $kategori);
+        array_push($row, ...$biodata);
+
+        return $row;
     }
 
     public function headings(): array
     {
-        return [
+        $biodata = FormData::where('tahun_kegiatan_id', $this->tahun)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('jenis', 'BIODATA')
+            ->orderBy('indexed')
+            ->get()
+            ->map(fn($item) => $item->config_json['title']);
+        $kategori = FormData::where('tahun_kegiatan_id', $this->tahun)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('jenis', 'PEMBERKASAN')
+            ->where('config->name', 'kategori')
+            ->orderBy('indexed')
+            ->first()?->config_json['title'];
+
+        $heading = [
             'No',
             'NIM',
             'Nama',
@@ -75,15 +116,18 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
             'Fakultas',
             'Beasiswa',
             'Tahun',
-            'Tanggal Ujian',
-            'Sesi',
-            'Ruang'
+            'Status',
+            'Catatan Verifikator'
         ];
+        array_push($heading, $kategori);
+        array_push($heading, ...$biodata);
+
+        return $heading;
     }
 
     public function title(): string
     {
-        return 'Rekap Pendaftar';
+        return 'Data Seleksi Administrasi';
     }
 
     public function styles(Worksheet $sheet)
@@ -116,7 +160,9 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
                             'borderStyle' => Border::BORDER_THIN,
                         ],
                     ],
-                ])->getAlignment();
+                ])
+                    ->getAlignment()
+                    ->setWrapText(true);
             }
         ];
     }

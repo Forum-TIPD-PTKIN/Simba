@@ -9,12 +9,15 @@
     <tbody>
         @foreach ($rekap_prodi as $key => $item)
             <tr>
-                <td rowspan="{{ count($item) + 1 }}">{{ $key }}</td>
+                @php
+                    [$kd_prodi, $nm_prodi] = explode('|', $key);
+                @endphp
+                <td rowspan="{{ count($item) + 1 }}">{{ $nm_prodi }}</td>
             </tr>
             @foreach ($item as $k => $i)
                 <tr>
-                    <td>{{ $i['status'] }}</td>
-                    <td>{{ $i['jumlah'] }}</td>
+                    <td>{{ $i->status }}</td>
+                    <td>{{ $i->jumlah }}</td>
                 </tr>
             @endforeach
         @endforeach

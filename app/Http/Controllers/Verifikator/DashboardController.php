@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Verifikator;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\Pendaftar;
+use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 
@@ -100,28 +101,28 @@ class DashboardController extends Controller
     {
         switch ($label_filter) {
             case 'filter_status':
-                $rekap = Pendaftar::with(['latestStatus'])
-                    ->where('tahun_kegiatan_id', $tahun)
-                    ->where('beasiswa_id', $beasiswa)
-                    ->whereHas('latestStatus', function ($query) {
-                        $query->whereIn('status', ['PENGAJUAN', 'LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']);
+                $rawRekap = PendaftarStatus::selectRaw('status, COUNT(status) AS jumlah')
+                    ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                        $query->where('tahun_kegiatan_id', $tahun)
+                            ->where('beasiswa_id', $beasiswa);
                     })
+                    ->whereIn('status', ['PENGAJUAN', 'LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'])
+                    ->groupBy('status')
                     ->get()
-                    ->map(function ($item) {
-                        return [
-                            'label' => ($item->latest_status?->status === 'GAGAL ADMINISTRASI' or $item->latest_status?->status === 'LOLOS ADMINISTRASI') ? 'SUDAH DIVERIFIKASI' : 'BELUM DIVERIFIKASI',
-                            'data' => $item->id
-                        ];
-                    })
-                    ->groupBy('label')
-                    ->map(function ($group) {
-                        return [
-                            'label' => $group[0]['label'],
-                            'jumlah' => count($group),
-                        ];
-                    })
-                    ->sortBy('label')
-                    ->values();
+                    ->pluck('jumlah', 'status');
+
+                // Ambil jumlah masing-masing
+                $pengajuan         = $rawRekap->get('PENGAJUAN', 0);
+                $lolos             = $rawRekap->get('LOLOS ADMINISTRASI', 0);
+                $gagal             = $rawRekap->get('GAGAL ADMINISTRASI', 0);
+                $sudahDiverifikasi = $lolos + $gagal;
+                $belumVerifikasi   = $pengajuan - $sudahDiverifikasi;
+
+                // Format hasil akhir
+                $rekap = collect([
+                    'SUDAH VERIFIKASI' => $sudahDiverifikasi,
+                    'BELUM VERIFIKASI'   => $belumVerifikasi,
+                ]);
                 break;
 
             case 'filter_prodi':

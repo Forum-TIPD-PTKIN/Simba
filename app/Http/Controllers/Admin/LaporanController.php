@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Admin\HasilSeleksiAdministrasiExport;
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
 use App\Models\JadwalKegiatan;
@@ -10,13 +11,16 @@ use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
 class LaporanController extends Controller
 {
     public function verifikasi(Request $request)
     {
-
+        // return \App\Models\Pendaftar::with('pemberkasan')
+        //     ->whereId('4d954541-51a5-44c1-ab68-f710e0bbaffe')
+        //     ->get();
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
         $beasiswa = Beasiswa::where('status', 1)
@@ -140,10 +144,7 @@ class LaporanController extends Controller
 
         $data = array();
         try {
-            $status = new PendaftarStatus();
-            $status->pendaftar_id = $curr_status->pendaftar_id;
-            $status->status = 'PENGAJUAN';
-            $status->save();
+            if ($curr_status && in_array($curr_status->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'])) $curr_status->delete();
 
             $data['icon'] = 'success';
             $data['title'] = 'Berhasil';
@@ -169,5 +170,19 @@ class LaporanController extends Controller
 
             return response()->json($jadwal_kegiatan);
         }
+    }
+
+    public function unduh(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+        $status = $request->status;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+
+        return Excel::download(new HasilSeleksiAdministrasiExport($tahun, $beasiswa, $status), "Data " . ($request->status ?? '') . " Seleksi Administrasi Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
     }
 }
