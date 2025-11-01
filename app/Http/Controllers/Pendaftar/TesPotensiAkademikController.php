@@ -48,8 +48,10 @@ class TesPotensiAkademikController extends Controller
             ->whereBeasiswaId($pendaftar->beasiswa_id)
             ->whereRole('TES_POTENSI_AKADEMIK')
             ->first();
-        // Jadwal cetak kartu sehari sebelum TPA
-        $is_jadwal_cetak_kartu = Carbon::now()->isSameDay(Carbon::parse($jadwal_tpa->tanggal_mulai)->copy()->subDay());
+        // Jadwal cetak kartu sehari sebelum TPA dan tanggal setelahnya
+        $is_jadwal_cetak_kartu = Carbon::now()->gte(
+            Carbon::parse($jadwal_tpa->tanggal_mulai)->copy()->subDay()
+        );
         if (!$is_jadwal_cetak_kartu) return response()->json('Jadwal cetak kartu sehari sebelum TES POTENSI AKADEMIK', 419);
 
         if ($request->ajax()) {
