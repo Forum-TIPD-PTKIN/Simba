@@ -266,7 +266,11 @@ class TesPotensiAkademikController extends Controller
             'ruang.required' => 'Ruang tidak ditentukan'
         ]);
 
-        $style = public_path('assets/admin/css/style.css');
+        if (env('APP_ENV') === 'production') {
+            $style = base_path('../assets/admin/css/style.css');
+        } else {
+            $style = public_path('assets/admin/css/style.css');
+        }
 
         $data = $this->getDataPesertaTes(
             $request->tahun,
@@ -301,8 +305,11 @@ class TesPotensiAkademikController extends Controller
         $pdf = SnappyPdf::loadHTML($html)
             ->setOption('page-width', '215mm')
             ->setOption('page-height', '330mm')
+            ->setOption('margin-bottom', '20mm')
             ->setOption('no-background', false)
-            ->setOption('print-media-type', true);
+            ->setOption('print-media-type', true)
+            ->setOption('encoding', 'UTF-8')
+            ->setOption('disable-smart-shrinking', true);
         return $pdf->download($filename);
     }
 

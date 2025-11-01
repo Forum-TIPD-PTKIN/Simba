@@ -18,9 +18,6 @@ class LaporanController extends Controller
 {
     public function verifikasi(Request $request)
     {
-        // return \App\Models\Pendaftar::with('pemberkasan')
-        //     ->whereId('4d954541-51a5-44c1-ab68-f710e0bbaffe')
-        //     ->get();
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
         $beasiswa = Beasiswa::where('status', 1)

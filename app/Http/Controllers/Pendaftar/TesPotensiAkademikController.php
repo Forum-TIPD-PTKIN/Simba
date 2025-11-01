@@ -19,8 +19,13 @@ class TesPotensiAkademikController extends Controller
 {
     public function generate_kartu(Request $request)
     {
-        $style = public_path('assets/admin/css/style.css');
-        $style_kartu = public_path('assets/admin/css/style-kartu.css');
+        if (env('APP_ENV') === 'production') {
+            $style = base_path('../assets/admin/css/style.css');
+            $style_kartu = base_path('../assets/admin/css/style-kartu.css');
+        } else {
+            $style = public_path('assets/admin/css/style.css');
+            $style_kartu = public_path('assets/admin/css/style-kartu.css');
+        }
 
         // Ambil data pendaftar
         $pendaftar = Pendaftar::with(['mahasiswa', 'beasiswa', 'user'])
@@ -157,8 +162,11 @@ class TesPotensiAkademikController extends Controller
             $pdf = SnappyPdf::loadHTML($html)
                 ->setOption('page-width', '215mm')
                 ->setOption('page-height', '330mm')
+                ->setOption('margin-bottom', '20mm')
                 ->setOption('no-background', false)
-                ->setOption('print-media-type', true);
+                ->setOption('print-media-type', true)
+                ->setOption('encoding', 'UTF-8')
+                ->setOption('disable-smart-shrinking', true);
             return $pdf->download($filename);
         }
     }

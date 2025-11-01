@@ -68,6 +68,14 @@
             margin: 2px 0;
             font-size: 11px;
         }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .spacer {
+            height: 40px;
+        }
     </style>
 </head>
 
@@ -117,28 +125,61 @@
         </tr>
     </table>
 
-    <table class="table data-peserta" cellspacing="0" cellpadding="0" style="width: 100%">
-        <thead class="bg-secondary">
-            <tr>
-                <th scope="col" class="text-center text-white">No</th>
-                <th scope="col" class="text-center text-white">NIM</th>
-                <th scope="col" class="text-center text-white">Nama</th>
-                <th scope="col" class="text-center text-white">Program Studi</th>
-                <th scope="col" class="text-center text-white">Tanda Tangan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($data as $item)
+    @if (env('APP_ENV') === 'production')
+        @php
+            $globalIndex = 1;
+        @endphp
+        @foreach ($data->chunk(20) as $chunk)
+            <table class="table data-peserta" cellspacing="0" cellpadding="0" style="width: 100%">
+                <thead class="bg-secondary">
+                    <tr>
+                        <th scope="col" class="text-center text-white">No</th>
+                        <th scope="col" class="text-center text-white">NIM</th>
+                        <th scope="col" class="text-center text-white">Nama</th>
+                        <th scope="col" class="text-center text-white">Program Studi</th>
+                        <th scope="col" class="text-center text-white">Tanda Tangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($chunk as $item)
+                        <tr>
+                            <td class="text-center">{{ $globalIndex }}</td>
+                            <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nim }}</td>
+                            <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nama }}</td>
+                            <td class="text-center">{{ $item->pendaftar?->mahasiswa?->prodi_name }}</td>
+                            <td></td>
+                        </tr>
+                        @php $globalIndex++; @endphp
+                    @endforeach
+                </tbody>
+            </table>
+            <div class="page-break"></div>
+            <div class="spacer"></div>
+        @endforeach
+    @else
+        <table class="table data-peserta" cellspacing="0" cellpadding="0" style="width: 100%">
+            <thead class="bg-secondary">
                 <tr>
-                    <td class="text-center">{{ $loop->iteration }}</td>
-                    <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nim }}</td>
-                    <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nama }}</td>
-                    <td class="text-center">{{ $item->pendaftar?->mahasiswa?->prodi_name }}</td>
-                    <td></td>
+                    <th scope="col" class="text-center text-white">No</th>
+                    <th scope="col" class="text-center text-white">NIM</th>
+                    <th scope="col" class="text-center text-white">Nama</th>
+                    <th scope="col" class="text-center text-white">Program Studi</th>
+                    <th scope="col" class="text-center text-white">Tanda Tangan</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($data as $item)
+                    <tr>
+                        <td class="text-center">{{ $loop->iteration }}</td>
+                        <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nim }}</td>
+                        <td class="text-center">{{ $item->pendaftar?->mahasiswa?->nama }}</td>
+                        <td class="text-center">{{ $item->pendaftar?->mahasiswa?->prodi_name }}</td>
+                        <td></td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </body>
 
 </html>
