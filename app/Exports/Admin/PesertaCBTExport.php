@@ -18,10 +18,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, WithStyles, WithTitle, ShouldAutoSize, WithEvents
 {
+    use Exportable;
+
     /**
      * @return \Illuminate\Support\Collection
      */
-    use Exportable;
 
     private $nomor = 1;
     private $results;

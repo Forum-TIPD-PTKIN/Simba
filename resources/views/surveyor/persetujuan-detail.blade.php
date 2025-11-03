@@ -18,7 +18,7 @@
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Persetujian Surveyor</h2>
+                                <h2 class="mb-0">Persetujuan Surveyor</h2>
                                 <div class="fs-4">Kegiatan Beasiswa {{ $titleKegiatan }}</div>
                             </div>
                         </div>
@@ -67,7 +67,9 @@
 
                                 <div v-if="status === '1'">
                                     <div class="form-group">
-                                        <label for="alamat">Alamat Lengkap</label>
+                                        <label for="alamat">Alamat Saat Ini <span
+                                                class="small text-muted fst-italic fw-bold">(Desa/Kelurahan, Kecamatan,
+                                                Kota/Kabupaten)</span></label>
                                         <textarea class="form-control" id="alamat" v-model="alamat" rows="3" required></textarea>
                                     </div>
                                     <div class="form-group">

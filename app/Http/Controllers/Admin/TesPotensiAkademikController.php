@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\Admin\PesertaCBTExport;
+use App\Exports\Admin\TemplatePelulusanPesertaTpa;
 use App\Http\Controllers\Controller;
+use App\Imports\Admin\ImporPelulusanPesertaTpa;
 use App\Models\Beasiswa;
 use App\Models\JadwalCbt;
 use App\Models\JenisTesCbt;
@@ -336,6 +338,8 @@ class TesPotensiAkademikController extends Controller
                     ->where('beasiswa_id', $beasiswa);
             });
 
+        $dt_map_ujian = $query_map_ujian->get();
+
         $jenis_tes_cbt = $query_map_ujian
             ->select('cbt_jenis_tes')
             ->distinct()
@@ -351,12 +355,12 @@ class TesPotensiAkademikController extends Controller
         if (!count($data_hasil_cbt)) return response()->json('Data hasil CBT tidak ditemukan', 404);
 
         try {
-            foreach ($query_map_ujian->get() as $key => $value) {
+            foreach ($dt_map_ujian as $key => $value) {
                 $get_nilai = $data_hasil_cbt->filter(function ($item) use ($value) {
-                    return $item->no_test === $value->pendaftar?->mahasiswa?->nim;
+                    return (string) $item->no_test === (string) $value->pendaftar?->mahasiswa?->nim;
                 })->first();
 
-                $value->nilai = $get_nilai?->nilai ?? 0;
+                $value->nilai = $get_nilai?->nilai ?? null;
                 $value->update();
             }
         } catch (\Throwable $th) {
@@ -405,6 +409,169 @@ class TesPotensiAkademikController extends Controller
             'title' => 'Sukses!',
             'message' => 'Data peserta tes berhasil dihapus'
         ], 200);
+    }
+
+    public function pelulusan()
+    {
+        $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
+            ->get();
+        $beasiswa = Beasiswa::where('status', 1)
+            ->orderBy('nama')
+            ->get();
+        $status = ['LOLOS TPA', 'GAGAL TPA'];
+
+        return view('admin.laporan.pelulusan-tpa', [
+            'tahun_kegiatan' => $tahun_kegiatan,
+            'beasiswa' => $beasiswa,
+            'status' => $status
+        ]);
+    }
+
+    public function pelulusan_data(Request $request)
+    {
+        if ($request->ajax()) {
+            $dt_pendaftar = Pendaftar::with(['mahasiswa'])
+                ->selectRaw('pendaftars.*')
+                ->join('mahasiswas', 'pendaftars.id', '=', 'mahasiswas.pendaftar_id')
+                ->join(
+                    DB::raw('(
+                    SELECT *
+                    FROM pendaftar_statuses AS ps1
+                    WHERE created_at = (
+                        SELECT MAX(created_at)
+                        FROM pendaftar_statuses AS ps2
+                        WHERE ps2.pendaftar_id = ps1.pendaftar_id
+                    )
+                ) as ps'),
+                    'pendaftars.id',
+                    '=',
+                    'ps.pendaftar_id'
+                )
+                ->when($request->flt_tahun, function ($q) use ($request) {
+                    return $q->where('tahun_kegiatan_id', $request->flt_tahun);
+                })
+                ->when($request->flt_beasiswa, function ($q) use ($request) {
+                    return $q->where('beasiswa_id', $request->flt_beasiswa);
+                })
+                ->whereHas('map_ujian', function ($query) {
+                    $query->whereNotNull('nilai');
+                })
+                ->where(function ($query) use ($request) {
+                    if ($request->flt_status) {
+                        return $query->whereHas('latestStatus', fn($q) => $q->where('status', $request->flt_status));
+                    }
+
+                    return $query->whereHas(
+                        'latestStatus',
+                        fn($q) => $q->whereIn('status', ['LOLOS TPA', 'GAGAL TPA'])
+                    );
+                })
+                ->orderBy('mahasiswas.fakultas')
+                ->orderBy('mahasiswas.prodi')
+                ->orderBy('mahasiswas.nim');
+
+            return DataTables::of($dt_pendaftar)
+                ->editColumn('beasiswa', function ($data) {
+                    return "
+                            <div class='flex-grow-1'>
+                              <div class='row g-1'>
+                                <div class='col-12'>
+                                  <h6 class='mb-0'>{$data->beasiswa?->nama}</h6>
+                                  <p class='text-muted mb-0'><small>{$data->tahun_kegiatan?->tahun}</small></p>
+                                </div>
+                              </div>
+                            </div>";
+                })
+                ->editColumn('status', function ($data) {
+                    return "<span class='badge " . ($data->latest_status?->status === 'LOLOS TPA' ? 'bg-success' : 'bg-danger') . "'>{$data->latest_status?->status}</span>";
+                })
+                ->addColumn('action', function ($data) {
+                    return view('admin.template._action_button_table', [
+                        'data' => $data,
+                        'title' => 'Status Seleksi TPA',
+                        'showTitle' => false,
+                        'buttons' => [
+                            'lolos' => [
+                                'title' => 'Lolos',
+                                'icon' => 'ti ti-circle-check',
+                                'btn-class' => 'btn btn-success',
+                                'encrypted_id' => $data->id
+                            ],
+                            'gagal' => [
+                                'title' => 'Gagal',
+                                'icon' => 'ti ti-circle-x',
+                                'btn-class' => 'btn btn-danger',
+                                'encrypted_id' => $data->id
+                            ]
+                        ]
+                    ])
+                        ->render();
+                })
+                ->rawColumns(['beasiswa', 'status', 'action'])
+                ->make(true);
+        }
+    }
+
+    public function pelulusan_template(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+        $filename = "template_pelulusan_tpa_beasiswa_" . strtolower(str_replace(' ', '_', $dt_beasiswa)) . "_" . $dt_tahun . ".xlsx";
+
+        return Excel::download(new TemplatePelulusanPesertaTpa($tahun, $beasiswa), $filename);
+    }
+
+    public function impor(Request $request)
+    {
+        $request->validate([
+            'tahun_kegiatan' => 'required',
+            'beasiswa'       => 'required',
+            'file_impor' => 'required|file|mimes:xls,xlsx|max:2048'
+        ], [
+            'tahun_kegiatan.requierd' => 'Tahun kegiatan belum dipilih',
+            'beasiswa.required' => 'Beasiswa belum dipilih',
+            'file_impor.required' => 'File template harus dipilih',
+            'file_impor.mimes' => 'Format harus xls/xlsx',
+            'file_impor.max' => 'Ukuran file tidak boleh lebih dari 2 MB'
+        ]);
+
+        try {
+            set_time_limit(60 * 60);
+            $import = new ImporPelulusanPesertaTpa($request->tahun_kegiatan, $request->beasiswa);
+            Excel::import($import, $request->file('file_impor'));
+
+            $data = array(
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => $import->getRowCount() . ' data peserta TPA berhasil disimpan status lulusnya',
+                'jalur' => $request->jalur_masuk
+            );
+            return response()->json($data);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+
+            foreach ($failures as $failure) {
+                $errors[] = [
+                    'row' => $failure->row(),
+                    'attribute' => $failure->attribute(),
+                    'errors' => $failure->errors(),
+                    'values' => $failure->values(),
+                ];
+            }
+
+            return response()->json([
+                'icon' => 'error',
+                'title' => 'Gagal Mengimpor',
+                'message' => 'Terdapat kesalahan pada file Excel.',
+                'errors' => $errors
+            ], 422);
+        }
     }
 
     public static function getDataPendaftar(string $tahun, string $beasiswa, ?int $skip = null, ?int $take = null)

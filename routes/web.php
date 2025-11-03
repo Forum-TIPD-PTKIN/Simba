@@ -127,6 +127,11 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::get('/seleksi-tpa/{tahun}/{beasiswa}/sinkron-nilai', [TesPotensiAkademikController::class, 'sinkron_nilai'])->name('admin.seleksi-tpa.sinkron-nilai');
     Route::delete('/seleksi-tpa', [TesPotensiAkademikController::class, 'destroy'])->name('admin.seleksi-tpa.destroy');
 
+    Route::get('/seleksi-tpa/pelulusan', [TesPotensiAkademikController::class, 'pelulusan'])->name('admin.seleksi-tpa.pelulusan');
+    Route::post('/seleksi-tpa/pelulusan/data', [TesPotensiAkademikController::class, 'pelulusan_data'])->name('admin.seleksi-tpa.pelulusan.data');
+    Route::post('/seleksi-tpa/pelulusan/template', [TesPotensiAkademikController::class, 'pelulusan_template'])->name('admin.seleksi-tpa.pelulusan.template');
+    Route::post('/seleksi-tpa/pelulusan/impor', [TesPotensiAkademikController::class, 'impor'])->name('admin.seleksi-tpa.pelulusan.impor');
+
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
         Route::get('/rekap', [RekapController::class, 'index'])->name('admin.laporan.rekap');

@@ -640,42 +640,54 @@
                 "{{ route('admin.seleksi-tpa.sinkron-nilai', ['tahun' => ':tahun', 'beasiswa' => ':beasiswa']) }}";
             url = url.replace(':tahun', tahun).replace(':beasiswa', beasiswa);
 
-            $.ajax({
-                url: url,
-                beforeSend: () => {
-                    Swal.fire({
-                        title: 'Memproses data...',
-                        showCancelButton: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+            Swal.fire({
+                title: 'Sinkron Nilai Sekarang?',
+                html: `Pastikan semua peserta di setiap sesi sudah selesai melaksanakan ujian CBT`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Lanjut!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        beforeSend: () => {
+                            Swal.fire({
+                                title: 'Memproses data...',
+                                showCancelButton: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                allowOutsideClick: false
+                            });
                         },
-                        allowOutsideClick: false
-                    });
-                },
-                success: (res) => {
-                    reloadData();
-                    Swal.fire({
-                        icon: res.icon,
-                        title: res.title,
-                        text: res.message,
-                        timer: 1500,
-                        timerProgressBar: true
-                    });
-                },
-                error: function(error) {
-                    const msg = JSON.parse(error.responseText);
-                    Swal.fire({
-                        title: 'Gagal',
-                        text: error && error.status !== 200 ?
-                            (typeof msg === 'string' ? msg : msg.message) :
-                            'Tidak dapat melakukan sinkron nilai dari aplikasi CBT. Terjadi kesalahan atau data tidak tersedia',
-                        icon: 'error',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true,
-                        customClass: {
-                            timerProgressBar: 'bg-danger'
+                        success: (res) => {
+                            reloadData();
+                            Swal.fire({
+                                icon: res.icon,
+                                title: res.title,
+                                text: res.message,
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        },
+                        error: function(error) {
+                            const msg = JSON.parse(error.responseText);
+                            Swal.fire({
+                                title: 'Gagal',
+                                text: error && error.status !== 200 ?
+                                    (typeof msg === 'string' ? msg : msg.message) :
+                                    'Tidak dapat melakukan sinkron nilai dari aplikasi CBT. Terjadi kesalahan atau data tidak tersedia',
+                                icon: 'error',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                customClass: {
+                                    timerProgressBar: 'bg-danger'
+                                }
+                            });
                         }
                     });
                 }
