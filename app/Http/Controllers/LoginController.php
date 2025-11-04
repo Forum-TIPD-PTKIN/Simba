@@ -130,19 +130,21 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
         if ($request->ajax()) {
-            Auth::logout();
-
-            $request->session()->invalidate();
-
-            $request->session()->regenerateToken();
-
             return response()->json([
                 'icon' => 'success',
                 'title' => 'Berhasil',
                 'message' => 'Sedang dialihkan...',
                 'redirect' => route('login')
             ]);
+        } else {
+            return redirect()->route('login');
         }
     }
 

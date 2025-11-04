@@ -119,7 +119,6 @@ class SurveyorController extends Controller
      */
     public function index(Request $request)
     {
-
         $master_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?limit=1000")->data?->data)
             ->map(function ($pegawai) {
                 return (object)[
