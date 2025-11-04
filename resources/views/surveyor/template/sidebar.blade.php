@@ -76,6 +76,15 @@
                         <span class="pc-mtext">Persetujuan</span>
                     </a>
                 </li>
+
+                <li class="pc-item">
+                    <a href="{{ route('surveyor.survey') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="fas fa-question-circle"></i>
+                        </span>
+                        <span class="pc-mtext">Survey</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
