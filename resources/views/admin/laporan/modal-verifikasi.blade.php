@@ -1,5 +1,8 @@
 @php
-    $deskripsi_verifikasi = json_decode($data->latest_status?->deskripsi);
+    $status_seleksi_administrasi = collect($data->pendaftar_status)
+        ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+        ->first();
+    $deskripsi_verifikasi = json_decode($status_seleksi_administrasi?->deskripsi);
 @endphp
 <div class="row">
     <div class="col-12 col-md-6">

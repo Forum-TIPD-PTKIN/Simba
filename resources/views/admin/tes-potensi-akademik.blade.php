@@ -339,6 +339,7 @@
             }).then(result => {
                 if (result.isConfirmed) {
                     runBatch(tahun, beasiswa, count, perBatch, totalBatch);
+                    $('#flt_tahun, #flt_beasiswa').trigger('change');
                 }
             });
         }

@@ -126,6 +126,15 @@
                             <span class="pc-mtext">Seleksi Administrasi</span>
                         </a>
                     </li>
+
+                    <li class="pc-item">
+                        <a href="{{ route('pendaftar.seleksi-tpa') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <i class="fas fa-laptop-code"></i>
+                            </span>
+                            <span class="pc-mtext">Seleksi TPA</span>
+                        </a>
+                    </li>
                 @endif
 
             </ul>

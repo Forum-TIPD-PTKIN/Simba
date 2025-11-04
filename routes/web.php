@@ -132,6 +132,7 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-tpa/pelulusan/data', [TesPotensiAkademikController::class, 'pelulusan_data'])->name('admin.seleksi-tpa.pelulusan.data');
     Route::post('/seleksi-tpa/pelulusan/template', [TesPotensiAkademikController::class, 'pelulusan_template'])->name('admin.seleksi-tpa.pelulusan.template');
     Route::post('/seleksi-tpa/pelulusan/impor', [TesPotensiAkademikController::class, 'impor'])->name('admin.seleksi-tpa.pelulusan.impor');
+    Route::put('/seleksi-tpa/pelulusan/update', [TesPotensiAkademikController::class, 'pelulusan_update'])->name('admin.seleksi-tpa.pelulusan.update');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {
@@ -212,6 +213,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
         Route::post('/pemberkasan', [PemberkasanController::class, 'store'])->name('pendaftar.pemberkasan.store');
         Route::get('/seleksi-administrasi', [PendaftarSeleksiAdministrasiController::class, 'index'])->name('pendaftar.seleksi-administrasi');
 
+        Route::get('/seleksi-tpa', [PendaftarTesPotensiAkademikController::class, 'index'])->name('pendaftar.seleksi-tpa');
         Route::post('/seleksi-tpa/kartu-peserta', [PendaftarTesPotensiAkademikController::class, 'generate_kartu'])->name('pendaftar.seleksi-tpa.kartu-ujian');
     });
 });
@@ -219,7 +221,7 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 // Verifikator
 Route::group(['prefix' => 'verifikator', 'middleware' => ['auth', 'isVerifikator']], function () {
     Route::get('/', [DashboardVerifikator::class, 'index'])->name('verifikator.dashboard');
-    Route::get('/show/{tahun}/{beasiswa}', [DashboardAdmin::class, 'show'])->name('verifikator.dashboard.show');
+    Route::get('/show/{tahun}/{beasiswa}', [DashboardVerifikator::class, 'show'])->name('verifikator.dashboard.show');
 
     Route::get('/seleksi-administrasi', [SeleksiAdministrasiController::class, 'index'])->name('verifikator.seleksi-administrasi');
     Route::get('/seleksi-administrasi/data', [SeleksiAdministrasiController::class, 'data'])->name('verifikator.seleksi-administrasi.data');

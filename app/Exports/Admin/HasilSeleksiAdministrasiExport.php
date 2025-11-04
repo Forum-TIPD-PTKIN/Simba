@@ -45,7 +45,7 @@ class HasilSeleksiAdministrasiExport implements
 
     public function collection()
     {
-        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'biodata_pendaftar'])
+        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'biodata_pendaftar', 'pendaftar_status'])
             ->selectRaw('pendaftars.*')
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->where(function ($query) {
@@ -74,7 +74,10 @@ class HasilSeleksiAdministrasiExport implements
             ->map(fn($item) => $item->value)
             ->values();
         $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption;
-        $catatan_verifikator = json_decode($data->latest_status?->deskripsi)->catatan;
+        $status_seleksi_administrasi = collect($data->pendaftar_status)
+            ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+            ->first();
+        $catatan_verifikator = json_decode($status_seleksi_administrasi?->deskripsi)->catatan;
 
         $row = [
             $this->nomor++,

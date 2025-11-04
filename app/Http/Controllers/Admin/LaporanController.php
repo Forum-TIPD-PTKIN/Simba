@@ -64,11 +64,11 @@ class LaporanController extends Controller
                 ->whereHas('pemberkasan')
                 ->where(function ($query) use ($request) {
                     if ($request->flt_status) {
-                        return $query->whereHas('latestStatus', fn($q) => $q->where('status', $request->flt_status));
+                        return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));
                     }
 
                     return $query->whereHas(
-                        'latestStatus',
+                        'pendaftar_status',
                         fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')->orWhere('status', 'GAGAL ADMINISTRASI')
                     );
                 })
@@ -89,10 +89,16 @@ class LaporanController extends Controller
                             </div>";
                 })
                 ->editColumn('status', function ($data) {
-                    return "<span class='badge bg-primary'>{$data->latest_status?->status}</span>";
+                    $status_seleksi_administrasi = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+                        ->first();
+                    return "<span class='badge bg-primary'>{$status_seleksi_administrasi?->status}</span>";
                 })
                 ->editColumn('verifikator', function ($data) {
-                    $deskripsi = json_decode($data->latest_status?->deskripsi);
+                    $status_seleksi_administrasi = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+                        ->first();
+                    $deskripsi = json_decode($status_seleksi_administrasi?->deskripsi);
                     return $deskripsi?->verifikator;
                 })
                 ->addColumn('action', function ($data) {

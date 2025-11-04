@@ -27,7 +27,14 @@ class RekapController extends Controller
         //     ->filter()
         //     ->unique()
         //     ->values();
-        $status_pendaftar = ['DAFTAR', 'PENGAJUAN', 'LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'];
+        $status_pendaftar = [
+            'DAFTAR',
+            'PENGAJUAN',
+            'LOLOS ADMINISTRASI',
+            'GAGAL ADMINISTRASI',
+            'LOLOS TPA',
+            'GAGAL TPA',
+        ];
 
         return view('admin.laporan.rekap-pendaftar', [
             'master_tahun' => $master_tahun,

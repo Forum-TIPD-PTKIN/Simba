@@ -4,7 +4,6 @@ ADMINISTRATOR
 > Fitur kelulusan seleksi TPA
 > Fitur isian survei oleh surveyor
 > Fitur penentuan penerima beasiswa.
-> Perbaikan pada unduh data peserta TPA (tambah nilai, biodata, dan kategori beasiswa)
 > 
 
 VERIFIKATOR

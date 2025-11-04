@@ -62,7 +62,8 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
             $data->tahun_kegiatan?->tahun,
             Carbon::parse($data->map_ujian?->tanggal_mulai)->translatedFormat('d-m-Y'),
             $data->map_ujian?->sesi . '(' . Carbon::parse($data->map_ujian?->tanggal_mulai)->translatedFormat('H:i') . ' - ' . Carbon::parse($data->map_ujian?->tanggal_selesai)->translatedFormat('H:i') . ')',
-            $data->map_ujian?->ruang
+            $data->map_ujian?->ruang,
+            $data->map_ujian?->nilai
         ];
     }
 
@@ -78,7 +79,8 @@ class PesertaCBTExport implements FromCollection, WithMapping, WithHeadings, Wit
             'Tahun',
             'Tanggal Ujian',
             'Sesi',
-            'Ruang'
+            'Ruang',
+            'Nilai'
         ];
     }
 

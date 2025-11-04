@@ -58,8 +58,19 @@
                                                 <td>{{ $item->beasiswa->nama }}</td>
                                                 <td>{{ $item->tahun_kegiatan->tahun }}</td>
                                                 <td>
-                                                    @if (in_array($item->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']) &&
-                                                            !cek_jadwal($item->tahun_kegiatan?->id, $item->beasiswa?->id, 'PENGUMUMAN_SELEKSI_ADMINISTRASI', false, true))
+                                                    @if (in_array($item->latest_status?->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI', 'LOLOS TPA', 'GAGAL TPA']) &&
+                                                            (!cek_jadwal(
+                                                                $item->tahun_kegiatan?->id,
+                                                                $item->beasiswa?->id,
+                                                                'PENGUMUMAN_SELEKSI_ADMINISTRASI',
+                                                                false,
+                                                                true) ||
+                                                                !cek_jadwal(
+                                                                    $item->tahun_kegiatan?->id,
+                                                                    $item->beasiswa?->id,
+                                                                    'PENGUMUMAN_TES_POTENSI_AKADEMIK',
+                                                                    false,
+                                                                    true)))
                                                         -
                                                     @else
                                                         {{ $item->latest_status?->status }}

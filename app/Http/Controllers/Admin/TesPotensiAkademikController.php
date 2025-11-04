@@ -14,6 +14,7 @@ use App\Models\Pendaftar;
 use App\Models\PesertaCbt;
 use App\Models\SiakadMahasiswa;
 use App\Models\TahunKegiatan;
+use App\Models\PendaftarStatus;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -389,6 +390,9 @@ class TesPotensiAkademikController extends Controller
             ->pluck('cbt_jenis_tes')
             ->first();
 
+        $jadwal_tpa = cek_jadwal($request->tahun, $request->beasiswa, 'TES_POTENSI_AKADEMIK', is_active: true);
+        if ($jadwal_tpa) return response()->json('Hapus data peserta tes tidak dapat dilakukan karena TES POTENSI AKADEMIK sudah berjalan', 419);
+
         try {
             if ($query_map_ujian->count() > 0) {
                 $query_map_ujian->delete();
@@ -458,11 +462,11 @@ class TesPotensiAkademikController extends Controller
                 })
                 ->where(function ($query) use ($request) {
                     if ($request->flt_status) {
-                        return $query->whereHas('latestStatus', fn($q) => $q->where('status', $request->flt_status));
+                        return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));
                     }
 
                     return $query->whereHas(
-                        'latestStatus',
+                        'pendaftar_status',
                         fn($q) => $q->whereIn('status', ['LOLOS TPA', 'GAGAL TPA'])
                     );
                 })
@@ -483,9 +487,15 @@ class TesPotensiAkademikController extends Controller
                             </div>";
                 })
                 ->editColumn('status', function ($data) {
-                    return "<span class='badge " . ($data->latest_status?->status === 'LOLOS TPA' ? 'bg-success' : 'bg-danger') . "'>{$data->latest_status?->status}</span>";
+                    $status_seleksi_tpa = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS TPA', 'GAGAL TPA']))
+                        ->first();
+                    return "<span class='badge " . ($status_seleksi_tpa?->status === 'LOLOS TPA' ? 'bg-success' : 'bg-danger') . "'>{$status_seleksi_tpa?->status}</span>";
                 })
                 ->addColumn('action', function ($data) {
+                    $status_seleksi_tpa = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS TPA', 'GAGAL TPA']))
+                        ->first();
                     return view('admin.template._action_button_table', [
                         'data' => $data,
                         'title' => 'Status Seleksi TPA',
@@ -495,13 +505,13 @@ class TesPotensiAkademikController extends Controller
                                 'title' => 'Lolos',
                                 'icon' => 'ti ti-circle-check',
                                 'btn-class' => 'btn btn-success',
-                                'encrypted_id' => $data->id
+                                'encrypted_id' => $status_seleksi_tpa?->id
                             ],
                             'gagal' => [
                                 'title' => 'Gagal',
                                 'icon' => 'ti ti-circle-x',
                                 'btn-class' => 'btn btn-danger',
-                                'encrypted_id' => $data->id
+                                'encrypted_id' => $status_seleksi_tpa?->id
                             ]
                         ]
                     ])
@@ -524,6 +534,35 @@ class TesPotensiAkademikController extends Controller
         $filename = "template_pelulusan_tpa_beasiswa_" . strtolower(str_replace(' ', '_', $dt_beasiswa)) . "_" . $dt_tahun . ".xlsx";
 
         return Excel::download(new TemplatePelulusanPesertaTpa($tahun, $beasiswa), $filename);
+    }
+
+    public function pelulusan_update(Request $request)
+    {
+        $request->validate([
+            'status_id' => 'required',
+            'status' => 'required|in:Lolos,Gagal'
+        ], [
+            'status_id.required' => 'ID status tidak ditemukan',
+            'status.required' => 'Status tidak boleh kosong',
+            'status.in' => 'Status tidak valid'
+        ]);
+
+        try {
+            $status = PendaftarStatus::find($request->status_id);
+            $status->status = $request->status == 'Lolos' ? 'LOLOS TPA' : 'GAGAL TPA';
+            $status->update();
+
+            return response()->json([
+                'status' => true,
+                'icon' => 'success',
+                'title' => 'Sukses!',
+                'message' => 'Status kelulusan peserta TPA berhasil diupdate'
+            ], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+
+            return response()->json($error[2], 422);
+        }
     }
 
     public function impor(Request $request)
@@ -601,7 +640,7 @@ class TesPotensiAkademikController extends Controller
             ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
             ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
                 $query->whereHas(
-                    'latestStatus',
+                    'pendaftar_status',
                     fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
                 )
                     ->where(function ($q) use ($tahun, $beasiswa) {
