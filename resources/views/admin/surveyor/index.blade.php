@@ -88,18 +88,20 @@
                                                     v-for="(detail, index2) in surveyor.surveyor_detail"
                                                     :key="detail.id" style="cursor: default;">
 
-                                                    <div class="d-flex flex-column">
-                                                        <div class="">
-                                                            @{{ index2 + 1 }}. @{{ detail.pendaftar ? detail.pendaftar.mahasiswa.nama : detail.mahasiswa.nama }}
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="d-flex flex-column">
+                                                            <div class="">
+                                                                @{{ index2 + 1 }}. @{{ detail.pendaftar ? detail.pendaftar.mahasiswa.nama : detail.mahasiswa.nama }}
+                                                            </div>
+                                                            <div class="alamat text-muted small">
+                                                                @{{ detail.pendaftar ? detail.pendaftar.biodata_pendaftar.data.biodata.alamat_ktp.value : detail.mahasiswa.alamat }}
+                                                            </div>
                                                         </div>
-                                                        <div class="alamat text-muted small">
-                                                            @{{ detail.pendaftar ? detail.pendaftar.biodata_pendaftar.data.biodata.alamat_ktp.value : detail.mahasiswa.alamat }}
+                                                        <div @click.stop="removeMahasiswa(surveyor, detail)"
+                                                            class="text-danger fs-4" title="Hapus"
+                                                            style="cursor: pointer;">
+                                                            <i class="ti ti-trash"></i>
                                                         </div>
-                                                    </div>
-                                                    <div @click.stop="removeMahasiswa(surveyor, detail)"
-                                                        class="text-danger float-end" title="Hapus"
-                                                        style="cursor: pointer;">
-                                                        <i class="ti ti-trash"></i>
                                                     </div>
                                                 </div>
                                                 <div class="text-muted fst-italic py-2 text-center"

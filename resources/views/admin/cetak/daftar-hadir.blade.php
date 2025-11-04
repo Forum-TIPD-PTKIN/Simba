@@ -76,6 +76,14 @@
         .spacer {
             height: 40px;
         }
+
+        .footer {
+            margin-top: 30px;
+            position: absolute;
+            right: 0;
+            width: 300px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -180,6 +188,16 @@
             </tbody>
         </table>
     @endif
+
+    <div class="footer">
+        <p>............, ........................</p>
+        <p>Pengawas ruang,</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>(..........................................)</p>
+    </div>
+
 </body>
 
 </html>

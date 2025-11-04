@@ -39,7 +39,7 @@
                                 <strong>Perhatian!</strong> Pilihan yang Anda buat bersifat final dan tidak dapat diubah
                                 kembali.
                             </div>
-                            <form @submit.prevent="submitForm">
+                            <form @submit.prevent="submitForm" id="formPersetujuanSurveyor">
                                 <div class="form-group">
                                     <label class="form-label">Apakah Anda bersedia menjadi surveyor?</label>
                                     <div class="form-check">
@@ -76,6 +76,26 @@
                                         <label for="no_wa">Nomor WhatsApp Aktif</label>
                                         <input type="text" class="form-control" id="no_wa" v-model="no_wa" required>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="no_rekening">Nomor Rekening</label>
+                                        <input type="text" class="form-control" id="no_rekening" v-model="no_rekening"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nama_rekening">Nama di Rekening</label>
+                                        <input type="text" class="form-control" id="nama_rekening"
+                                            v-model="nama_rekening" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nama_bank">Nama Bank</label>
+                                        <input type="text" class="form-control" id="nama_bank" v-model="nama_bank"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="file_rekening">File Buku Rekening</label>
+                                        <input type="file" name="file_rekening" id="file_rekening"
+                                            @change="handleFileRekening" class="form-control" required>
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary" :disabled="!isFormValid">Simpan</button>
@@ -100,6 +120,10 @@
                 alasan: '',
                 alamat: '',
                 no_wa: '',
+                no_rekening: '',
+                nama_rekening: '',
+                nama_bank: '',
+                file_rekening: null,
             },
             computed: {
                 isFormValid() {
@@ -113,6 +137,9 @@
                 }
             },
             methods: {
+                handleFileRekening(event) {
+                    this.file_rekening = event.target.files[0];
+                },
                 submitForm() {
                     if (!this.isFormValid) {
                         Swal.fire({

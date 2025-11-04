@@ -52,6 +52,11 @@ class Pendaftar extends Uuid
         return $this->hasOne(MapUjian::class);
     }
 
+    public function surveyor_detail()
+    {
+        return $this->hasOne(SurveyorDetail::class);
+    }
+
     public function latestStatus()
     {
         return $this->hasOne(PendaftarStatus::class)->latestOfMany('created_at');

@@ -30,7 +30,27 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-                            <div class="h2">KAMING SUUN</div>
+                            <h5 class="mb-3 mb-sm-0">Daftar Peserta Survei</h5>
+                            <div class="d-flex gap-1 form-filter">
+                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
+                                    id="flt_tahun">
+                                    @foreach ($tahun_kegiatan as $item)
+                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
+                                    @foreach ($beasiswa as $item)
+                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button class="btn btn-sm btn-primary btnFilter">Filter</button>
+                            </div>
+                        </div>
+
+                        <div class="card-body" id="daftar-responden">
+                            {!! $view_daftar_responden !!}
                         </div>
                     </div>
                 </div>
@@ -38,3 +58,40 @@
         </div>
     </div>
 @endsection
+
+@push('script')
+    <script>
+        $(document).on('click', '.btnFilter', function() {
+            const container = $(this).closest('div.form-filter'),
+                tahun = container.find('#flt_tahun').val(),
+                beasiswa = container.find('#flt_beasiswa').val();
+
+            let url = "{{ route('surveyor.dashboard.show', ['tahun' => ':tahun', 'beasiswa' => ':beasiswa']) }}"
+                .replace(':tahun', tahun)
+                .replace(':beasiswa', beasiswa);
+
+            $.ajax({
+                url: url,
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    let target;
+                    target = $('#daftar-responden');
+                    target.children().remove();
+                    target.html(res);
+
+                    Swal.close();
+                }
+            });
+        });
+    </script>
+@endpush
