@@ -1,10 +1,13 @@
 @php
-    $deskripsi_verifikasi = json_decode($pendaftar->latest_status?->deskripsi);
+    $status_seleksi_administrasi = collect($pendaftar->pendaftar_status)
+        ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
+        ->first();
+    $deskripsi_verifikasi = json_decode($status_seleksi_administrasi?->deskripsi);
 @endphp
 @if (
     $is_pengumuman_seleksi_administrasi &&
-        in_array($pendaftar->latest_status?->status, ['GAGAL ADMINISTRASI', 'LOLOS ADMINISTRASI']))
-    @if ($pendaftar->latest_status?->status === 'LOLOS ADMINISTRASI')
+        in_array($status_seleksi_administrasi?->status, ['GAGAL ADMINISTRASI', 'LOLOS ADMINISTRASI']))
+    @if ($status_seleksi_administrasi?->status === 'LOLOS ADMINISTRASI')
         <div class="alert alert-success">
             <h4><i class="ti ti-mood-smile"></i> Selamat!</h4>
             <p class="mb-0">Anda dinyatakan <span class="fw-bold fs-5">LOLOS SELEKSI
@@ -33,7 +36,7 @@
                 dinyatakan <span class="fw-bold fs-5">TIDAK LOLOS SELEKSI ADMINISTRASI</span>.
             </p>
             <p class="fw-bold mt-3 mb-0">Catatan Verifikator :</p>
-            {!! $deskripsi_verifikasi->catatan !!}
+            {!! $deskripsi_verifikasi?->catatan !!}
             <p>Jika ada pertanyaan lebih lanjut, hubungi panitia seleksi.</p>
         </div>
     @endif

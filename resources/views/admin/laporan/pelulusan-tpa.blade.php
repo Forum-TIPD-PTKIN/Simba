@@ -354,31 +354,68 @@
     </script>
 
     <script>
-        // Lihat Verifikasi data
-        function verifikasiData(id) {
-            let url = "{{ route('admin.laporan.verifikasi.edit', ':id') }}";
-            url = url.replace(':id', id);
+        // Fungsi ubah status
+        function ubahStatusKelulusanTpa(status_id, status) {
+            let url = "{{ route('admin.seleksi-tpa.pelulusan.update') }}";
 
-            $.ajax({
-                url: url,
-                beforeSend: () => {
-                    Swal.fire({
-                        title: 'Mengambil data...',
-                        showCancelButton: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+            Swal.fire({
+                title: 'Anda Yakin?',
+                html: `Anda akan mengubah status kelulusan TPA menjadi <strong>${status}</strong>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: "PUT",
+                        data: {
+                            status_id: status_id,
+                            status: status,
+                            _token: "{{ csrf_token() }}"
                         },
-                        allowOutsideClick: false
+                        beforeSend: () => {
+                            Swal.fire({
+                                title: 'Memproses data...',
+                                showCancelButton: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                allowOutsideClick: false
+                            });
+                        },
+                        success: (res) => {
+                            reloadData();
+                            Swal.fire({
+                                icon: res.icon,
+                                title: res.title,
+                                text: res.message,
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        }
                     });
-                },
-                success: (res) => {
-                    $('#modalVerifikasi .modal-body').html(res);
-
-                    $('#modalVerifikasi').modal('show');
-                    Swal.close();
                 }
             });
+        }
+
+        // Lolos
+        function lolosData(id) {
+            const status_id = id;
+            const status = 'Lolos';
+
+            ubahStatusKelulusanTpa(status_id, status);
+        }
+
+        // Gagal
+        function gagalData(id) {
+            const status_id = id;
+            const status = 'Gagal';
+
+            ubahStatusKelulusanTpa(status_id, status);
         }
     </script>
 

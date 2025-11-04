@@ -48,7 +48,7 @@ class RekapPendaftarExport implements
             ->selectRaw('pendaftars.*')
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->when($this->status !== null, function ($query) {
-                $query->whereHas('latestStatus', function ($query) {
+                $query->whereHas('pendaftar_status', function ($query) {
                     $query->where('status', $this->status);
                 });
             })
