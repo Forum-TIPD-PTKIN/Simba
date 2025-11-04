@@ -34,6 +34,7 @@ use App\Http\Controllers\Penguji\Kip\{
 use App\Http\Controllers\Surveyor\{
     DashboardController as DashboardSurveyor,
     PersetujuanController,
+    SurveyController,
 };
 use Illuminate\Support\Facades\Route;
 
@@ -190,6 +191,9 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
             'destroy' => 'surveyor.persetujuan.destroy'
         ]
     ]);
+
+    Route::get('survey', [SurveyController::class, 'index'])->name('surveyor.survey');
+    Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
 });
 
 // Pendaftar

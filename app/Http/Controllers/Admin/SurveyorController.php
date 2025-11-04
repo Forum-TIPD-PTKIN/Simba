@@ -88,7 +88,7 @@ class SurveyorController extends Controller
                     });
                 }]);
 
-            return Datatables::of($data)
+            return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('name', function ($row) {
                     return $row->user->name;
