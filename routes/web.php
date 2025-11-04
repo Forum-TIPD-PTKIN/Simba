@@ -148,6 +148,8 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     });
 
     Route::get('/surveyor/rekap', [SurveyorController::class, 'rekap'])->name('admin.surveyor.rekap');
+    Route::post('/surveyor/rekap/publish/{id}', [SurveyorController::class, 'publish'])->name('admin.surveyor.rekap.publish');
+    Route::post('/surveyor/rekap/publish-all', [SurveyorController::class, 'publishAll'])->name('admin.surveyor.rekap.publish-all');
     Route::get('/surveyor/detail/{id}', [SurveyorController::class, 'detail'])->name('admin.surveyor.detail');
     Route::resource('/surveyor', SurveyorController::class, [
         'names' => [

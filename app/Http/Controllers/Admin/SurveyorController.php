@@ -22,15 +22,45 @@ class SurveyorController extends Controller
         return view('admin.surveyor.detail', compact('detailSurveyor'));
     }
 
+    public function publishAll(Request $request)
+    {
+        $status = $request->status ?? 0;
+        $beasiswa = $request->beasiswa ?? null;
+        $tahun = $request->tahun ?? null;
+
+        Surveyor::whereBeasiswaId($beasiswa)
+            ->whereTahunKegiatanId($tahun)
+            ->update(['publish' => $status]);
+        return response()->json([
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Surveyor berhasil dipublish',
+        ]);
+    }
+
+    public function publish(Request $request, $id)
+    {
+        $status = $request->status ?? 0;
+
+        Surveyor::find($id)->update(['publish' => $status]);
+        return response()->json([
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Surveyor berhasil dipublish',
+        ]);
+    }
+
     public function rekap(Request $request)
     {
         $status_surveyor = ['Publish', 'Draft'];
 
         $master_tahun = TahunKegiatan::where('status', 1)
             ->orderBy('tahun', 'desc')
-            ->get();
+            ->get()
+            ->makeVisible(['id']);
         $master_beasiswa = Beasiswa::where('status', 1)
-            ->get();
+            ->get()
+            ->makeVisible(['id']);
 
         if ($request->beasiswa) {
             $kip_select = Beasiswa::find($request->beasiswa);
@@ -46,6 +76,11 @@ class SurveyorController extends Controller
         if ($request->ajax()) {
             $data = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan'])
                 ->where('bersedia', 1)
+                ->whereBeasiswaId($request->beasiswa ?? $kip_select->id)
+                ->whereTahunKegiatanId($request->tahun ?? $tahun_select->id)
+                ->when($request->status, function ($query, $status) {
+                    $query->where('publish', $status == 'Publish' ? 1 : 0);
+                })
                 ->withCount('surveyor_detail as details_count')
                 ->withCount(['surveyor_detail as selesai_count' => function ($query) {
                     $query->whereHas('pendaftar.latestStatus', function ($q) {
@@ -70,8 +105,8 @@ class SurveyorController extends Controller
                 })
                 ->addColumn('status', function ($row) {
                     if (!$row->publish)
-                        return '<span class="badge text-bg-warning">Draft</span>';
-                    else return '<span class="badge text-bg-success">Publish</span>';
+                        return '<button onclick="publishSurveyor(event, 1)" data-id="' . $row->id . '" class="badge btn  btn-sm small text-bg-warning p-1 btn-sm">Draft</button>';
+                    else return '<button onclick="publishSurveyor(event, 0)" data-id="' . $row->id . '" class="badge btn btn-sm small text-bg-success p-1 btn-sm">Publish</button>';
                 })
                 ->rawColumns(['action', 'status', 'name'])
                 ->make(true);

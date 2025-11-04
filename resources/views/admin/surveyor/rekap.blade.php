@@ -17,7 +17,8 @@
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Rekap Surveyor</h2>
+                                <h2 class="mb-0">Rekap Surveyor <span class="kip-nama">{{ $kip_select->nama }}
+                                        {{ $tahun_select->tahun }}</span></h2>
                             </div>
                         </div>
                     </div>
@@ -61,6 +62,19 @@
                             <div class="alert alert-info">
                                 Surveyor yang berstatus Draft tidak akan ditampilkan ke akun surveyor maupun ke mahasiswa
                             </div>
+                            <div class="d-flex justify-content-end mb-2">
+                                <div class="d-flex align-items-center gap-1">
+                                    <div class="text-muted">Status <span class="kip-nama">{{ $kip_select->nama }}
+                                            {{ $tahun_select->tahun }}</span> ->
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" onclick="publishSurveyorAll(0)" type="button"
+                                            class="btn btn-sm btn-warning">Draft Semua</button>
+                                        <button type="button" onclick="publishSurveyorAll(1)"
+                                            class="btn btn-sm btn-success">Publish Semua</button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped" id="datatable-rekap-surveyor">
                                     <thead>
@@ -69,10 +83,12 @@
                                             <th>Nama Surveyor</th>
                                             <th>Beasiswa</th>
                                             <th class="text-center">Jml. Mhs</th>
-                                            <th class="text-center"> <i class="fas fa-check text-success"></i> Selesai</th>
+                                            <th class="text-center"> <i class="fas fa-check text-success"></i> Selesai
+                                            </th>
                                             <th class="text-center"> <i class="fas fa-times text-danger"></i> Belum
                                             </th>
-                                            <th class="text-center">Status</th>
+                                            <th class="text-center">Status <span class="text-muted small">(Klik)</span>
+                                            </th>
                                             <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
@@ -115,16 +131,28 @@
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script>
         let modalDetail = null;
+        let datatable = null;
+        const masterTahun = @json($master_tahun);
+        const masterBeasiswa = @json($master_beasiswa);
+        const statusSurveyor = @json($status_surveyor);
+
         $(function() {
             modalDetail = $('#modalDetail').modal({
                 backdrop: 'static',
                 keyboard: false
             });
 
-            $('#datatable-rekap-surveyor').DataTable({
+            datatable = $('#datatable-rekap-surveyor').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.surveyor.rekap') }}',
+                ajax: {
+                    url: '{{ route('admin.surveyor.rekap') }}',
+                    data: function(d) {
+                        d.tahun = $('#flt_tahun').val();
+                        d.beasiswa = $('#flt_beasiswa').val();
+                        d.status = $('#flt_status').val();
+                    },
+                },
                 columnDefs: [{
                     targets: 5,
                     createdCell: function(td, cellData, rowData, row, col) {
@@ -134,6 +162,11 @@
                     targets: 4,
                     createdCell: function(td, cellData, rowData, row, col) {
                         $(td).addClass('text-danger');
+                    }
+                }, {
+                    targets: 6,
+                    createdCell: function(td, cellData, rowData, row, col) {
+                        $(td).addClass('text-center');
                     }
                 }],
                 columns: [{
@@ -180,6 +213,97 @@
             });
         });
 
+        function publishSurveyor(evt, status) {
+            const id = evt.currentTarget.dataset.id;
+            Swal.fire({
+                title: status ? 'Mempublish surveyor...' : 'Menonaktifkan surveyor...',
+                showCancelButton: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false
+            });
+            let url = '{{ route('admin.surveyor.rekap.publish', ['id' => ':id']) }}';
+            url = url.replace(':id', evt.currentTarget.dataset.id);
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    status: status
+                },
+                success: (response) => {
+                    Swal.fire({
+                        icon: response.icon,
+                        title: response.title,
+                        text: response.message,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+                    datatable.ajax.reload();
+                },
+                complete: () => {
+                    Swal.close();
+                }
+            });
+        }
+
+        function publishSurveyorAll(status) {
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: status ? 'Anda yakin ingin mempublish surveyor ini?' :
+                    'Anda yakin ingin menonaktifkan surveyor ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: `Ya, ${status ? 'Publish' : 'Nonaktifkan'}!`,
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: status ? 'Mempublish surveyor...' : 'Menonaktifkan surveyor...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                    let url = '{{ route('admin.surveyor.rekap.publish-all') }}';
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            status: status,
+                            tahun: $('#flt_tahun').val(),
+                            beasiswa: $('#flt_beasiswa').val(),
+                        },
+                        success: (response) => {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.message,
+                                timer: 2000,
+                                timerProgressBar: true,
+                            });
+                            datatable.ajax.reload();
+                        },
+                        complete: () => {
+                            Swal.close();
+                        }
+
+                    });
+                }
+            });
+        }
+
+        function reloadData() {
+            datatable.ajax.reload();
+            gantiNama();
+        }
+
         function openDetal(evt) {
             Swal.fire({
                 title: 'Menyimpan data...',
@@ -204,10 +328,14 @@
                 }
 
             });
-            /* // get data-id
-                        const id = evt.target.dataset.id;
-                        modalDetail.modal('show');
-             */
+        }
+
+        function gantiNama() {
+            const tahun = $('#flt_tahun').val();
+            const beasiswa = $('#flt_beasiswa').val();
+            const itemTahun = masterTahun.find(item => item.id == tahun);
+            const itemBeasiswa = masterBeasiswa.find(item => item.id == beasiswa);
+            $('.kip-nama').text(`${itemBeasiswa.nama} ${itemTahun.tahun}`);
         }
     </script>
 @endpush
