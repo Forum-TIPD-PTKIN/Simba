@@ -177,6 +177,7 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
             'destroy' => 'surveyor.dashboard.destroy'
         ]
     ]);
+    Route::get('/show/{tahun}/{beasiswa}', [DashboardSurveyor::class, 'show'])->name('surveyor.dashboard.show');
 
     Route::get('persetujuan/data', [PersetujuanController::class, 'data'])->name('surveyor.persetujuan.data');
     Route::resource('/persetujuan', PersetujuanController::class, [
