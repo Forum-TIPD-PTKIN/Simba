@@ -16,4 +16,4 @@ SURVEYOR
 ===================================================================
 > Cetak daftar nama peserta survei 
 > Cetak instrumen survei
-> Persetujuan menambah field nomor rekening, nama rekening dan foto buku rekening
+> 

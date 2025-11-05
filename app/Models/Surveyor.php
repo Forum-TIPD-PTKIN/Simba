@@ -13,7 +13,25 @@ class Surveyor extends Uuid
         'alasan',
         'hp',
         'alamat',
+        'rekening_bank',
     ];
+
+    protected $appends = [
+        'rekening_bank_formatted',
+    ];
+
+    public function getRekeningBankFormattedAttribute()
+    {
+        $value = str_replace('[URL_ORIGIN]', url('file/'), $this->rekening_bank);
+
+        if (is_string($value) && json_decode($value) !== null) {
+            $decoded = json_decode($value, true);
+
+            return $decoded ?? $value;
+        }
+
+        return $value;
+    }
 
     public function user()
     {

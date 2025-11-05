@@ -102,6 +102,9 @@
                             <a href="{{ route('admin.surveyor') }}" class="pc-link">Assign</a>
                         </li>
                         <li class="pc-item">
+                            <a href="{{ route('admin.surveyor.show') }}" class="pc-link">Data</a>
+                        </li>
+                        <li class="pc-item">
                             <a href="{{ route('admin.surveyor.rekap') }}" class="pc-link">Rekap</a>
                         </li>
                     </ul>

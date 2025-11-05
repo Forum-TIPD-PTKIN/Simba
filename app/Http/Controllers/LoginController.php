@@ -42,6 +42,14 @@ class LoginController extends Controller
                     'profil' => $akun?->data?->data?->user?->profil
                 ]);
                 return redirect()->route('verifikator.dashboard');
+            } else if (in_array(3, $user->access)) {
+                //surveyor
+                session([
+                    'is_surveyor' => true,
+                    'level' => 3,
+                    'profil' => $akun?->data?->data?->user?->profil
+                ]);
+                return redirect()->route('verifikator.dashboard');
             }
         } else if ($akun->data->data->user->level == 1) {
             return redirect()->route('login')->with('error', 'Anda tidak memiliki akses pada sistem ini!');
@@ -118,6 +126,13 @@ class LoginController extends Controller
                 session([
                     'is_verifikator' => true,
                     'level' => 1
+                ]);
+                return redirect()->route('verifikator.dashboard');
+            } else if (in_array(3, $user->access)) {
+                //surveyor
+                session([
+                    'is_surveyor' => true,
+                    'level' => 3,
                 ]);
                 return redirect()->route('verifikator.dashboard');
             }
