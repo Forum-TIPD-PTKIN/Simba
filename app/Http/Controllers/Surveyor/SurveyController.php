@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Surveyor;
 
 use App\Http\Controllers\Controller;
+use App\Models\MasterStatis;
 use App\Models\Surveyor;
 use App\Models\SurveyorDetail;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class SurveyController extends Controller
@@ -98,7 +100,46 @@ class SurveyController extends Controller
      */
     public function show(string $id)
     {
-        return view('surveyor.survey.detail');
+        $masters = MasterStatis::whereIn('nama', [
+            'penghasilan',
+            'pekerjaan',
+            'kepemilikan_rumah',
+            'bangunan_rumah',
+            'lantai_rumah',
+            'kepemilikan_listrik'
+        ])->get();
+
+        $masterPenghasilan = $masters->where('nama', 'penghasilan')->first()->data;
+        $masterPekerjaan = $masters->where('nama', 'pekerjaan')->first()->data;
+        $masterKepemilikanRumah = $masters->where('nama', 'kepemilikan_rumah')->first()->data;
+        $masterBangunanRumah = $masters->where('nama', 'bangunan_rumah')->first()->data;
+        $masterLantaiRumah = $masters->where('nama', 'lantai_rumah')->first()->data;
+        $masterKepemilikanListrik = $masters->where('nama', 'kepemilikan_listrik')->first()->data;
+
+        $pendaftar = SurveyorDetail::with('pendaftar.mahasiswa', 'pendaftar.pemberkasan', 'pendaftar.biodata_pendaftar')
+            ->where('id', $id)
+            ->whereHas('surveyor', function ($query) {
+                $query->where('bersedia', 1)
+                    ->where('publish', 1)
+                    ->whereUserId(Auth::id());
+            })
+            ->first();
+
+        if (!$pendaftar) {
+            return redirect()->route('surveyor.survey');
+        }
+
+        return $pendaftar;
+
+        return view('surveyor.survey.detail', compact(
+            'masterPenghasilan',
+            'masterPekerjaan',
+            'masterKepemilikanRumah',
+            'masterBangunanRumah',
+            'masterLantaiRumah',
+            'masterKepemilikanListrik',
+            'pendaftar',
+        ));
     }
 
     /**

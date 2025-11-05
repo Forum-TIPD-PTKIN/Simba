@@ -11,7 +11,9 @@ class Pemberkasan extends Uuid
 
     public function getDataAttribute($val)
     {
-        $val = str_replace('[URL_ORIGIN]', url('file/'), $val);
+        $urlorigin = url('file/');
+        // $urlorigin = 'https://simba.uinmadura.ac.id/file';
+        $val = str_replace('[URL_ORIGIN]', $urlorigin, $val);
         // return json_decode($val);
 
         $data = is_string($val) ? json_decode($val, true) : $val;
