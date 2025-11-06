@@ -27,7 +27,7 @@
 
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-circle me-2"></i> <strong>Perhatian! </strong><br>
-                Pastikan status sudah tesrimpan (Ter-update).
+                Pastikan status sudah tesimpan (Ter-update).
             </div>
 
             <div class="row">
