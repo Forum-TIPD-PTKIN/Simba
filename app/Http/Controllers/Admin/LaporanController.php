@@ -188,4 +188,28 @@ class LaporanController extends Controller
 
         return Excel::download(new HasilSeleksiAdministrasiExport($tahun, $beasiswa, $status), "Data " . ($request->status ?? '') . " Seleksi Administrasi Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx");
     }
+
+    public function rekap_verifikator(Request $request)
+    {
+        $tahun = TahunKegiatan::where('id', $request->tahun)->pluck('tahun')->first();
+        $beasiswa = Beasiswa::where('id', $request->beasiswa)->pluck('nama')->first();
+
+        $verifikator = PendaftarStatus::selectRaw("deskripsi->>'$.verifikator' AS verifikator, COUNT(*) AS total")
+            ->whereHas('pendaftar', function ($q) use ($request) {
+                $q->where('tahun_kegiatan_id', $request->tahun)
+                    ->where('beasiswa_id', $request->beasiswa);
+            })
+            ->whereIn('status', ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'])
+            ->groupBy(DB::raw("deskripsi->>'$.verifikator'"))
+            ->orderBy('total', 'desc')
+            ->orderBy('verifikator')
+            ->get();
+
+        return view('admin.laporan.rekap-verifikator', [
+            'tahun' => $tahun,
+            'beasiswa' => $beasiswa,
+            'verifikator' => $verifikator,
+        ])
+            ->render();
+    }
 }

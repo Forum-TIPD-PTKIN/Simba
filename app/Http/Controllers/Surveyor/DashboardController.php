@@ -27,7 +27,10 @@ class DashboardController extends Controller
                 $q->where('status', 'LOLOS TPA');
             })
             ->whereHas('surveyor_detail', function ($query) {
-                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'));
+                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
+                    ->whereHas('surveyor', function ($surveyorQuery) {
+                        $surveyorQuery->where('publish', '1');
+                    });
             })
             ->get();
         $view_daftar_responden = view('surveyor.dashboard.daftar-responden', [
