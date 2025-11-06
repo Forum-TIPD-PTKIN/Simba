@@ -194,6 +194,7 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
 
     Route::get('survey', [SurveyController::class, 'index'])->name('surveyor.survey');
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
+    Route::post('survey/update/skor', [SurveyController::class, 'update_skor'])->name('surveyor.survey.update.skor');
 });
 
 // Pendaftar
