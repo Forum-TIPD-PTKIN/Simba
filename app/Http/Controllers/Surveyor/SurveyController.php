@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Surveyor;
 
-use App\Http\Controllers\Controller;
+use App\Models\Beasiswa;
+use App\Models\Surveyor;
+use App\Models\Pendaftar;
 use App\Models\HasilSurvey;
 use App\Models\MasterStatis;
-use App\Models\Surveyor;
-use App\Models\SurveyorDetail;
-use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\TahunKegiatan;
+use App\Models\SurveyorDetail;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class SurveyController extends Controller
@@ -308,5 +310,36 @@ class SurveyController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function peserta_survei(Request $request)
+    {
+        $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
+        $beasiswa = Beasiswa::where('status', 1)->get();
+
+        $responden = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'biodata_pendaftar'])
+            ->where('tahun_kegiatan_id', isset($request->tahun) && $request->tahun ? $request->tahun : (count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null))
+            ->where('beasiswa_id', isset($request->beasiswa) && $request->beasiswa ? $request->beasiswa : (count($beasiswa) ? $beasiswa[0]->id : null))
+            ->whereHas('pendaftar_status', function ($q) {
+                $q->where('status', 'LOLOS TPA');
+            })
+            ->whereHas('surveyor_detail', function ($query) {
+                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
+                    ->whereHas('surveyor', function ($surveyorQuery) {
+                        $surveyorQuery->where('publish', '1');
+                    });
+            })
+            ->get();
+        $view_daftar_responden = view('surveyor.data-peserta-survei', [
+            'responden' => $responden
+        ])->render();
+
+        if ($request->ajax()) return $view_daftar_responden;
+
+        return view('surveyor.peserta-survei', [
+            'tahun_kegiatan' => $tahun_kegiatan,
+            'beasiswa' => $beasiswa,
+            'view_daftar_responden' => $view_daftar_responden
+        ]);
     }
 }

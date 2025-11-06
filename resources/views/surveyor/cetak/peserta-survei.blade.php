@@ -11,8 +11,7 @@
             font-family: "Segoe UI", Arial, sans-serif;
             background-color: #f5f7fa;
             color: #333;
-            margin: 0;
-            padding: 0;
+            margin: 30px;
         }
 
         header {
@@ -44,7 +43,11 @@
             border-collapse: collapse;
             margin-top: 20px;
             background-color: white;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            border-bottom: 2px solid #636363;
+            background-color: #e0e0e0;
         }
 
         th,
@@ -56,8 +59,6 @@
         }
 
         th {
-            background-color: #1976d2;
-            color: white;
             font-weight: bold;
             text-align: center;
         }
@@ -66,19 +67,17 @@
             background-color: #f2f2f2;
         }
 
-        tr:hover {
-            background-color: #e3f2fd;
-        }
-
         .footer {
             margin-top: 40px;
-            text-align: right;
+            padding-right: 40px;
+            float: right;
             font-size: 15px;
         }
 
         .signature {
             margin-top: 30px;
             line-height: 1.6;
+            text-align: left;
         }
     </style>
 </head>
@@ -91,6 +90,10 @@
     </header>
 
     <main>
+        <p>Dengan ini Saya melaporkan telah melaksanakan <span class="fw-bold">Survei Calon Penerima Beasiswa
+                {{ $beasiswa }}
+                UIN MADURA Tahun
+                {{ $tahun }}</span>, dengan sasaran sebagai berikut:</p>
         <table>
             <thead>
                 <tr>
@@ -112,21 +115,22 @@
                         <td class="text-center">{{ $item->mahasiswa?->prodi_name }}</td>
                         <td>{{ $item->biodata_pendaftar?->data?->biodata?->alamat_ktp?->value }}</td>
                         <td class="text-center">{{ $item->biodata_pendaftar?->data?->biodata?->no_hp?->value }}</td>
-                        <td class="text-center">{{ $item->biodata_pendaftar?->data?->biodata?->nama_ayah?->value }}</td>
+                        <td class="text-center">{{ $item->biodata_pendaftar?->data?->biodata?->nama_ayah?->value }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
+        <p class="mt-4">Dokumentasi pelaksanaan survei terlampir. Demikian laporan pelaksanaan kegiatan.</p>
         <section class="footer">
-            <p><em>Dokumentasi pelaksanaan survei terlampir. Demikian laporan pelaksanaan kegiatan.</em></p>
-
             <div class="signature">
-                <p>Pamekasan, _____ Oktober 2024</p>
-                <p><strong>Surveyor,</strong></p>
+                <p class="mb-0">................................., ................................................
+                </p>
+                <p>Surveyor,</p>
                 <br><br>
-                <p><strong>SUMARTONO, SH., MM.</strong></p>
-                <p>NIP. 198201282005011005</p>
+                <p class="mb-0"><strong>{{ $surveyor->user?->name }}</strong></p>
+                <p>NIP. </p>
             </div>
         </section>
     </main>

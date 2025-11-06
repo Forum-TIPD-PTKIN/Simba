@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Surveyor;
 
 use App\Models\Beasiswa;
+use App\Models\Surveyor;
 use App\Models\Pendaftar;
 use Illuminate\Http\Request;
 use App\Models\TahunKegiatan;
@@ -41,12 +42,19 @@ class CetakController extends Controller
             ->orderBy('mahasiswas.nama')
             ->get();
 
+        $surveyor = Surveyor::with(['user'])
+            ->where('user_id', Auth::id())
+            ->where('tahun_kegiatan_id', $request->tahun)
+            ->where('beasiswa_id', $request->beasiswa)
+            ->first();
+
         if (!count($peserta)) return response()->json('Data peserta survei tidak ditemukan', 404);
 
         $beasiswa = Beasiswa::where('id', $request->beasiswa)->pluck('nama')->first();
         $tahun = TahunKegiatan::where('id', $request->tahun)->pluck('tahun')->first();
         return view('surveyor.cetak.peserta-survei', [
             'peserta' => $peserta,
+            'surveyor' => $surveyor,
             'beasiswa' => $beasiswa,
             'tahun' => $tahun,
             'style' => $style,

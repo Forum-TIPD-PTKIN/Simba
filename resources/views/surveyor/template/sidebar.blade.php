@@ -84,6 +84,14 @@
                     </svg>
                 </li>
                 <li class="pc-item">
+                    <a href="{{ route('surveyor.peserta-survei') }}" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="fas fa-user-check"></i>
+                        </span>
+                        <span class="pc-mtext">Peserta Survei</span>
+                    </a>
+                </li>
+                <li class="pc-item">
                     <a href="{{ route('surveyor.survey') }}" class="pc-link">
                         <span class="pc-micon">
                             <i class="fas fa-question-circle"></i>
