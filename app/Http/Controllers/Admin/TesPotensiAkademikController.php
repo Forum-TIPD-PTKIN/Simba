@@ -364,8 +364,8 @@ class TesPotensiAkademikController extends Controller
                 $value->nilai = $get_nilai?->nilai ?? null;
                 $value->update();
             }
-        } catch (\Throwable $th) {
-            return response()->json($th->getMessage(), 500);
+        } catch (\Illuminate\Database\QueryException $th) {
+            return response()->json($th->errorInfo[2], 500);
         }
 
         return response()->json([
@@ -403,8 +403,8 @@ class TesPotensiAkademikController extends Controller
                 JadwalCbt::where('id_jenis_tes', $jenis_tes_cbt)
                     ->update(['isi' => null]);
             }
-        } catch (\Throwable $th) {
-            return response()->json($th->getMessage(), 500);
+        } catch (\Illuminate\Database\QueryException $th) {
+            return response()->json($th->errorInfo[2], 500);
         }
 
         return response()->json([

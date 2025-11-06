@@ -77,13 +77,37 @@
                     </a>
                 </li>
 
+                <li class="pc-item pc-caption">
+                    <label>Survei</label>
+                    <svg class="pc-icon">
+                        <use xlink:href="#custom-box-1"></use>
+                    </svg>
+                </li>
                 <li class="pc-item">
                     <a href="{{ route('surveyor.survey') }}" class="pc-link">
                         <span class="pc-micon">
                             <i class="fas fa-question-circle"></i>
                         </span>
-                        <span class="pc-mtext">Survey</span>
+                        <span class="pc-mtext">Survei</span>
                     </a>
+                </li>
+                <li class="pc-item pc-hasmenu">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="fas fa-print"></i>
+                        </span>
+                        <span class="pc-mtext">Cetak Dokumen</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item">
+                            <a href="{{ route('surveyor.cetak.peserta-survei') }}" class="pc-link">Peserta Survei</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('surveyor.cetak.instrumen-survei') }}" class="pc-link">Instrumen
+                                Survei</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>

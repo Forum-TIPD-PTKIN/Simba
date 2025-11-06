@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('surveyors', function (Blueprint $table) {
             $table->uuid('tahun_kegiatan_id')->after('beasiswa_id');
             $table->boolean('bersedia')->nullable()->after('tahun_kegiatan_id');
-            $table->string('alasan')->nullable()->after('bersedia');
+            $table->text('alasan')->nullable()->after('bersedia');
             $table->string('hp', 15)->nullable()->after('alasan');
             $table->string('alamat')->nullable()->after('hp');
 

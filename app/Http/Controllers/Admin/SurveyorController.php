@@ -347,8 +347,8 @@ class SurveyorController extends Controller
                 'title' => 'Berhasil',
                 'message' => 'Surveyor berhasil ditambahkan',
             ]);
-        } catch (\Throwable $th) {
-            return response()->json($th->getMessage(), 422);
+        } catch (\Illuminate\Database\QueryException $th) {
+            return response()->json($th->errorInfo[2], 422);
         }
     }
 

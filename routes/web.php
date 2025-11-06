@@ -32,6 +32,7 @@ use App\Http\Controllers\Penguji\Kip\{
     DashboardController as DashboardPengujiKip,
 };
 use App\Http\Controllers\Surveyor\{
+    CetakController,
     DashboardController as DashboardSurveyor,
     PersetujuanController,
     SurveyController,
@@ -196,6 +197,9 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
 
     Route::get('survey', [SurveyController::class, 'index'])->name('surveyor.survey');
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
+
+    Route::get('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
+    Route::get('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
 });
 
 // Pendaftar

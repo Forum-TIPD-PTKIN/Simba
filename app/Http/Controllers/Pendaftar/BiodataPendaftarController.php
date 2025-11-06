@@ -96,7 +96,7 @@ class BiodataPendaftarController extends Controller
                                     try {
                                         unlink($path);
                                     } catch (\Throwable $th) {
-                                        return 'error';
+                                        return abort(500, 'Proses gagal');
                                     }
                                 }
                             }
