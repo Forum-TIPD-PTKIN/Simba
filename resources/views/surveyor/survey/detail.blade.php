@@ -27,7 +27,7 @@
 
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-circle me-2"></i> <strong>Perhatian! </strong><br>
-                Pastikan untuk menyimpan setiap perubahan sebelum keluar dari halaman.
+                Pastikan status sudah tesimpan (Ter-update).
             </div>
 
             <div class="row">
@@ -89,16 +89,70 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="namaAyah" class="form-label">Nama Ayah</label>
-                                    <input type="text" class="form-control" id="namaAyah" v-model="survey.ayah.nama">
+                                    <label for="namaAyah" class="form-label fw-bold mb-0">Nama Ayah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elAyahNama">
+                                                @if ($nilaiSurvey->ayahNamaUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ayahNamaUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.nama_ayah.value }}</div>
+                                        </div>
+                                    </div>
+                                    <input type="text"
+                                        v-on:input="liveChage('ayahNama', survey.ayah.nama, '#elAyahNama', 'tidak')"
+                                        class="form-control" id="namaAyah" v-model="survey.ayah.nama">
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('ayahNamaStatus')"
+                                                v-model="survey.ayah.status" name="namaAyah" value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('ayahNamaStatus')"
+                                                v-model="survey.ayah.status" name="namaAyah" value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <hr>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="kesehatanAyah" class="form-label">Kesehatan Ayah <span class="badge"
-                                            :class="kesehatanAyahBadgeClass"
-                                            v-html="kesehatanAyahSufficiancyText"></span></label>
+                                    <label for="kesehatanAyah" class="form-label fw-bold mb-0">Kesehatan Ayah</label>
                                     <div class="d-flex flex-column">
-                                        <input type="range" class="form-range" min="1" max="10"
-                                            id="kesehatanAyah" step="0.5" v-model.number="survey.ayah.kesehatan">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elAyahKesehatan">
+                                                @if ($nilaiSurvey->ayahKesehatanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ayahKesehatanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Tingkat kelayakan:
+                                            <span class="badge"
+                                                :class="kesehatanAyahBadgeClass">@{{ kesehatanAyahSufficiancyText }}</span>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.kondisi_ayah.valOption }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <input type="range"
+                                            v-on:change="change('ayahKesehatan', survey.ayah.kesehatan, '#elAyahKesehatan')"
+                                            class="form-range" min="1" max="10" id="kesehatanAyah"
+                                            step="0.5" v-model.number="survey.ayah.kesehatan">
                                         <div class="d-flex justify-content-between mt-1">
                                             <div class="fw-bold text-danger">
                                                 <i class="fas fa-chevron-left"></i> Tidak layak menerima
@@ -109,16 +163,74 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="my-5">
+                                    <hr>
+                                </div>
                                 <div class="mb-3 mt-5">
-                                    <label for="namaIbu" class="form-label">Nama Ibu</label>
-                                    <input type="text" class="form-control" id="namaIbu" v-model="survey.ibu.nama">
+                                    <label for="namaIbu" class="form-label mb-0 fw-bold">Nama Ibu</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elIbuNama">
+                                                @if ($nilaiSurvey->ibuNamaUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ibuNamaUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.nama_ibu.value }}</div>
+                                        </div>
+                                    </div>
+                                    <input type="text"
+                                        v-on:input="liveChage('ibuNama', survey.ibu.nama, '#elIbuNama', 'tidak')"
+                                        class="form-control" id="namaIbu" v-model="survey.ibu.nama">
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('ibuNamaStatus')"
+                                                v-model="survey.ibu.status" name="namaIbu" value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('ibuNamaStatus')"
+                                                v-model="survey.ibu.status" name="namaIbu" value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <hr>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="kondisiIbu" class="form-label">Kondisi Ibu <span class="badge"
-                                            :class="kondisiIbuBadgeClass" v-html="kondisiIbuSufficiancyText"></span></label>
+                                    <label for="kondisiIbu" class="form-label fw-bold mb-0">Kondisi Ibu</label>
                                     <div class="d-flex flex-column">
-                                        <input type="range" class="form-range" min="1" max="10"
-                                            id="kondisiIbu" step="0.5" v-model.number="survey.ibu.kondisi">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elIbuKondisi">
+                                                @if ($nilaiSurvey->ibuKondisiUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ibuKondisiUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Tingkat kelayakan:
+                                            <span class="badge"
+                                                :class="kondisiIbuBadgeClass">@{{ kondisiIbuSufficiancyText }}</span>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.kondisi_ibu.valOption }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <input type="range"
+                                            v-on:change="change('ibuKondisi', survey.ibu.kondisi, '#elIbuKondisi')"
+                                            class="form-range" min="1" max="10" id="kondisiIbu"
+                                            step="0.5" v-model.number="survey.ibu.kondisi">
                                         <div class="d-flex justify-content-between mt-1">
                                             <div class="fw-bold text-danger"><i class="fas fa-chevron-left"></i>
                                                 Tidak layak menerima</div>
@@ -138,8 +250,25 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="pekerjaanAyah" class="form-label">Pekerjaan Ayah</label>
+                                    <label for="pekerjaanAyah" class="form-label fw-bold mb-0">Pekerjaan Ayah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elAyahPekerjaan">
+                                                @if ($nilaiSurvey->ayahPekerjaanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ayahPekerjaanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.pekerjaan_ayah.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <select class="form-select" id="pekerjaanAyah"
+                                        v-on:change="change('ayahPekerjaan', survey.pekerjaan.ayah.pekerjaan, '#elAyahPekerjaan')"
                                         v-model="survey.pekerjaan.ayah.pekerjaan">
                                         <option value="" disabled selected>-- Pilih Pekerjaan --</option>
                                         <option v-for="item in master.pekerjaan" :value="item.value">
@@ -149,12 +278,34 @@
                                 </div>
                                 <div class="mb-3" v-if="survey.pekerjaan.ayah.pekerjaan === 'LAINNYA'">
                                     <label for="pekerjaanAyahLainnya" class="form-label">Tulis Pekerjaan Lainnya</label>
-                                    <input type="text" class="form-control" id="pekerjaanAyahLainnya"
+                                    <input
+                                        v-on:input="liveChage('ayahPekerjaanLainnya', survey.pekerjaan.ayah.pekerjaanLainnya, '#elAyahPekerjaan', 'tidak')"
+                                        type="text" class="form-control" id="pekerjaanAyahLainnya"
                                         v-model="survey.pekerjaan.ayah.pekerjaanLainnya">
                                 </div>
-                                <div class="mb-5">
-                                    <label for="penghasilanAyah" class="form-label">Penghasilan Ayah</label>
+                                <div class="my-5">
+                                    <hr>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="penghasilanAyah" class="form-label mb-0 fw-bold">Penghasilan Ayah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elAyahPenghasilan">
+                                                @if ($nilaiSurvey->ayahPenghasilanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ayahPenghasilanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.penghasilan_ayah.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <select class="form-select" id="penghasilanAyah"
+                                        v-on:change="change('ayahPenghasilan', survey.pekerjaan.ayah.penghasilan, '#elAyahPenghasilan')"
                                         v-model="survey.pekerjaan.ayah.penghasilan">
                                         <option value="" disabled selected>-- Pilih Penghasilan --</option>
                                         <option v-for="item in master.penghasilan" :value="item.value">
@@ -162,9 +313,29 @@
                                         </option>
                                     </select>
                                 </div>
+                                <div class="my-5">
+                                    <hr>
+                                </div>
                                 <div class="mb-3">
-                                    <label for="pekerjaanIbu" class="form-label">Pekerjaan Ibu</label>
+                                    <label for="pekerjaanIbu" class="form-label mb-0 fw-bold">Pekerjaan Ibu</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elIbuPekerjaan">
+                                                @if ($nilaiSurvey->ibuPekerjaanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ibuPekerjaanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.pekerjaan_ibu.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <select class="form-select" id="pekerjaanIbu"
+                                        v-on:change="change('ibuPekerjaan', survey.pekerjaan.ibu.pekerjaan, '#elIbuPekerjaan')"
                                         v-model="survey.pekerjaan.ibu.pekerjaan">
                                         <option value="" disabled selected>-- Pilih Pekerjaan --</option>
                                         <option v-for="item in master.pekerjaan" :value="item.value">
@@ -174,24 +345,83 @@
                                 </div>
                                 <div class="mb-3" v-if="survey.pekerjaan.ibu.pekerjaan === 'LAINNYA'">
                                     <label for="pekerjaanIbuLainnya" class="form-label">Tulis Pekerjaan Lainnya</label>
-                                    <input type="text" class="form-control" id="pekerjaanIbuLainnya"
+                                    <input type="text"
+                                        v-on:input="liveChage('ibuPekerjaanLainnya', survey.pekerjaan.ibu.pekerjaanLainnya, '#elIbuPekerjaan', 'tidak')"
+                                        class="form-control" id="pekerjaanIbuLainnya"
                                         v-model="survey.pekerjaan.ibu.pekerjaanLainnya">
                                 </div>
+                                <div class="my-5">
+                                    <hr>
+                                </div>
                                 <div class="mb-5">
-                                    <label for="penghasilanIbu" class="form-label">Penghasilan Ibu</label>
+                                    <label for="penghasilanIbu" class="form-label mb-0 fw-bold">Penghasilan Ibu</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elIbuPenghasilan">
+                                                @if ($nilaiSurvey->ibuPenghasilanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->ibuPenghasilanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.penghasilan_ibu.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <select class="form-select" id="penghasilanIbu"
-                                        v-model="survey.pekerjaan.ibu.penghasilan">
+                                        v-model="survey.pekerjaan.ibu.penghasilan"
+                                        v-on:change="change('ibuPenghasilan', survey.pekerjaan.ibu.penghasilan, '#elIbuPenghasilan')">
                                         <option value="" disabled selected>-- Pilih Penghasilan --</option>
                                         <option v-for="item in master.penghasilan" :value="item.value">
                                             @{{ item.label }}
                                         </option>
                                     </select>
                                 </div>
+                                <div class="my-5">
+                                    <hr>
+                                </div>
                                 <div class="mb-3">
-                                    <label for="jumlahTanggungan" class="form-label">Jumlah Tanggungan</label>
+                                    <label for="jumlahTanggunganKeluarga" class="form-label mb-0 fw-bold">Jumlah
+                                        Tanggungan Keluarga</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elTanggunganKeluarga">
+                                                @if ($nilaiSurvey->tanggunganKeluargaUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->tanggunganKeluargaUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.tanggungan_keluarga.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <input type="number" style="max-width: 170px; width:100%;"
+                                        v-on:input="liveChage('tanggunganKeluarga', survey.tanggunganKeluarga, '#elTanggunganKeluarga', 'tidak')"
                                         class="form-control text-center" min="1" max="99"
-                                        id="jumlahTanggungan" v-model="survey.tanggungan">
+                                        id="jumlahTanggunganKeluarga" v-model="survey.tanggunganKeluarga">
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('tanggunganKeluargaStatus')"
+                                                v-model="survey.tanggunganKeluargaStatus" name="tanggunganKeluarga"
+                                                value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('tanggunganKeluargaStatus')"
+                                                v-model="survey.tanggunganKeluargaStatus" name="tanggunganKeluarga"
+                                                value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -202,41 +432,180 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="kepemilikanRumah" class="form-label">Status Kepemilikan Rumah</label>
-                                    <select class="form-select" id="kepemilikanRumah" v-model="survey.kepemilikanRUmah">
+                                    <label for="kepemilikanRumah" class="form-label mb-0 fw-bold">Status Kepemilikan
+                                        Rumah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elKepemilikanRumah">
+                                                @if ($nilaiSurvey->kepemilikanRumahUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->kepemilikanRumahUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.kepemilikan_rumah.valOption }}</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select"
+                                        v-on:change="change('kepemilikanRumah', survey.kepemilikanRumah, '#elKepemilikanRumah')"
+                                        id="kepemilikanRumah" v-model="survey.kepemilikanRumah">
                                         <option value="" disabled selected>-- Pilih Status --</option>
                                         <option v-for="item in master.kepemilikanRumah" :value="item.value">
                                             @{{ item.label }}
                                         </option>
                                     </select>
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('kepemilikanRumahStatus')"
+                                                v-model="survey.kepemilikanRumahStatus" name="kepemilikanRumah"
+                                                value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('kepemilikanRumahStatus')"
+                                                v-model="survey.kepemilikanRumahStatus" name="kepemilikanRumah"
+                                                value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <hr>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="bangunanRumah" class="form-label">Jenis Bangunan Rumah</label>
-                                    <select class="form-select" id="bangunanRumah" v-model="survey.bangunanRumah">
+                                    <label for="bangunanRumah" class="form-label fw-bold mb-0">Jenis Bangunan
+                                        Rumah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elBangunanRumah">
+                                                @if ($nilaiSurvey->bangunanRumahUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->bangunanRumahUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.bangunan_rumah.valOption }}</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select"
+                                        v-on:change="change('bangunanRumah', survey.bangunanRumah, '#elBangunanRumah')"
+                                        id="bangunanRumah" v-model="survey.bangunanRumah">
                                         <option value="" disabled selected>-- Pilih Jenis --</option>
                                         <option v-for="item in master.bangunanRumah" :value="item.value">
                                             @{{ item.label }}
                                         </option>
                                     </select>
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('bangunanRumahStatus')"
+                                                v-model="survey.bangunanRumahStatus" name="bangunanRumah" value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('bangunanRumahStatus')"
+                                                v-model="survey.bangunanRumahStatus" name="bangunanRumah" value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <hr>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="kepemilikanListrik" class="form-label">Status Kepemilikan Listrik</label>
+                                    <label for="kepemilikanListrik" class="form-label fw-bold mb-0">Status Kepemilikan
+                                        Listrik</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elKepemilikanListrik">
+                                                @if ($nilaiSurvey->kepemilikanListrikUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->kepemilikanListrikUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.kepemilikan_listrik.valOption }}</div>
+                                        </div>
+                                    </div>
                                     <select class="form-select" id="kepemilikanListrik"
+                                        v-on:change="change('kepemilikanListrik', survey.kepemilikanListrik, '#elKepemilikanListrik')"
                                         v-model="survey.kepemilikanListrik">
                                         <option value="" disabled selected>-- Pilih Status --</option>
                                         <option v-for="item in master.kepemilikanListrik" :value="item.value">
                                             @{{ item.label }}
                                         </option>
                                     </select>
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('kepemilikanListrikStatus')"
+                                                v-model="survey.kepemilikanListrikStatus" name="kepemilikanListrik"
+                                                value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio"
+                                                v-on:change="changeStatusSesuai('kepemilikanListrikStatus')"
+                                                v-model="survey.kepemilikanListrikStatus" name="kepemilikanListrik"
+                                                value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="my-5">
+                                    <hr>
                                 </div>
                                 <div class="mb-5">
-                                    <label for="lantaiRumah" class="form-label">Jenis Lantai Rumah</label>
-                                    <select class="form-select" id="lantaiRumah" v-model="survey.lantaiRumah">
+                                    <label for="lantaiRumah" class="form-label fw-bold mb-0">Jenis Lantai Rumah</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elLantaiRumah">
+                                                @if ($nilaiSurvey->lantaiRumahUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->lantaiRumahUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum dinilai</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Isian Mahasiswa: <div class="fst-italic">@{{ isianMahasiswa.lantai_rumah.valOption }}</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select"
+                                        v-on:change="change('lantaiRumah', survey.lantaiRumah, '#elLantaiRumah')"
+                                        id="lantaiRumah" v-model="survey.lantaiRumah">
                                         <option value="" disabled selected>-- Pilih Jenis --</option>
                                         <option v-for="item in master.lantaiRumah" :value="item.value">
                                             @{{ item.label }}
                                         </option>
                                     </select>
+                                    <div class="radio-mini-form mt-2">
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('lantaiRumahStatus')"
+                                                v-model="survey.lantaiRumahStatus" name="lantaiRumah" value="sesuai">
+                                            <span>Sesuai</span>
+                                        </label>
+                                        <label class="radio-mini-label">
+                                            <input type="radio" v-on:change="changeStatusSesuai('lantaiRumahStatus')"
+                                                v-model="survey.lantaiRumahStatus" name="lantaiRumah" value="tidak">
+                                            <span>Tidak Sesuai</span>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <div class="card">
@@ -252,22 +621,38 @@
                                                     <label class="form-label text-muted small">Tampak Samping</label>
                                                     <img src="{{ $pendaftar->pendaftar->pemberkasan->data->pemberkasan->file_rumah_samping->value->url }}"
                                                         class="rounded w-100 mb-3" alt="">
+                                                    <div class="d-flex flex-column mb-2">
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Status: <div id="elKondisiRumah">
+                                                                @if ($nilaiSurvey->kondisiRumahUpdateAt)
+                                                                    <span class="fw-bold text-success"><i
+                                                                            class="fas fa-check-circle"></i>
+                                                                        update
+                                                                        {{ formatDateUpdateAt($nilaiSurvey->kondisiRumahUpdateAt) }}</span>
+                                                                @else
+                                                                    <span class="text-warning">Belum dinilai</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <div class="checked-kecocokan">
                                                         <div class="radio-widget-mini">
-                                                            <form class="radio-mini-form">
+                                                            <div class="radio-mini-form">
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiRumah', 'sesuai', '#elKondisiRumah','sesuai')"
                                                                         v-model="survey.kondisiRumah.rumah"
                                                                         name="kondisiRumahRumah" value="sesuai">
                                                                     <span>Sesuai</span>
                                                                 </label>
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiRumah', 'tidak', '#elKondisiRumah','tidak')"
                                                                         v-model="survey.kondisiRumah.rumah"
                                                                         name="kondisiRumahRumah" value="tidak">
                                                                     <span>Tidak Sesuai</span>
                                                                 </label>
-                                                            </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -287,33 +672,51 @@
                                                 </div>
                                                 <div class="col-12 col-md-6 col-lg-5 mb-3 mb-md-0">
                                                     <label class="form-label text-muted small">Penilaian</label>
+                                                    <div class="d-flex flex-column mb-2">
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Status: <div id="elKondisiDapur">
+                                                                @if ($nilaiSurvey->kondisiDapurUpdateAt)
+                                                                    <span class="fw-bold text-success"><i
+                                                                            class="fas fa-check-circle"></i>
+                                                                        update
+                                                                        {{ formatDateUpdateAt($nilaiSurvey->kondisiDapurUpdateAt) }}</span>
+                                                                @else
+                                                                    <span class="text-warning">Belum dinilai</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Tingkat kelayakan:
+                                                            <span class="badge"
+                                                                :class="kondisiDapurBadgeClass">@{{ kondisiDapurSufficiancyText }}</span>
+                                                        </div>
+                                                    </div>
                                                     <div class="checked-kecocokan">
                                                         <div class="radio-widget-mini mb-3">
-                                                            <form class="radio-mini-form">
+                                                            <div class="radio-mini-form">
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiDapur', survey.kondisiRumah.dapur.kondisi, '#elKondisiDapur', 'sesuai')"
                                                                         v-model="survey.kondisiRumah.dapur.status"
                                                                         name="kondisiRumahDapur" value="sesuai">
                                                                     <span>Sesuai</span>
                                                                 </label>
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiDapur', survey.kondisiRumah.dapur.kondisi, '#elKondisiDapur', 'tidak')"
                                                                         v-model="survey.kondisiRumah.dapur.status"
                                                                         name="kondisiRumahDapur" value="tidak">
                                                                     <span>Tidak Sesuai</span>
                                                                 </label>
-                                                            </form>
+                                                            </div>
                                                         </div>
                                                     </div>
-
-                                                    <span v-if="survey.kondisiRumah.dapur.status" class="badge"
-                                                        :class="kondisiDapurBadgeClass"
-                                                        v-html="kondisiDapurSufficiancyText"></span>
                                                 </div>
                                             </div>
                                             <div class="mt-3">
                                                 <div class="d-flex flex-column">
                                                     <input type="range" class="form-range" min="1"
+                                                        v-on:change="change('kondisiDapur', survey.kondisiRumah.dapur.kondisi, '#elKondisiDapur', survey.kondisiRumah.dapur.status)"
                                                         max="10" id="kondisiDapur" step="0.5"
                                                         :disabled="!survey.kondisiRumah.dapur.status"
                                                         v-model.number="survey.kondisiRumah.dapur.kondisi">
@@ -342,34 +745,52 @@
                                                 </div>
                                                 <div class="col-12 col-md-6 col-lg-5 mb-3 mb-md-0">
                                                     <label class="form-label text-muted small">Penilaian</label>
+                                                    <div class="d-flex flex-column mb-2">
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Status: <div id="elKondisiKamarMandi">
+                                                                @if ($nilaiSurvey->kondisiKamarMandiUpdateAt)
+                                                                    <span class="fw-bold text-success"><i
+                                                                            class="fas fa-check-circle"></i>
+                                                                        update
+                                                                        {{ formatDateUpdateAt($nilaiSurvey->kondisiKamarMandiUpdateAt) }}</span>
+                                                                @else
+                                                                    <span class="text-warning">Belum dinilai</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Tingkat kelayakan:
+                                                            <span class="badge"
+                                                                :class="kondisiKamarMandiBadgeClass">@{{ kondisiKamarMandiSufficiancyText }}</span>
+                                                        </div>
+                                                    </div>
                                                     <div class="checked-kecocokan">
                                                         <div class="radio-widget-mini mb-3">
-                                                            <form class="radio-mini-form">
+                                                            <div class="radio-mini-form">
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiKamarMandi', survey.kondisiRumah.kamarMandi.kondisi, '#elKondisiKamarMandi', 'sesuai')"
                                                                         v-model="survey.kondisiRumah.kamarMandi.status"
                                                                         name="kondisiKamarMandi" value="sesuai">
                                                                     <span>Sesuai</span>
                                                                 </label>
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiKamarMandi', survey.kondisiRumah.kamarMandi.kondisi, '#elKondisiKamarMandi', 'tidak')"
                                                                         v-model="survey.kondisiRumah.kamarMandi.status"
                                                                         name="kondisiKamarMandi" value="tidak">
                                                                     <span>Tidak Sesuai</span>
                                                                 </label>
-                                                            </form>
+                                                            </div>
                                                         </div>
                                                     </div>
-
-                                                    <span v-if="survey.kondisiRumah.kamarMandi.status" class="badge"
-                                                        :class="kondisiKamarMandiBadgeClass"
-                                                        v-html="kondisiKamarMandiSufficiancyText"></span>
                                                 </div>
                                             </div>
                                             <div class="mt-3">
                                                 <div class="d-flex flex-column">
                                                     <input type="range" class="form-range" min="1"
                                                         max="10" id="kondisiKamarMandi" step="0.5"
+                                                        v-on:change="change('kondisiKamarMandi', survey.kondisiRumah.kamarMandi.kondisi, '#elKondisiKamarMandi', survey.kondisiRumah.kamarMandi.status)"
                                                         :disabled="!survey.kondisiRumah.kamarMandi.status"
                                                         v-model.number="survey.kondisiRumah.kamarMandi.kondisi">
                                                     <div class="d-flex justify-content-between mt-1">
@@ -397,34 +818,52 @@
                                                 </div>
                                                 <div class="col-12 col-md-6 col-lg-5 mb-3 mb-md-0">
                                                     <label class="form-label text-muted small">Penilaian</label>
+                                                    <div class="d-flex flex-column mb-2">
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Status: <div id="elKondisiWc">
+                                                                @if ($nilaiSurvey->kondisiWcUpdateAt)
+                                                                    <span class="fw-bold text-success"><i
+                                                                            class="fas fa-check-circle"></i>
+                                                                        update
+                                                                        {{ formatDateUpdateAt($nilaiSurvey->kondisiWcUpdateAt) }}</span>
+                                                                @else
+                                                                    <span class="text-warning">Belum dinilai</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                                            Tingkat kelayakan:
+                                                            <span class="badge"
+                                                                :class="kondisiWcMandiBadgeClass">@{{ kondisiWciSufficiancyText }}</span>
+                                                        </div>
+                                                    </div>
                                                     <div class="checked-kecocokan">
                                                         <div class="radio-widget-mini mb-3">
-                                                            <form class="radio-mini-form">
+                                                            <div class="radio-mini-form">
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiWc', survey.kondisiRumah.wc.kondisi, '#elKondisiWc', 'sesuai')"
                                                                         v-model="survey.kondisiRumah.wc.status"
                                                                         name="kondisiWC" value="sesuai">
                                                                     <span>Sesuai</span>
                                                                 </label>
                                                                 <label class="radio-mini-label">
                                                                     <input type="radio"
+                                                                        v-on:change="change('kondisiWc', survey.kondisiRumah.wc.kondisi, '#elKondisiWc', 'tidak')"
                                                                         v-model="survey.kondisiRumah.wc.status"
                                                                         name="kondisiWC" value="tidak">
                                                                     <span>Tidak Sesuai</span>
                                                                 </label>
-                                                            </form>
+                                                            </div>
                                                         </div>
                                                     </div>
-
-                                                    <span v-if="survey.kondisiRumah.wc.status" class="badge"
-                                                        :class="kondisiWcMandiBadgeClass"
-                                                        v-html="kondisiWciSufficiancyText"></span>
                                                 </div>
                                             </div>
                                             <div class="mt-3">
                                                 <div class="d-flex flex-column">
                                                     <input type="range" class="form-range" min="1"
                                                         max="10" id="kondisiWC" step="0.5"
+                                                        v-on:change="change('kondisiWc', survey.kondisiRumah.wc.kondisi, '#elKondisiWc', survey.kondisiRumah.wc.status)"
                                                         :disabled="!survey.kondisiRumah.wc.status"
                                                         v-model.number="survey.kondisiRumah.wc.kondisi">
                                                     <div class="d-flex justify-content-between mt-1">
@@ -444,19 +883,33 @@
                         </div>
                         <div class="card">
                             <div class="card-body">
-                                <div v-if="surveyErrors">
+                                {{-- <div v-if="surveyErrors">
                                     <div class="fw-bold text-danger">Kesalahan Validasi</div>
                                     <ol class="text-danger">
                                         <li v-for="error in surveyErrors">@{{ error }}</li>
                                     </ol>
-                                </div>
-                                <div class="d-flex gap-3">
-                                    <textarea class="form-control" v-model="survey.catatan" placeholder="Catatan (opsional)" name=""
-                                        id=""></textarea>
-                                    <button class="btn btn-lg btn-primary" type="submit"
+                                </div> --}}
+                                <div xclass="d-flex gap-3">
+                                    <label for="catatan" class="form-label fw-bold mb-0">Catatan (Opsional)</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elCatatan">
+                                                @if ($nilaiSurvey->catatanUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->catatanUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum diperbarui</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <textarea v-on:input="liveChage('catatan', survey.catatan, '#elCatatan')" class="form-control"
+                                        v-model="survey.catatan" placeholder="Ketikkan sesuatu..." id="catatan"></textarea>
+                                    {{-- <button class="btn btn-lg btn-primary" type="submit"
                                         :disabled="surveyErrors !== null">
                                         <i class="fas fa-save me-1"></i> Simpan
-                                    </button>
+                                    </button> --}}
                                 </div>
                             </div>
                         </div>
@@ -512,6 +965,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         /* custom circle */
@@ -544,6 +998,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script>
+        let timeout = {};
         new Vue({
             el: '#app',
             data: {
@@ -555,48 +1010,60 @@
                     lantaiRumah: @json($masterLantaiRumah),
                     kepemilikanListrik: @json($masterKepemilikanListrik),
                 },
+                isianMahasiswa: @json($pendaftar->pendaftar->biodata_pendaftar->data->biodata),
                 survey: {
                     ayah: {
-                        nama: '',
-                        kesehatan: 7
+                        nama: '{{ $nilaiSurvey->ayahNama }}',
+                        kesehatan: {{ $nilaiSurvey->ayahKesehatan }},
+                        status: '{{ $nilaiSurvey->ayahNamaStatus }}'
                     },
                     ibu: {
-                        nama: '',
-                        kondisi: 6
+                        nama: '{{ $nilaiSurvey->ibuNama }}',
+                        kondisi: {{ $nilaiSurvey->ibuKondisi }},
+                        status: '{{ $nilaiSurvey->ibuNamaStatus }}'
                     },
                     pekerjaan: {
                         ayah: {
-                            pekerjaanLainnya: '',
-                            pekerjaan: 4,
-                            penghasilan: 9
+                            pekerjaanLainnya: '{{ $nilaiSurvey->ayahPekerjaanLainnya }}',
+                            pekerjaan: {!! $nilaiSurvey->ayahPekerjaan == 'LAINNYA'
+                                ? "'" . $nilaiSurvey->ayahPekerjaan . "'"
+                                : $nilaiSurvey->ayahPekerjaan !!},
+                            penghasilan: {{ $nilaiSurvey->ayahPenghasilan }}
                         },
                         ibu: {
-                            pekerjaanLainnya: '',
-                            pekerjaan: 8,
-                            penghasilan: 9
+                            pekerjaanLainnya: '{{ $nilaiSurvey->ibuPekerjaanLainnya }}',
+                            pekerjaan: {!! $nilaiSurvey->ibuPekerjaan == 'LAINNYA'
+                                ? "'" . $nilaiSurvey->ibuPekerjaan . "'"
+                                : $nilaiSurvey->ibuPekerjaan !!},
+                            penghasilan: {{ $nilaiSurvey->ibuPenghasilan }}
                         }
                     },
-                    tanggungan: 1,
-                    kepemilikanRUmah: 1,
-                    bangunanRumah: 1,
-                    lantaiRumah: 4,
-                    kepemilikanListrik: 1,
+                    tanggunganKeluarga: {{ $nilaiSurvey->tanggunganKeluarga }},
+                    tanggunganKeluargaStatus: '{{ $nilaiSurvey->tanggunganKeluargaStatus }}',
+                    kepemilikanRumah: {{ $nilaiSurvey->kepemilikanRumah }},
+                    kepemilikanRumahStatus: '{{ $nilaiSurvey->kepemilikanRumahStatus }}',
+                    bangunanRumah: {{ $nilaiSurvey->bangunanRumah }},
+                    bangunanRumahStatus: '{{ $nilaiSurvey->bangunanRumahStatus }}',
+                    lantaiRumah: {{ $nilaiSurvey->lantaiRumah }},
+                    lantaiRumahStatus: '{{ $nilaiSurvey->lantaiRumahStatus }}',
+                    kepemilikanListrik: {{ $nilaiSurvey->kepemilikanListrik }},
+                    kepemilikanListrikStatus: '{{ $nilaiSurvey->kepemilikanListrikStatus }}',
                     kondisiRumah: {
-                        rumah: '',
+                        rumah: '{{ $nilaiSurvey->kondisiRumahStatus }}',
                         dapur: {
-                            status: '',
-                            kondisi: 4
+                            status: '{{ $nilaiSurvey->kondisiDapurStatus }}',
+                            kondisi: {{ $nilaiSurvey->kondisiDapur }}
                         },
                         kamarMandi: {
-                            status: '',
-                            kondisi: 4
+                            status: '{{ $nilaiSurvey->kondisiKamarMandiStatus }}',
+                            kondisi: {{ $nilaiSurvey->kondisiKamarMandi }}
                         },
                         wc: {
-                            status: '',
-                            kondisi: 4
+                            status: '{{ $nilaiSurvey->kondisiWcStatus }}',
+                            kondisi: {{ $nilaiSurvey->kondisiWc }}
                         },
                     },
-                    catatan: ''
+                    catatan: '{{ $nilaiSurvey->catatan }}'
                 }
             },
             computed: {
@@ -636,8 +1103,8 @@
                         errors.push("Penghasilan ibu wajib diisi");
 
                     // === DATA UMUM ===
-                    if (!s.tanggungan) errors.push("Jumlah tanggungan wajib diisi");
-                    if (!s.kepemilikanRUmah) errors.push("Kepemilikan rumah wajib diisi");
+                    if (!s.tanggunganKeluarga) errors.push("Jumlah tanggungan keluarga wajib diisi");
+                    if (!s.kepemilikanRumah) errors.push("Kepemilikan rumah wajib diisi");
                     if (!s.bangunanRumah) errors.push("Jenis bangunan rumah wajib diisi");
                     if (!s.lantaiRumah) errors.push("Jenis lantai rumah wajib diisi");
                     if (!s.kepemilikanListrik) errors.push("Kepemilikan listrik wajib diisi");
@@ -664,7 +1131,7 @@
                     return errors.length === 0 ? null : errors;
                 },
                 kesehatanAyahSufficiancyText() {
-                    return `Tingkat kelayakan ${this.survey.ayah.kesehatan}`;
+                    return this.survey.ayah.kesehatan;
                 },
                 kesehatanAyahBadgeClass() {
                     const value = this.survey.ayah.kesehatan;
@@ -674,7 +1141,7 @@
                     return 'bg-success';
                 },
                 kondisiIbuSufficiancyText() {
-                    return `Tingkat kelayakan ${this.survey.ibu.kondisi}`;
+                    return `${this.survey.ibu.kondisi}`;
                 },
                 kondisiIbuBadgeClass() {
                     const value = this.survey.ibu.kondisi;
@@ -684,7 +1151,7 @@
                     return 'bg-success';
                 },
                 kondisiDapurSufficiancyText() {
-                    return `Tingkat kelayakan ${this.survey.kondisiRumah.dapur.kondisi}`;
+                    return `${this.survey.kondisiRumah.dapur.kondisi}`;
                 },
                 kondisiDapurBadgeClass() {
                     const value = this.survey.kondisiRumah.dapur.kondisi;
@@ -694,7 +1161,7 @@
                     return 'bg-success';
                 },
                 kondisiKamarMandiSufficiancyText() {
-                    return `Tingkat kelayakan ${this.survey.kondisiRumah.kamarMandi.kondisi}`;
+                    return this.survey.kondisiRumah.kamarMandi.kondisi;
                 },
                 kondisiKamarMandiBadgeClass() {
                     const value = this.survey.kondisiRumah.kamarMandi.kondisi;
@@ -704,7 +1171,7 @@
                     return 'bg-success';
                 },
                 kondisiWciSufficiancyText() {
-                    return `Tingkat kelayakan ${this.survey.kondisiRumah.wc.kondisi}`;
+                    return this.survey.kondisiRumah.wc.kondisi;
                 },
                 kondisiWcMandiBadgeClass() {
                     const value = this.survey.kondisiRumah.wc.kondisi;
@@ -720,9 +1187,127 @@
                     // using an AJAX call (e.g., with axios).
                     console.log('Submitting survey data:', JSON.stringify(this.survey, null, 2));
                     alert('Data survey (pura-pura) berhasil disimpan! Cek console log untuk melihat datanya.');
+                },
+                changeStatusSesuai(key) {
+                    switch (key) {
+                        case 'ayahNamaStatus':
+                            if (this.survey.ayah.status == 'sesuai') {
+                                this.survey.ayah.nama = this.isianMahasiswa.nama_ayah.value
+                                this.change('ayahNama', this.survey.ayah.nama, '#elAyahNama', this.survey.ayah
+                                    .status);
+                            } else {
+                                this.survey.ayah.nama = ''
+                            }
+                            break;
+                        case 'ibuNamaStatus':
+                            if (this.survey.ibu.status == 'sesuai') {
+                                this.survey.ibu.nama = this.isianMahasiswa.nama_ibu.value
+                                this.change('ibuNama', this.survey.ibu.nama, '#elIbuNama', this.survey.ibu
+                                    .status);
+                            } else {
+                                this.survey.ibu.nama = ''
+                            }
+                            break;
+                        case 'kepemilikanRumahStatus':
+                            if (this.survey.kepemilikanRumahStatus == 'sesuai') {
+                                this.survey.kepemilikanRumah = +this.isianMahasiswa.kepemilikan_rumah.value
+                                this.change('kepemilikanRumah', this.survey.kepemilikanRumah, '#elKepemilikanRumah',
+                                    this.survey.kepemilikanRumahStatus);
+                            } else {
+                                this.survey.kepemilikanRumah = ''
+                            }
+                            break;
+                        case 'bangunanRumahStatus':
+                            if (this.survey.bangunanRumahStatus == 'sesuai') {
+                                this.survey.bangunanRumah = +this.isianMahasiswa.bangunan_rumah.value
+                                this.change('bangunanRumah', this.survey.bangunanRumah, '#elBangunanRumah',
+                                    this.survey.bangunanRumahStatus);
+                            } else {
+                                this.survey.bangunanRumah = ''
+                            }
+                            break;
+                        case 'kepemilikanListrikStatus':
+                            if (this.survey.kepemilikanListrikStatus == 'sesuai') {
+                                this.survey.kepemilikanListrik = +this.isianMahasiswa.kepemilikan_listrik.value
+                                this.change('kepemilikanListrik', this.survey.kepemilikanListrik,
+                                    '#elKepemilikanListrik',
+                                    this.survey.kepemilikanListrikStatus);
+                            } else {
+                                this.survey.kepemilikanListrik = ''
+                            }
+                            break;
+                        case 'lantaiRumahStatus':
+                            if (this.survey.lantaiRumahStatus == 'sesuai') {
+                                this.survey.lantaiRumah = +this.isianMahasiswa.lantai_rumah.value
+                                this.change('lantaiRumahStatus', this.survey.lantaiRumahStatus,
+                                    '#elLantaiRumah',
+                                    this.survey.lantaiRumahStatus);
+                            } else {
+                                this.survey.lantaiRumah = ''
+                            }
+                            break;
+                        case 'tanggunganKeluargaStatus':
+                            if (this.survey.tanggunganKeluargaStatus == 'sesuai') {
+                                this.survey.tanggunganKeluarga = +this.isianMahasiswa.tanggungan_keluarga.value
+                                this.change('tanggunganKeluarga', this.survey.tanggunganKeluarga,
+                                    '#elTanggunganKeluarga', this.survey
+                                    .tanggunganKeluargaStatus);
+                            } else {
+                                this.survey.ibu.nama = ''
+                            }
+                            break;
+                    }
+                },
+                change(key, data, el, sesuai) {
+                    if (key == 'ayahPekerjaan' && data == 'LAINNYA') {
+                        // SKIP
+                    } else if (key == 'ibuPekerjaan' && data == 'LAINNYA') {
+                        // SKIP
+                    } else {
+                        saveOnce(key, data, el, sesuai);
+                    }
+                },
+                liveChage(key, data, el, sesuai, ms = 1000) { // ms = milissecond delay
+                    if (timeout[key]) {
+                        clearTimeout(timeout[key]);
+                        delete timeout[key];
+                    }
+                    timeout[key] = setTimeout(() => {
+                        if (key == 'ayahPekerjaanLainnya') {
+                            saveOnce('ayahPekerjaan', 'LAINNYA:' + data, el, sesuai);
+                        } else if (key == 'ibuPekerjaanLainnya') {
+                            saveOnce('ibuPekerjaan', 'LAINNYA:' + data, el, sesuai);
+                        } else {
+                            saveOnce(key, data, el, sesuai);
+                        }
+                    }, ms);
+
                 }
             }
         });
+
+        function saveOnce(key, data, el, sesuai) {
+            $(el).html('<span class="fst-italic text-muted">Menyimpan...</span>');
+            $.ajax({
+                url: "{{ route('surveyor.survey.update.skor') }}",
+                type: "POST",
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    key,
+                    data,
+                    sesuai: sesuai ?? null,
+                    pendaftar: '{{ $pendaftar->pendaftar->id }}'
+                },
+                success: (respon) => {
+                    $(el).html(
+                        `<span class="fw-bold text-success"><i class="fas fa-check-circle"></i> update ${respon.date}</span>`
+                    );
+                },
+                error: () => {
+                    $(el).html('<span class="fw-bold text-danger">Gagal disimpan!</span>')
+                }
+            })
+        }
     </script>
 @endpush
 

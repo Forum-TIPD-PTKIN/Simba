@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Surveyor;
 
 use App\Http\Controllers\Controller;
+use App\Models\HasilSurvey;
 use App\Models\MasterStatis;
 use App\Models\Surveyor;
 use App\Models\SurveyorDetail;
@@ -125,11 +126,103 @@ class SurveyController extends Controller
             })
             ->first();
 
+        // return $pendaftar;
+
         if (!$pendaftar) {
             return redirect()->route('surveyor.survey');
         }
 
-        return $pendaftar;
+        $nilai = HasilSurvey::where('pendaftar_id', $pendaftar->pendaftar->id)->get();
+
+        $nilaiSurvey = (object)[
+            'ayahNama' => '',
+            'ayahKesehatan' => 1,
+            'ayahKesehatanUpdateAt' => null,
+            'ayahNamaStatus' => '',
+            'ayahNamaUpdateAt' => null,
+            'ibuNama' => '',
+            'ibuKondisi' => 1,
+            'ibuKondisiUpdateAt' => null,
+            'ibuNamaStatus' => '',
+            'ibuNamaUpdateAt' => null,
+            'ayahPekerjaan' => 1,
+            'ayahPekerjaanUpdateAt' => null,
+            'ayahPekerjaanLainnya' => '',
+            'ayahPenghasilan' => 1,
+            'ayahPenghasilanUpdateAt' => null,
+            'ibuPekerjaan' => 1,
+            'ibuPekerjaanUpdateAt' => null,
+            'ibuPekerjaanLainnya' => '',
+            'ibuPenghasilan' => 1,
+            'ibuPenghasilanUpdateAt' => null,
+            'tanggunganKeluarga' => 1,
+            'tanggunganKeluargaUpdateAt' => null,
+            'tanggunganKeluargaStatus' => '',
+            'kepemilikanRumah' => 1,
+            'kepemilikanRumahUpdateAt' => null,
+            'kepemilikanRumahStatus' => '',
+            'bangunanRumah' => 1,
+            'bangunanRumahUpdateAt' => null,
+            'bangunanRumahStatus' => '',
+            'lantaiRumah' => 1,
+            'lantaiRumahUpdateAt' => null,
+            'lantaiRumahStatus' => '',
+            'kepemilikanListrik' => 1,
+            'kepemilikanListrikUpdateAt' => null,
+            'kepemilikanListrikStatus' => '',
+            'kondisiRumahStatus' => '',
+            'kondisiRumahUpdateAt' => null,
+            'kondisiDapurStatus' => '',
+            'kondisiDapur' => 1,
+            'kondisiDapurUpdateAt' => null,
+            'kondisiKamarMandiStatus' => '',
+            'kondisiKamarMandi' => 1,
+            'kondisiKamarMandiUpdateAt' => null,
+            'kondisiWcStatus' => '',
+            'kondisiWc' => 1,
+            'kondisiWcUpdateAt' => null,
+            'catatan' => '',
+            'catatanUpdateAt' => null,
+        ];
+
+        foreach ($nilai as $key => $value) {
+            $nilaiSurvey->{$value->aspek} = $value->nilai;
+            $nilaiSurvey->{$value->aspek . 'UpdateAt'} = $value->created_at;
+
+            $autoStatus = [
+                'ayahNama',
+                'ibuNama',
+                'tanggunganKeluarga',
+                'kepemilikanRumah',
+                'bangunanRumah',
+                'lantaiRumah',
+                'kepemilikanListrik',
+                'kondisiRumah',
+                'kondisiDapur',
+                'kondisiKamarMandi',
+                'kondisiWc',
+            ];
+            if (in_array($value->aspek, $autoStatus)) {
+                $nilaiSurvey->{$value->aspek . 'Status'} = $value->sesuai ? 'sesuai' : 'tidak';
+            } else if ($value->aspek == 'ayahPekerjaan') {
+                $cek = strpos($value->nilai, 'LAINNYA:');
+                if ($cek === 0) {
+                    $nilaiSurvey->{'ayahPekerjaanLainnya'} = str_replace('LAINNYA:', '', $value->nilai);
+                    $nilaiSurvey->{'ayahPekerjaan'} = 'LAINNYA';
+                } else {
+                    $nilaiSurvey->{'ayahPekerjaan'} = $value->nilai;
+                }
+            } else if ($value->aspek == 'ibuPekerjaan') {
+                $cek = strpos($value->nilai, 'LAINNYA:');
+                if ($cek === 0) {
+                    $nilaiSurvey->{'ibuPekerjaanLainnya'} = str_replace('LAINNYA:', '', $value->nilai);
+                    $nilaiSurvey->{'ibuPekerjaan'} = 'LAINNYA';
+                } else {
+                    $nilaiSurvey->{'ibuPekerjaan'} = $value->nilai;
+                }
+            }
+        }
+
 
         return view('surveyor.survey.detail', compact(
             'masterPenghasilan',
@@ -139,6 +232,7 @@ class SurveyController extends Controller
             'masterLantaiRumah',
             'masterKepemilikanListrik',
             'pendaftar',
+            'nilaiSurvey'
         ));
     }
 
@@ -156,6 +250,56 @@ class SurveyController extends Controller
     public function update(Request $request, string $id)
     {
         //
+    }
+
+    public function update_skor(Request $request)
+    {
+        try {
+            $key = $request->key;
+            $nilai = $request->data;
+            $pendaftar = $request->pendaftar;
+            $sesuai = $request->sesuai ?? null;
+
+            $cek = DB::table('pendaftars')
+                ->whereRaw("
+                exists(
+                    select 1 from surveyor_details sd
+                    where sd.pendaftar_id = ? and exists(
+                        select 1 from surveyors s 
+                        where s.id = sd.surveyor_id
+                        and s.user_id = ? and s.bersedia = 1 and s.publish = 1
+                    )
+                ) 
+            ", [$pendaftar, Auth::id()])->count();
+
+            if ($cek == 0) {
+                return response()->json([
+                    '' => ''
+                ], 422);
+            }
+
+            $dtNilai = HasilSurvey::where('pendaftar_id', $pendaftar)
+                ->where('aspek', $key)
+                ->first();
+
+            if (!$dtNilai) {
+                $dtNilai = new HasilSurvey();
+            }
+
+            $dtNilai->pendaftar_id = $pendaftar;
+            $dtNilai->aspek = $key;
+            $dtNilai->sesuai = $sesuai == 'sesuai' ? true : ($sesuai == 'tidak' ? false : null);
+            $dtNilai->nilai = $nilai ?? '';
+            $dtNilai->save();
+
+            return response()->json([
+                'date' => formatDateUpdateAt(now())
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**

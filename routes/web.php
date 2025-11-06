@@ -200,6 +200,7 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
 
     Route::get('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
     Route::get('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
+    Route::post('survey/update/skor', [SurveyController::class, 'update_skor'])->name('surveyor.survey.update.skor');
 });
 
 // Pendaftar
