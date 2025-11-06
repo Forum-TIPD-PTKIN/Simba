@@ -174,7 +174,7 @@ class SurveyorController extends Controller
         //
     }
 
-    public function plotMutliMahasiswa(Request $request)
+    public function plotMultiMahasiswa(Request $request)
     {
         $plots = $request->input('pendaftar_ids');
         if (empty($plots) || !is_array($plots)) {
@@ -355,9 +355,74 @@ class SurveyorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request)
     {
-        //
+        $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')
+            ->get();
+        $master_beasiswa = Beasiswa::where('status', 1)
+            ->get();
+        $status_surveyor = [
+            'u' => 'Belum Merespon',
+            't' => 'Tidak Bersedia',
+            'y' => 'Bersedia',
+        ];
+
+        if ($request->ajax()) {
+            $data = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan'])
+                ->select('surveyors.*')
+                ->join('users', 'surveyors.user_id', '=', 'users.id')
+                ->whereBeasiswaId($request->beasiswa ?? (count($master_beasiswa) ? $master_beasiswa[0]->id : null))
+                ->whereTahunKegiatanId($request->tahun ?? (count($master_tahun) ? $master_tahun[0]->id : null))
+                ->when($request->status, function ($query) use ($request) {
+                    if ($request->status === 'u') {
+                        $query->whereNull('bersedia');
+                    } else {
+                        $query->where('bersedia', ($request->status == 'y' ? 1 : 0));
+                    }
+                });
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('beasiswa', function ($data) {
+                    return "
+                        <div class='flex-grow-1'>
+                          <div class='row g-1'>
+                            <div class='col-12'>
+                              <h6 class='mb-0'>{$data->beasiswa?->nama}</h6>
+                              <p class='text-muted mb-0'><small>{$data->tahun_kegiatan?->tahun}</small></p>
+                            </div>
+                          </div>
+                        </div>";
+                })
+                ->editColumn('status', function ($row) {
+                    if ($row->bersedia === 1) return '<span class="badge bg-success">Bersedia</span>';
+                    else if ($row->bersedia === 0) return '<span class="badge bg-danger">Tidak Bersedia</span>';
+                    else return '<span class="badge bg-warning">Belum Merespon</span>';
+                })
+                ->editColumn('rekening_bank', function ($row) {
+                    if ($row->rekening_bank_formatted == null) {
+                        return "-";
+                    }
+
+                    return '<dl class="row mb-0">
+                                <dt class="col-sm-6">No. Rekening</dt>
+                                <dd class="col-sm-6">' . $row->rekening_bank_formatted['no_rekening'] . '</dd>
+
+                                <dt class="col-sm-6">Nama di Rekening</dt>
+                                <dd class="col-sm-6">' . $row->rekening_bank_formatted['nama_rekening'] . '</dd>
+
+                                <dt class="col-sm-6">Nama Bank</dt>
+                                <dd class="col-sm-6">' . $row->rekening_bank_formatted['nama_bank'] . '</dd>
+
+                                <dt class="col-sm-6">File Buku Rekening</dt>
+                                <dd class="col-sm-6"><a href="' . $row->rekening_bank_formatted['file_rekening'] . '" target="_blank">Link</a></dd>
+                        </dl>';
+                })
+                ->rawColumns(['beasiswa', 'status', 'rekening_bank'])
+                ->make(true);
+        }
+
+        return view('admin.surveyor.data', compact('master_tahun', 'master_beasiswa', 'status_surveyor'));
     }
 
     /**

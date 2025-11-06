@@ -76,6 +76,9 @@
                                 <button type="button" class="btn btn-sm btn-success"
                                     id="unduhHasilSeleksiAdministrasi"><span class="far fa-file-excel"></span>
                                     Unduh data excel</button>
+                                <button type="button" class="btn btn-sm btn-warning"
+                                    id="rekapVerifikatorSeleksiAdministrasi"><span class="fas fa-user-check"></span>
+                                    Rekap Verifikator</button>
                             </div>
                             <div
                                 class="alert {{ $jadwal_kegiatan ? 'alert-warning' : 'alert-danger' }} container-alert-jadwal">
@@ -119,6 +122,24 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="modalVerifikasiLabel">Verifikasi Pendaftaran</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Rekap Verifikator -->
+            <div class="modal fade" id="modalRekapVerifikator" tabindex="-1" aria-labelledby="modalRekapVerifikatorLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalRekapVerifikatorLabel">Data Rekap Verifikator</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -443,6 +464,38 @@
                             timerProgressBar: 'bg-danger'
                         }
                     });
+                }
+            });
+        });
+
+        $(document).on('click', '#rekapVerifikatorSeleksiAdministrasi', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            $.ajax({
+                url: "{{ route('admin.laporan.verifikasi.rekap-verifikator') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    $('#modalRekapVerifikator .modal-body').html(res);
+
+                    $('#modalRekapVerifikator').modal('show');
+                    Swal.close();
                 }
             });
         });

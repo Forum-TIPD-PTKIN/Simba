@@ -71,7 +71,7 @@ class HasilSeleksiAdministrasiExport implements
     public function map($data): array
     {
         $biodata = collect($data->biodata_pendaftar?->data?->biodata)
-            ->map(fn($item) => $item->value)
+            ->map(fn($item) => ($item->type === 'select' ? $item->value . ' - ' . $item->valOption : $item->value))
             ->values();
         $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption;
         $status_seleksi_administrasi = collect($data->pendaftar_status)

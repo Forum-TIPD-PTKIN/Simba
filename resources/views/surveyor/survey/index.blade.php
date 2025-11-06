@@ -67,7 +67,7 @@
                         @else
                             <div class="card-body">
                                 <div class="alert alert-warning">
-                                    Silahkan pilih surveyor terlebih dahulu.
+                                    Data tidak ditemukan
                                 </div>
                             </div>
                         @endif

@@ -2,7 +2,7 @@ ADMINISTRATOR
 ===================================================================
 > Fitur verifikator terbanyak (Administrator)
 > Fitur penentuan penerima beasiswa.
-> 
+> Cek template pelulusan peserta TPA (row terakhir tidak terkena validasi)
 
 VERIFIKATOR
 ===================================================================
@@ -16,4 +16,4 @@ SURVEYOR
 ===================================================================
 > Cetak daftar nama peserta survei 
 > Cetak instrumen survei
-> Persetujuan menambah field nomor rekening, nama rekening dan foto buku rekening
+> 

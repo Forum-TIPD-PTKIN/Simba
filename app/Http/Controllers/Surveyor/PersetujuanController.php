@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Surveyor;
 
+use App\Helpers\UploadFileHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Surveyor;
 use Illuminate\Http\Request;
@@ -91,9 +92,9 @@ class PersetujuanController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'status' => 'required|boolean',
-            'alamat' => 'required_if:status,1|string|nullable',
-            'no_wa' => 'required_if:status,1|string|nullable',
+            'bersedia' => 'required|boolean',
+            'alamat' => 'required_if:bersedia,1|string|nullable',
+            'no_wa' => 'required_if:bersedia,1|string|nullable',
             'alasan' => 'string|nullable',
         ]);
 
@@ -105,10 +106,22 @@ class PersetujuanController extends Controller
                 return response()->json(['message' => 'Anda sudah mengirimkan tanggapan sebelumnya.'], 422);
             }
 
-            $surveyor->bersedia = $request->status;
-            if ($request->status == 1) {
+            $surveyor->bersedia = $request->bersedia;
+            if ($request->bersedia == 1) {
+                $no_rekening = $request->input('no_rekening');
+                $nama_rekening = $request->input('nama_rekening');
+                $nama_bank = $request->input('nama_bank');
+                $file_rekening = UploadFileHelper::upload($request->file_rekening, 'rekening_bank/surveyor');
+                $rekening_bank_data = [
+                    'no_rekening' => $no_rekening,
+                    'nama_rekening' => $nama_rekening,
+                    'nama_bank' => $nama_bank,
+                    'file_rekening' => '[URL_ORIGIN]/' . $file_rekening,
+                ];
+
                 $surveyor->alamat = $request->alamat;
                 $surveyor->hp = $request->no_wa;
+                $surveyor->rekening_bank = json_encode($rekening_bank_data);
                 $surveyor->alasan = null;
             } else {
                 $surveyor->alasan = $request->alasan;
@@ -121,8 +134,9 @@ class PersetujuanController extends Controller
             return response()->json(['message' => 'Data persetujuan berhasil disimpan.']);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Data surveyor tidak ditemukan.'], 404);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()], 500);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+            return response()->json(['message' => 'Terjadi kesalahan pada server: ' . $error[2]], 500);
         }
     }
 

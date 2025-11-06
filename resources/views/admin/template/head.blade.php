@@ -26,6 +26,10 @@
     <link rel="stylesheet" href="{{ asset('assets/admin/css/style.css') }}" id="main-style-link">
     <link rel="stylesheet" href="{{ asset('assets/admin/css/style-preset.css') }}">
 
+    {{-- @if (env('APP_ENV') === 'local')
+        @vite(['resources/views/**/*.blade.php'])
+    @endif --}}
+
     @stack('head')
 </head>
 <!-- [Head] end -->

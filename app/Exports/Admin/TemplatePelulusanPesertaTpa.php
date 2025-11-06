@@ -52,9 +52,7 @@ class TemplatePelulusanPesertaTpa implements
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->where('tahun_kegiatan_id', $this->tahun)
             ->where('beasiswa_id', $this->beasiswa)
-            ->whereHas('map_ujian', function ($query) {
-                $query->whereNotNull('nilai');
-            })
+            ->whereHas('map_ujian')
             ->whereDoesntHave('latestStatus', function ($query) {
                 $query->whereIn('status', ['LOLOS TPA', 'GAGAL TPA']);
             })
@@ -159,14 +157,13 @@ class TemplatePelulusanPesertaTpa implements
                     $validation->setFormula1(sprintf('"%s"', implode(',', $options)));
 
                     // clone validation to remaining rows
-                    for ($i = 3; $i <= count($this->results) - 1; $i++) {
+                    for ($i = 3; $i <= $totalRow; $i++) {
                         $event->sheet->getCell("{$value}{$i}")->setDataValidation(clone $validation);
                     }
                 }
 
-                for ($i = 2; $i <= count($this->results); $i++) {
+                for ($i = 2; $i <= $totalRow; $i++) {
                     $cell = "{$value}{$i}";
-                    $event->sheet->getCell($cell)->setDataValidation(clone $validation);
 
                     // Conditional formatting: jika "LOLOS", beri warna hijau
                     $conditionalLolos = new Conditional();

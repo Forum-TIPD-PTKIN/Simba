@@ -457,9 +457,7 @@ class TesPotensiAkademikController extends Controller
                 ->when($request->flt_beasiswa, function ($q) use ($request) {
                     return $q->where('beasiswa_id', $request->flt_beasiswa);
                 })
-                ->whereHas('map_ujian', function ($query) {
-                    $query->whereNotNull('nilai');
-                })
+                ->whereHas('map_ujian')
                 ->where(function ($query) use ($request) {
                     if ($request->flt_status) {
                         return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));
@@ -635,7 +633,7 @@ class TesPotensiAkademikController extends Controller
     public static function getDataPesertaTes(string $tahun, string $beasiswa, ?string $tanggal_ujian, ?string $sesi, ?string $ruang, bool $is_query = false)
     {
         $query = MapUjian::with(['pendaftar.mahasiswa', 'pendaftar.beasiswa'])
-            ->selectRaw('map_ujians.*')
+            ->selectRaw('map_ujians.*, CAST(map_ujians.sesi AS UNSIGNED) as sesi_numeric')
             ->join('pendaftars', 'pendaftars.id', 'map_ujians.pendaftar_id')
             ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
             ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
@@ -656,10 +654,11 @@ class TesPotensiAkademikController extends Controller
             })
             ->when($ruang, function ($query) use ($ruang) {
                 $query->where('ruang', $ruang);
-            })
-            ->orderBy('mahasiswas.nama');
+            });
 
-        if (!$is_query) $query = $query->get();
+        if (!$is_query) $query = $query
+            ->orderBy('mahasiswas.nama')
+            ->get();
 
         return $query;
     }
