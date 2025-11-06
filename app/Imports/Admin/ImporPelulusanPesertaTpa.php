@@ -70,8 +70,7 @@ class ImporPelulusanPesertaTpa implements
                 $pendaftar_status = new PendaftarStatus();
                 $pendaftar_status->pendaftar_id = $pendaftar->id;
                 $pendaftar_status->status = (string) $row[7] === 'LOLOS' ? 'LOLOS TPA' : 'GAGAL TPA';
-                $pendaftar_status->deskripsi =
-                    $insert = $pendaftar_status->save();
+                $insert = $pendaftar_status->save();
             }
 
             if ($insert) $this->row_success++;
