@@ -218,14 +218,17 @@
                 },
                 {
                     data: 'beasiswa',
-                    searchable: false
+                    searchable: false,
+                    orderable: false
                 },
                 {
                     data: 'tanggal_ujian',
+                    name: 'tanggal_mulai',
                     searchable: false
                 },
                 {
-                    data: 'sesi'
+                    data: 'sesi_numeric',
+                    searchable: false
                 },
                 {
                     data: 'ruang'
@@ -249,8 +252,11 @@
                 },
                 {
                     "targets": 6,
-                    "width": "10%"
+                    "width": "10%",
                 },
+            ],
+            "order": [
+                [1, 'asc']
             ],
             "responsive": true,
             "autoWidth": true,
