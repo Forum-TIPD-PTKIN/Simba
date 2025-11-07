@@ -54,9 +54,6 @@
                                 <button type="button" class="btn btn-sm btn-danger" id="unduhDaftarPesertaSurvei"><span
                                         class="far fa-file-pdf"></span>
                                     Unduh Daftar Peserta</button>
-                                <button type="button" class="btn btn-sm btn-warning" id="unduhInstrumenSurvei"><span
-                                        class="far fa-file-pdf"></span>
-                                    Unduh Instrumen Survei</button>
                             </div>
                             {!! $view_daftar_responden !!}
                         </div>
@@ -176,9 +173,10 @@
             });
         });
 
-        $(document).on('click', '#unduhInstrumenSurvei', function() {
+        $(document).on('click', '.unduhInstrumenSurvei', function() {
             const tahun = $('#flt_tahun').val(),
-                beasiswa = $('#flt_beasiswa').val();
+                beasiswa = $('#flt_beasiswa').val(),
+                pendaftar_id = $(this).data('pendaftar-id');
 
             $.ajax({
                 url: "{{ route('surveyor.cetak.instrumen-survei') }}",
@@ -187,6 +185,7 @@
                     _token: "{{ csrf_token() }}",
                     tahun: tahun,
                     beasiswa: beasiswa,
+                    pendaftar_id: pendaftar_id,
                 },
                 xhr: function() {
                     var xhr = new XMLHttpRequest();
