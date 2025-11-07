@@ -17,8 +17,7 @@
                         </div>
                         <div class="col-md-12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Rekap Surveyor <span class="kip-nama">{{ $kip_select->nama }}
-                                        {{ $tahun_select->tahun }}</span></h2>
+                                <h2 class="mb-0">Rekap Surveyor</span></h2>
                             </div>
                         </div>
                     </div>
@@ -60,12 +59,13 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="alert alert-info">
-                                Surveyor yang berstatus Draft tidak akan ditampilkan ke akun surveyor maupun ke mahasiswa
+                                Surveyor yang berstatus <span class="fw-bold">Draft</span> tidak akan menampilkan data
+                                peserta survei di akun surveyor
                             </div>
                             <div class="d-flex justify-content-end mb-2">
                                 <div class="d-flex align-items-center gap-1">
-                                    <div class="text-muted">Status <span class="kip-nama">{{ $kip_select->nama }}
-                                            {{ $tahun_select->tahun }}</span> ->
+                                    <div class="text-muted">Klik untuk mengubah semua status surveyor <i
+                                            class="fas fa-arrow-right"></i>
                                     </div>
                                     <div class="btn-group">
                                         <button type="button" onclick="publishSurveyorAll(0)" type="button"
