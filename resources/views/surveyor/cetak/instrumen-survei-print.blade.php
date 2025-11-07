@@ -11,8 +11,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 30px;
-            font-size: 10px;
             color: #000;
+            background: #ffffff;
         }
 
         header h2,
@@ -24,18 +24,18 @@
         }
 
         header h2 {
-            font-size: 12px;
+            font-size: 15px;
         }
 
         header h3 {
-            font-size: 10px;
+            font-size: 13px;
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
             margin-top: 10px;
-            font-size: 8px;
+            font-size: 13px;
             line-height: 1.3;
         }
 
@@ -58,7 +58,6 @@
         .vertical {
             text-align: center;
             vertical-align: middle;
-            width: 16px;
         }
 
         .rotate {
@@ -76,12 +75,12 @@
         .section h4 {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: 10px;
+            font-size: 14px;
         }
 
         .section p {
             margin: 5px 0;
-            font-size: 8px;
+            font-size: 12px;
         }
 
         .box {
@@ -92,7 +91,7 @@
 
         .signature {
             margin-top: 10px;
-            font-size: 8px;
+            font-size: 12px;
         }
 
         .signature p {
@@ -100,7 +99,7 @@
         }
 
         .signature table p {
-            font-size: 8px;
+            font-size: 12px;
         }
 
         .names {
@@ -124,7 +123,7 @@
     <table>
         <thead>
             <tr>
-                <th>&nbsp;</th>
+                <th width="5%">&nbsp;</th>
                 <th width="5%">NO</th>
                 <th width="15%">BUTIR SURVEI</th>
                 <th>URAIAN</th>

@@ -18,6 +18,7 @@
         header {
             text-align: left;
             color: #000;
+            margin: 0 40px;
             padding: 10px 0;
             border-bottom: 3px double #000;
             margin-bottom: 20px;
