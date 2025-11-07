@@ -277,6 +277,11 @@
                                     </select>
                                 </div>
                                 <div class="mb-3" v-if="survey.pekerjaan.ayah.pekerjaan === 'LAINNYA'">
+                                    <div class="alert alert-warning">
+                                        <strong>Penting!</strong> Kategori “Pekerjaan lainnya” mencakup pekerjaan dengan
+                                        tingkat di bawah
+                                        "Buruh Tidak Tetap" dan di atas "Tidak Bekerja".
+                                    </div>
                                     <label for="pekerjaanAyahLainnya" class="form-label">Tulis Pekerjaan Lainnya</label>
                                     <input
                                         v-on:input="liveChage('ayahPekerjaanLainnya', survey.pekerjaan.ayah.pekerjaanLainnya, '#elAyahPekerjaan', 'tidak')"
@@ -344,6 +349,11 @@
                                     </select>
                                 </div>
                                 <div class="mb-3" v-if="survey.pekerjaan.ibu.pekerjaan === 'LAINNYA'">
+                                    <div class="alert alert-warning">
+                                        <strong>Penting!</strong> Kategori “Pekerjaan lainnya” mencakup pekerjaan dengan
+                                        tingkat di bawah
+                                        "Buruh Tidak Tetap" dan di atas "Tidak Bekerja".
+                                    </div>
                                     <label for="pekerjaanIbuLainnya" class="form-label">Tulis Pekerjaan Lainnya</label>
                                     <input type="text"
                                         v-on:input="liveChage('ibuPekerjaanLainnya', survey.pekerjaan.ibu.pekerjaanLainnya, '#elIbuPekerjaan', 'tidak')"
@@ -913,6 +923,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="card bg-danger text-bg-danger">
+                            <div class="card-body text-center ">
+                                Untuk mengosongkan seluruh penilaian, silakan klik RESET. Tindakan ini bersifat permanen dan
+                                tidak dapat dibatalkan.
+                                <div class="mt-3">
+                                    <button @click="resetSurvey" type="button" class="btn btn-lg btn-light">
+                                        <i class="fas fa-redo-alt me-1"></i> RESET</button>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1014,12 +1034,12 @@
                 survey: {
                     ayah: {
                         nama: '{{ $nilaiSurvey->ayahNama }}',
-                        kesehatan: {{ $nilaiSurvey->ayahKesehatan }},
+                        kesehatan: {!! $nilaiSurvey->ayahKesehatan !!},
                         status: '{{ $nilaiSurvey->ayahNamaStatus }}'
                     },
                     ibu: {
                         nama: '{{ $nilaiSurvey->ibuNama }}',
-                        kondisi: {{ $nilaiSurvey->ibuKondisi }},
+                        kondisi: {!! $nilaiSurvey->ibuKondisi !!},
                         status: '{{ $nilaiSurvey->ibuNamaStatus }}'
                     },
                     pekerjaan: {
@@ -1028,39 +1048,39 @@
                             pekerjaan: {!! $nilaiSurvey->ayahPekerjaan == 'LAINNYA'
                                 ? "'" . $nilaiSurvey->ayahPekerjaan . "'"
                                 : $nilaiSurvey->ayahPekerjaan !!},
-                            penghasilan: {{ $nilaiSurvey->ayahPenghasilan }}
+                            penghasilan: {!! $nilaiSurvey->ayahPenghasilan !!}
                         },
                         ibu: {
                             pekerjaanLainnya: '{{ $nilaiSurvey->ibuPekerjaanLainnya }}',
                             pekerjaan: {!! $nilaiSurvey->ibuPekerjaan == 'LAINNYA'
                                 ? "'" . $nilaiSurvey->ibuPekerjaan . "'"
                                 : $nilaiSurvey->ibuPekerjaan !!},
-                            penghasilan: {{ $nilaiSurvey->ibuPenghasilan }}
+                            penghasilan: {!! $nilaiSurvey->ibuPenghasilan !!}
                         }
                     },
-                    tanggunganKeluarga: {{ $nilaiSurvey->tanggunganKeluarga }},
+                    tanggunganKeluarga: {!! $nilaiSurvey->tanggunganKeluarga !!},
                     tanggunganKeluargaStatus: '{{ $nilaiSurvey->tanggunganKeluargaStatus }}',
-                    kepemilikanRumah: {{ $nilaiSurvey->kepemilikanRumah }},
+                    kepemilikanRumah: {!! $nilaiSurvey->kepemilikanRumah !!},
                     kepemilikanRumahStatus: '{{ $nilaiSurvey->kepemilikanRumahStatus }}',
-                    bangunanRumah: {{ $nilaiSurvey->bangunanRumah }},
+                    bangunanRumah: {!! $nilaiSurvey->bangunanRumah !!},
                     bangunanRumahStatus: '{{ $nilaiSurvey->bangunanRumahStatus }}',
-                    lantaiRumah: {{ $nilaiSurvey->lantaiRumah }},
+                    lantaiRumah: {!! $nilaiSurvey->lantaiRumah !!},
                     lantaiRumahStatus: '{{ $nilaiSurvey->lantaiRumahStatus }}',
-                    kepemilikanListrik: {{ $nilaiSurvey->kepemilikanListrik }},
+                    kepemilikanListrik: {!! $nilaiSurvey->kepemilikanListrik !!},
                     kepemilikanListrikStatus: '{{ $nilaiSurvey->kepemilikanListrikStatus }}',
                     kondisiRumah: {
                         rumah: '{{ $nilaiSurvey->kondisiRumahStatus }}',
                         dapur: {
                             status: '{{ $nilaiSurvey->kondisiDapurStatus }}',
-                            kondisi: {{ $nilaiSurvey->kondisiDapur }}
+                            kondisi: {!! $nilaiSurvey->kondisiDapur !!}
                         },
                         kamarMandi: {
                             status: '{{ $nilaiSurvey->kondisiKamarMandiStatus }}',
-                            kondisi: {{ $nilaiSurvey->kondisiKamarMandi }}
+                            kondisi: {!! $nilaiSurvey->kondisiKamarMandi !!}
                         },
                         wc: {
                             status: '{{ $nilaiSurvey->kondisiWcStatus }}',
-                            kondisi: {{ $nilaiSurvey->kondisiWc }}
+                            kondisi: {!! $nilaiSurvey->kondisiWc !!}
                         },
                     },
                     catatan: '{{ $nilaiSurvey->catatan }}'
@@ -1183,10 +1203,7 @@
             },
             methods: {
                 submitSurvey() {
-                    // In a real application, you would send this.survey data to the server
-                    // using an AJAX call (e.g., with axios).
-                    console.log('Submitting survey data:', JSON.stringify(this.survey, null, 2));
-                    alert('Data survey (pura-pura) berhasil disimpan! Cek console log untuk melihat datanya.');
+                    //
                 },
                 changeStatusSesuai(key) {
                     switch (key) {
@@ -1239,7 +1256,7 @@
                         case 'lantaiRumahStatus':
                             if (this.survey.lantaiRumahStatus == 'sesuai') {
                                 this.survey.lantaiRumah = +this.isianMahasiswa.lantai_rumah.value
-                                this.change('lantaiRumahStatus', this.survey.lantaiRumahStatus,
+                                this.change('lantaiRumah', this.survey.lantaiRumah,
                                     '#elLantaiRumah',
                                     this.survey.lantaiRumahStatus);
                             } else {
@@ -1259,6 +1276,38 @@
                     }
                 },
                 change(key, data, el, sesuai) {
+                    if (key == 'kondisiDapur') {
+                        if (!this.survey.kondisiRumah.dapur.status) {
+                            this.survey.kondisiRumah.dapur.status = 'tidak';
+                        }
+                        if (!this.survey.kondisiRumah.dapur.kondisi) {
+                            this.survey.kondisiRumah.dapur.kondisi = 1;
+                        }
+                        if (!data) {
+                            data = this.survey.kondisiRumah.dapur.kondisi;
+                        }
+                    } else if (key == 'kondisiKamarMandi') {
+                        if (!this.survey.kondisiRumah.kamarMandi.status) {
+                            this.survey.kondisiRumah.kamarMandi.status = 'tidak';
+                        }
+                        if (!this.survey.kondisiRumah.kamarMandi.kondisi) {
+                            this.survey.kondisiRumah.kamarMandi.kondisi = 1;
+                        }
+                        if (!data) {
+                            data = this.survey.kondisiRumah.kamarMandi.kondisi;
+                        }
+                    } else if (key == 'kondisiWc') {
+                        if (!this.survey.kondisiRumah.wc.status) {
+                            this.survey.kondisiRumah.wc.status = 'tidak';
+                        }
+                        if (!this.survey.kondisiRumah.wc.kondisi) {
+                            this.survey.kondisiRumah.wc.kondisi = 1;
+                        }
+                        if (!data) {
+                            data = this.survey.kondisiRumah.wc.kondisi;
+                        }
+                    }
+
                     if (key == 'ayahPekerjaan' && data == 'LAINNYA') {
                         // SKIP
                     } else if (key == 'ibuPekerjaan' && data == 'LAINNYA') {
@@ -1281,7 +1330,21 @@
                             saveOnce(key, data, el, sesuai);
                         }
                     }, ms);
-
+                },
+                resetSurvey() {
+                    Swal.fire({
+                        title: 'Konfirmasi',
+                        html: `Apaka anda yakin ingin mereset survey?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Lanjutkan',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            resetSurvey();
+                        }
+                    });
                 }
             }
         });
@@ -1307,6 +1370,45 @@
                     $(el).html('<span class="fw-bold text-danger">Gagal disimpan!</span>')
                 }
             })
+        }
+
+        function resetSurvey() {
+            Swal.fire({
+                title: 'Sedang mereset...',
+                showCancelButton: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    $.ajax({
+                        url: "{{ route('surveyor.survey.update.skor.reset') }}",
+                        type: "DELETE",
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            pendaftar: '{{ $pendaftar->pendaftar->id }}'
+                        },
+                        success: (respon) => {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Data telah direset.',
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                didClose: () => {
+                                    window.location.reload();
+                                }
+                            });
+                        },
+                        error: (err) => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: "Gagal",
+                                text: msg.responseJSON.message
+                            });
+                        }
+                    })
+                },
+                allowOutsideClick: false
+            });
         }
     </script>
 @endpush

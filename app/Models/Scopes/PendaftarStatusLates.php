@@ -6,6 +6,7 @@ use App\Models\PendaftarStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Support\Facades\DB;
 
 class PendaftarStatusLates implements Scope
 {
@@ -22,10 +23,15 @@ class PendaftarStatusLates implements Scope
                     'deskripsi', COALESCE(pendaftar_statuses.deskripsi, null)
                 )
             ")
-                ->whereColumn('pendaftar_statuses.pendaftar_id', 'pendaftars.id')
+                ->whereColumn('pendaftar_statuses.pendaftar_id', $model->getTable() . '.id')
                 ->orderByDesc('pendaftar_statuses.created_at')
                 ->limit(1)
         ])
-            ->orderBy('pendaftars.created_at');
+            ->addSelect(DB::raw("(
+                SELECT JSON_OBJECTAGG(h.aspek, NULLIF(h.nilai, ''))
+                FROM hasil_surveys h
+                WHERE h.pendaftar_id = {$model->getTable()}.id
+            ) AS data_survei"))
+            ->orderBy($model->getTable() . '.created_at');
     }
 }

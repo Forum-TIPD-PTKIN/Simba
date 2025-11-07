@@ -54,7 +54,7 @@ class SurveyController extends Controller
                     return $fak[1] . ' - ' . $pro[1];
                 })
                 ->addColumn('progress', function ($row) {
-                    $percentage = $row->progress ?? 0;
+                    $percentage = $row->pendaftar->hasil_survei->persen ?? 0;
                     $colorClass = 'bg-light-danger'; // default red
                     if ($percentage > 75) {
                         $colorClass = 'bg-light-success'; // green
@@ -128,8 +128,6 @@ class SurveyController extends Controller
             })
             ->first();
 
-        // return $pendaftar;
-
         if (!$pendaftar) {
             return redirect()->route('surveyor.survey');
         }
@@ -147,41 +145,41 @@ class SurveyController extends Controller
             'ibuKondisiUpdateAt' => null,
             'ibuNamaStatus' => '',
             'ibuNamaUpdateAt' => null,
-            'ayahPekerjaan' => 1,
+            'ayahPekerjaan' => '""',
             'ayahPekerjaanUpdateAt' => null,
             'ayahPekerjaanLainnya' => '',
-            'ayahPenghasilan' => 1,
+            'ayahPenghasilan' => '""',
             'ayahPenghasilanUpdateAt' => null,
-            'ibuPekerjaan' => 1,
+            'ibuPekerjaan' => '""',
             'ibuPekerjaanUpdateAt' => null,
             'ibuPekerjaanLainnya' => '',
-            'ibuPenghasilan' => 1,
+            'ibuPenghasilan' => '""',
             'ibuPenghasilanUpdateAt' => null,
-            'tanggunganKeluarga' => 1,
+            'tanggunganKeluarga' => '""',
             'tanggunganKeluargaUpdateAt' => null,
             'tanggunganKeluargaStatus' => '',
-            'kepemilikanRumah' => 1,
+            'kepemilikanRumah' => '""',
             'kepemilikanRumahUpdateAt' => null,
             'kepemilikanRumahStatus' => '',
-            'bangunanRumah' => 1,
+            'bangunanRumah' => '""',
             'bangunanRumahUpdateAt' => null,
             'bangunanRumahStatus' => '',
-            'lantaiRumah' => 1,
+            'lantaiRumah' => '""',
             'lantaiRumahUpdateAt' => null,
             'lantaiRumahStatus' => '',
-            'kepemilikanListrik' => 1,
+            'kepemilikanListrik' => '""',
             'kepemilikanListrikUpdateAt' => null,
             'kepemilikanListrikStatus' => '',
             'kondisiRumahStatus' => '',
             'kondisiRumahUpdateAt' => null,
             'kondisiDapurStatus' => '',
-            'kondisiDapur' => 1,
+            'kondisiDapur' => '""',
             'kondisiDapurUpdateAt' => null,
             'kondisiKamarMandiStatus' => '',
-            'kondisiKamarMandi' => 1,
+            'kondisiKamarMandi' => '""',
             'kondisiKamarMandiUpdateAt' => null,
             'kondisiWcStatus' => '',
-            'kondisiWc' => 1,
+            'kondisiWc' => '""',
             'kondisiWcUpdateAt' => null,
             'catatan' => '',
             'catatanUpdateAt' => null,
@@ -276,7 +274,7 @@ class SurveyController extends Controller
 
             if ($cek == 0) {
                 return response()->json([
-                    '' => ''
+                    'error' => 'Pendaftar Tidak ditemukan'
                 ], 422);
             }
 
@@ -293,6 +291,45 @@ class SurveyController extends Controller
             $dtNilai->sesuai = $sesuai == 'sesuai' ? true : ($sesuai == 'tidak' ? false : null);
             $dtNilai->nilai = $nilai ?? '';
             $dtNilai->save();
+
+            return response()->json([
+                'date' => formatDateUpdateAt(now())
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reset_skor(Request $request)
+    {
+        try {
+            $key = $request->key;
+            $nilai = $request->data;
+            $pendaftar = $request->pendaftar;
+            $sesuai = $request->sesuai ?? null;
+
+            $cek = DB::table('pendaftars')
+                ->whereRaw("
+                exists(
+                    select 1 from surveyor_details sd
+                    where sd.pendaftar_id = ? and exists(
+                        select 1 from surveyors s 
+                        where s.id = sd.surveyor_id
+                        and s.user_id = ? and s.bersedia = 1 and s.publish = 1
+                    )
+                ) 
+            ", [$pendaftar, Auth::id()])->count();
+
+            if ($cek == 0) {
+                return response()->json([
+                    'error' => 'Pendaftar Tidak ditemukan'
+                ], 422);
+            }
+
+            HasilSurvey::where('pendaftar_id', $pendaftar)
+                ->delete();
 
             return response()->json([
                 'date' => formatDateUpdateAt(now())

@@ -12,6 +12,10 @@ class Pendaftar extends Uuid
         'user_id'
     ];
 
+    protected $hidden = ['data_survei'];
+
+    protected $appends = ['hasil_survei'];
+
     public function pemberkasan()
     {
         return $this->hasOne(Pemberkasan::class);
@@ -65,6 +69,70 @@ class Pendaftar extends Uuid
     public function latestStatus()
     {
         return $this->hasOne(PendaftarStatus::class)->latestOfMany('created_at');
+    }
+
+    public function getHasilSurveiAttribute()
+    {
+        if (!$this->attributes['data_survei']) return (object)[
+            'nilai' => null,
+            'persen' => 0,
+        ];
+
+        $hasil = json_decode($this->attributes['data_survei']);
+
+        $keys = [
+            "ibuNama",
+            "ayahNama",
+            "kondisiWc",
+            "ibuKondisi",
+            "lantaiRumah",
+            "ibuPekerjaan",
+            "kondisiDapur",
+            "kondisiRumah",
+            "ayahPekerjaan",
+            "bangunanRumah",
+            "ibuPenghasilan",
+            "ayahPenghasilan",
+            "kepemilikanRumah",
+            "kondisiKamarMandi",
+            "kepemilikanListrik",
+            "tanggunganKeluarga",
+        ];
+        $isString = ['ibuNama', 'ayahNama', 'kondisiRumah', 'catatan'];
+        $valueAutoScore = ['ayahPekerjaan', 'ibuPekerjaan'];
+
+        // // tangani khusus nilai "LAINNYA:" untuk pekerjaan
+        foreach ($valueAutoScore as $pekerjaanKey) {
+            if (isset($hasil->$pekerjaanKey) && is_string($hasil->$pekerjaanKey)) {
+                if (stripos($hasil->$pekerjaanKey, 'LAINNYA:') === 0) {
+                    $hasil->$pekerjaanKey = 6.5;
+                }
+            }
+        }
+        foreach ($hasil as $key => $value) {
+            if (!in_array($key, $isString)) {
+                if (is_string($value) && $value !== '') {
+                    $hasil->$key = floatval($value);
+                } elseif ($value === '' || $value === null) {
+                    $hasil->$key = null;
+                }
+            }
+        }
+        $totalKey = count($keys);
+        $filledCount = 0;
+
+        foreach ($keys as $key) {
+            if (isset($hasil->$key) && $hasil->$key !== '' && $hasil->$key !== null) {
+                $filledCount++;
+            }
+        }
+
+        $persen = ($filledCount / $totalKey) * 100;
+
+        return (object)[
+            'nilai' => $hasil,
+            'persen' => round($persen, 2),
+        ];
     }
 
     public function getLatestStatusAttribute($val)

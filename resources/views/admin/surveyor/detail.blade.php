@@ -54,11 +54,15 @@
                         <th>Nama Mahasiswa</th>
                         <th>NIM</th>
                         <th>Alamat</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th>Progress</th>
+                        {{-- <th>Aksi</th> --}}
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $totalPersen = 0;
+                        $jumlahData = 0;
+                    @endphp
                     @forelse ($detailSurveyor->surveyor_detail as $index => $detail)
                         <tr>
                             <td>{{ $index + 1 }}</td>
@@ -72,19 +76,55 @@
                                 {{ $detail->pendaftar->biodata_pendaftar->data->biodata->alamat_ktp->value }}
                             </td>
                             <td>
-                                {{ $detail->pendaftar->lastest_status }}
+                                @php
+                                    $status = '';
+                                    $percentage = $detail->pendaftar->hasil_survei->persen ?? 0;
+                                    $totalPersen += $percentage;
+                                    $jumlahData++;
+                                    $colorClass = 'bg-light-danger';
+                                    if ($percentage > 75) {
+                                        $colorClass = 'bg-light-success';
+                                    } elseif ($percentage > 50) {
+                                        $colorClass = 'bg-light-info';
+                                    } elseif ($percentage > 25) {
+                                        $colorClass = 'bg-light-warning';
+                                    }
+                                    $status = '<span class="badge ' . $colorClass . '">' . $percentage . '%</span>';
+                                @endphp
+                                {!! $status !!}
                             </td>
-                            <td>
+                            {{-- <td>
                                 <button class="btn btn-sm btn-outline-secondary" disabled>
                                     <i class="fas fa-eye"></i> Lihat Hasil
                                 </button>
-                            </td>
+                            </td> --}}
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="text-center">Tidak ada pendaftar yang ditugaskan.</td>
                         </tr>
                     @endforelse
+
+                    {{-- tampilkan rata-rata persentase --}}
+                    @if ($jumlahData > 0)
+                        @php
+                            $rataRataPersen = round($totalPersen / $jumlahData, 2);
+                            $colorTotal =
+                                $rataRataPersen > 75
+                                    ? 'bg-light-success'
+                                    : ($rataRataPersen > 50
+                                        ? 'bg-light-info'
+                                        : ($rataRataPersen > 25
+                                            ? 'bg-light-warning'
+                                            : 'bg-light-danger'));
+                        @endphp
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Total Keseluruhan</td>
+                            <td>
+                                <span class="badge {{ $colorTotal }}">{{ $rataRataPersen }}%</span>
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
