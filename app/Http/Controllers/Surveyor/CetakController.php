@@ -8,6 +8,7 @@ use App\Models\Pendaftar;
 use Illuminate\Http\Request;
 use App\Models\TahunKegiatan;
 use App\Http\Controllers\Controller;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Support\Facades\Auth;
 
 class CetakController extends Controller
@@ -86,5 +87,59 @@ class CetakController extends Controller
             ->setOption('encoding', 'UTF-8')
             ->setOption('disable-smart-shrinking', true);
         return $pdf->download($filename);
+    }
+
+    public function instrumen_survei(Request $request)
+    {
+        $grouper = [
+            (object)[
+                'rowspan' => 16,
+                'range' => [0, 15],
+                'text' => 'BIODATA'
+            ],
+            (object)[
+                'rowspan' => 7,
+                'range' => [16, 23],
+                'text' => 'EKONOMI'
+            ],
+            (object)[
+                'rowspan' => 6,
+                'range' => [23, 28],
+                'text' => 'TEMPAT TINGGAL'
+            ]
+        ];
+        $butiran = [
+            ['NIM', '24383021023', 1],
+            ['Nama', 'DESTRA DWI CAHYO', 2],
+            ['Prodi', 'Perbankan Syariah', 3],
+            ['Alamat (Dusun sesuai KTP)', 'MURTAJIH', 4],
+            ['RT/RW (sesuai KTP)', '002/001', 5],
+            ['Desa/Kelurahan (sesuai KTP)', 'DS. MURTAJIH', 6],
+            ['Kecamatan (sesuai KTP)', 'PADEMAWU', 7],
+            ['Kabupaten/Kota (sesuai KTP)', 'PAMEKASAN', 8],
+            ['Provinsi (sesuai KTP)', 'JAWA TIMUR', 9],
+            ['Nomor KTP', '3528012012050003', 10],
+            ['Nomor Ijazah SMA', 'DN-05/M-SMA/K13/24/0046747', 11],
+            ['Nilai Transkrip SMA', '89,65', 12],
+            ['Nomor Ponsel', '81915509797', 13],
+            ['Nomor Kartu Keluarga', '3528022404066396', 14],
+            ['Nama Ayah', 'MOH. SAYURI', 15],
+            ['Nama Ibu', 'FATIMAH', 16],
+            ['Kondisi Ayah', 'Sehat', 17],
+            ['Pekerjaan Ayah', 'Petani/Nelayan', 18],
+            ['Penghasilan Ayah', '< 1 juta', 19],
+            ['Kondisi Ibu', 'Sehat', 20],
+            ['Pekerjaan Ibu', 'Tidak Bekerja', 21],
+            ['Penghasilan Ibu', '< 1 juta', 22],
+            ['Tanggungan Keluarga', '3 orang', 23],
+            ['Status Kepemilikan Rumah', 'Milik sendiri', 24],
+            ['Bangunan Rumah', 'Permanen', 25],
+            ['Lantai Rumah', 'Keramik', 26],
+            ['Kepemilikan Listrik', 'Milik sendiri', 27],
+            ['Kondisi Dapur', 'Rusak berat', 28],
+            ['Kondisi Kamar Mandi & WC', 'Rusak', 29],
+            // ['Berkas Persyaratan', 'https://drive.google.com/open?id=1wMJZ1s', 30],
+        ];
+        return view('surveyor.cetak.instrumen-survei', compact('butiran', 'grouper'));
     }
 }

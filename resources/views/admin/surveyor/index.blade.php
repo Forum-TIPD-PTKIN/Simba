@@ -139,9 +139,9 @@
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0"><i class="ti ti-user-circle ti-lg"></i></div>
                                         <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-0">
+                                            <h6 class="mb-0 text-dark">
                                                 @{{ index + 1 }}. @{{ mhs.mahasiswa.nama }}</h6>
-                                            <small class="text-muted">@{{ mhs.biodata_pendaftar.data.biodata.alamat_ktp.value }}</small>
+                                            <small class="text-dark">@{{ mhs.biodata_pendaftar.data.biodata.alamat_ktp.value }}</small>
                                         </div>
                                     </div>
                                 </a>
