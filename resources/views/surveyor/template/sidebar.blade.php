@@ -99,24 +99,6 @@
                         <span class="pc-mtext">Survei</span>
                     </a>
                 </li>
-                <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link">
-                        <span class="pc-micon">
-                            <i class="fas fa-print"></i>
-                        </span>
-                        <span class="pc-mtext">Cetak Dokumen</span>
-                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-                    </a>
-                    <ul class="pc-submenu">
-                        <li class="pc-item">
-                            <a href="{{ route('surveyor.cetak.peserta-survei') }}" class="pc-link">Peserta Survei</a>
-                        </li>
-                        <li class="pc-item">
-                            <a href="{{ route('surveyor.cetak.instrumen-survei') }}" class="pc-link">Instrumen
-                                Survei</a>
-                        </li>
-                    </ul>
-                </li>
             </ul>
         </div>
     </div>
