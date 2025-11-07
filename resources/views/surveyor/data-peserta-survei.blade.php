@@ -9,6 +9,7 @@
                     <th scope="col">Prodi</th>
                     <th scope="col">Beasiswa</th>
                     <th scope="col" width="25%">Alamat</th>
+                    <th scope="col">Instrumen Survei</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">
@@ -41,6 +42,9 @@
                             </div>
                         </td>
                         <td scope="row">{{ $item->biodata_pendaftar?->data?->biodata?->alamat_ktp?->value }}</td>
+                        <td scope="row"><button class="btn btn-sm btn-danger unduhInstrumenSurvei"
+                                data-pendaftar-id="{{ $item->id }}" title="Cetak Instrumen Survei"><i
+                                    class="far fa-file-alt"></i> Cetak</button></td>
                     </tr>
                 @endforeach
             </tbody>
