@@ -199,8 +199,8 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
     Route::get('/survey/peserta', [SurveyController::class, 'peserta_survei'])->name('surveyor.peserta-survei');
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
 
-    Route::get('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
-    Route::get('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
+    Route::post('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
+    Route::post('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
     Route::post('survey/update/skor', [SurveyController::class, 'update_skor'])->name('surveyor.survey.update.skor');
 
     Route::get('/', function () {

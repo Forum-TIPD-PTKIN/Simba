@@ -1,51 +1,39 @@
-@if (count($responden))
-    <div class="table-responsive">
-        <table class="table table-sm table-bordered text-center align-middle" id="pc-dt-simple">
-            <thead class="bg-teal-100">
-                <tr>
-                    <th scope="col" width="5%">No</th>
-                    <th scope="col" width="7%">NIM</th>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Prodi</th>
-                    <th scope="col">Beasiswa</th>
-                    <th scope="col" width="25%">Alamat</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                @foreach ($responden as $key => $item)
-                    <tr>
-                        <td scope="row">{{ $loop->iteration }}</td>
-                        <td scope="row">{{ $item->mahasiswa?->nim }}</td>
-                        <td scope="row">{{ $item->mahasiswa?->nama }}</td>
-                        <td scope="row">
-                            <div class='flex-grow-1'>
-                                <div class='row g-1'>
-                                    <div class='col-12'>
-                                        <h6 class='mb-0'>{{ $item->mahasiswa?->prodi_name }}</h6>
-                                        <p class='text-muted mb-0'><small>{{ $item->mahasiswa?->fakultas_name }}</small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td scope="row">
-                            <div class='flex-grow-1'>
-                                <div class='row g-1'>
-                                    <div class='col-12'>
-                                        <h6 class='mb-0'>{{ $item->beasiswa?->nama }}</h6>
-                                        <p class='text-muted mb-0'><small>Tahun
-                                                {{ $item->tahun_kegiatan?->tahun }}</small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td scope="row">{{ $item->biodata_pendaftar?->data?->biodata?->alamat_ktp?->value }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-@else
-    <div class="alert alert-info text-center fs-3 fw-bold">Menunggu plotting data peserta survei</div>
-@endif
+<div class="row">
+    @foreach ($responden as $key => $item)
+        @php
+            $label = [
+                'total_responden' => [
+                    'bg' => 'bg-blue-100',
+                    'icon' => 'fas fa-users',
+                    'text' => 'Total Peserta Survei',
+                ],
+                'sudah_disurvei' => ['bg' => 'bg-green-100', 'icon' => 'fas fa-user-check', 'text' => 'Proses Survei'],
+                'belum_disurvei' => [
+                    'bg' => 'bg-yellow-100',
+                    'icon' => 'fas fa-user-clock',
+                    'text' => 'Belum Disurvei',
+                ],
+            ];
+
+            $bg = $label[$key]['bg'] ?? 'bg-danger-100';
+            $icon = $label[$key]['icon'] ?? 'fas fa-user-times';
+            $text = $label[$key]['text'] ?? 'Total Peserta Survei';
+        @endphp
+        <div class="col-md-4">
+            <div class="card {{ $bg }}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h3 class="mb-1">{{ $item }} <span class="fs-6">Pelamar</span>
+                            </h3>
+                            <p class="text-muted mb-0">{{ $text }}</p>
+                        </div>
+                        <div class="col-4 text-end">
+                            <i class="{{ $icon }} text-secondary f-36"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>

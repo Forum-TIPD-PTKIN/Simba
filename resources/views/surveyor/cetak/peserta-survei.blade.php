@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
-            background-color: #f5f7fa;
+            background-color: #ffffff;
             color: #333;
             margin: 30px;
         }
@@ -18,8 +18,8 @@
             text-align: left;
             color: #000;
             padding: 20px 0 10px 0;
-            margin: 20px 40px;
             border-bottom: 3px double #000;
+            margin-bottom: 30px;
         }
 
         header h4 {
@@ -30,8 +30,9 @@
 
         header h5 {
             margin: 3px 0;
+            font-size: 16px;
             font-weight: 500;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
 
         main {

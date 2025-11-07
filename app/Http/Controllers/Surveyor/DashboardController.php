@@ -20,19 +20,7 @@ class DashboardController extends Controller
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
         $beasiswa = Beasiswa::where('status', 1)->get();
 
-        $responden = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'biodata_pendaftar'])
-            ->where('tahun_kegiatan_id', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null)
-            ->where('beasiswa_id', count($beasiswa) ? $beasiswa[0]->id : null)
-            ->whereHas('pendaftar_status', function ($q) {
-                $q->where('status', 'LOLOS TPA');
-            })
-            ->whereHas('surveyor_detail', function ($query) {
-                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
-                    ->whereHas('surveyor', function ($surveyorQuery) {
-                        $surveyorQuery->where('publish', '1');
-                    });
-            })
-            ->get();
+        $responden = $this->data(count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
         $view_daftar_responden = view('surveyor.dashboard.daftar-responden', [
             'responden' => $responden
         ])->render();
@@ -65,16 +53,7 @@ class DashboardController extends Controller
      */
     public function show(string $tahun, string $beasiswa)
     {
-        $responden = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'biodata_pendaftar'])
-            ->where('tahun_kegiatan_id', $tahun)
-            ->where('beasiswa_id', $beasiswa)
-            ->whereHas('pendaftar_status', function ($q) {
-                $q->where('status', 'LOLOS TPA');
-            })
-            ->whereHas('surveyor_detail', function ($query) {
-                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'));
-            })
-            ->get();
+        $responden = $this->data($tahun, $beasiswa);
 
         $view_daftar_responden = view('surveyor.dashboard.daftar-responden', [
             'responden' => $responden
@@ -105,5 +84,31 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public static function data($tahun, $beasiswa)
+    {
+        $baseQuery = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'biodata_pendaftar'])
+            ->where('tahun_kegiatan_id', $tahun)
+            ->where('beasiswa_id', $beasiswa)
+            ->whereHas('pendaftar_status', function ($q) {
+                $q->where('status', 'LOLOS TPA');
+            })
+            ->whereHas('surveyor_detail', function ($query) {
+                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
+                    ->whereHas('surveyor', function ($surveyorQuery) {
+                        $surveyorQuery->where('publish', '1');
+                    });
+            });
+
+        $total_responden = (clone $baseQuery)->count();
+        $sudah_disurvei = (clone $baseQuery)->whereHas('hasil_survey')->count();
+        $belum_disurvei = $total_responden - $sudah_disurvei;
+
+        return [
+            'total_responden' => $total_responden,
+            'sudah_disurvei' => $sudah_disurvei,
+            'belum_disurvei' => $belum_disurvei
+        ];
     }
 }

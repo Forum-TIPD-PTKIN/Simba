@@ -50,6 +50,14 @@
                         </div>
 
                         <div class="card-body" id="daftar-responden">
+                            <div class="btn-group mb-4" role="group" aria-label="Button Cetak">
+                                <button type="button" class="btn btn-sm btn-danger" id="unduhDaftarPesertaSurvei"><span
+                                        class="far fa-file-pdf"></span>
+                                    Unduh Daftar Peserta</button>
+                                <button type="button" class="btn btn-sm btn-warning" id="unduhInstrumenSurvei"><span
+                                        class="far fa-file-pdf"></span>
+                                    Unduh Instrumen Survei</button>
+                            </div>
                             {!! $view_daftar_responden !!}
                         </div>
                     </div>
@@ -91,6 +99,150 @@
                     target.html(res);
 
                     Swal.close();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '#unduhDaftarPesertaSurvei', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            $.ajax({
+                url: "{{ route('surveyor.cetak.peserta-survei') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa,
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Daftar peserta survei.pdf');
+
+                    var blob = new Blob([response]);
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).on('click', '#unduhInstrumenSurvei', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val();
+
+            $.ajax({
+                url: "{{ route('surveyor.cetak.instrumen-survei') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa,
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Instrumen survei.pdf');
+
+                    var blob = new Blob([response]);
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
                 }
             });
         });

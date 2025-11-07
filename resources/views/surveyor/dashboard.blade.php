@@ -30,7 +30,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-                            <h5 class="mb-3 mb-sm-0">Daftar Peserta Survei</h5>
+                            <h5 class="mb-3 mb-sm-0">Rekapitulasi Responden</h5>
                             <div class="d-flex gap-1 form-filter">
                                 <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
                                     id="flt_tahun">

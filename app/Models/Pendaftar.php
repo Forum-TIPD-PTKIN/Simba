@@ -57,6 +57,11 @@ class Pendaftar extends Uuid
         return $this->hasOne(SurveyorDetail::class);
     }
 
+    public function hasil_survey()
+    {
+        return $this->hasMany(HasilSurvey::class);
+    }
+
     public function latestStatus()
     {
         return $this->hasOne(PendaftarStatus::class)->latestOfMany('created_at');
