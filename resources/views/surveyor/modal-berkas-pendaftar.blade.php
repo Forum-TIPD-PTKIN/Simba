@@ -48,7 +48,7 @@
                             @endif
                         </td>
                         <td class="text-center align-middle">
-                            @if ($value->type === 'file')
+                            @if ($value->type === 'file' && $value->value)
                                 <a target="_blank"
                                     href="{{ route('download.file', ['path' => urlencode(\Crypt::encrypt($value->value?->path))]) }}">Unduh
                                     File</a>
