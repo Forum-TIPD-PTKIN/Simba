@@ -60,6 +60,24 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="modalBerkasPendaftar" data-bs-backdrop="static" tabindex="-1"
+                aria-labelledby="modalBerkasPendaftarLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalBerkasPendaftarLabel">Berkas Pendaftar</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -245,5 +263,85 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function lihatBerkasPendaftar(id) {
+            let url = "{{ route('surveyor.berkas-pendaftar', ':id') }}";
+            url = url.replace(':id', id);
+
+            $.ajax({
+                url: url,
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Mengambil data...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: (res) => {
+                    $('#modalBerkasPendaftar .modal-body').html(res);
+
+                    $('#modalBerkasPendaftar').modal('show');
+                    Swal.close();
+                }
+            });
+        }
+
+        function viewControl(e) {
+            let container = e.closest('.berkas-control');
+            let links = container.querySelectorAll('.base-berkas');
+            let urls = []
+            links.forEach(link => {
+                let url = link.getAttribute('data-url');
+                let type = link.getAttribute('data-type');
+                let extension = link.getAttribute('data-extension');
+                urls.push({
+                    url,
+                    type,
+                    extension
+                })
+            });
+            const data = {
+                active: {
+                    url: e.getAttribute('data-url'),
+                    type: e.getAttribute('data-type'),
+                    extension: e.getAttribute('data-extension')
+                },
+                data: urls
+            }
+            $.ajax({
+                type: 'post',
+                url: "{{ route('view.control') }}",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    data: data
+                },
+                dataType: 'HTML',
+                success: function(data) {
+                    const winUrl = URL.createObjectURL(
+                        new Blob([data], {
+                            type: "text/html"
+                        })
+                    );
+
+                    const margin = 100; // Jarak tepi agar tidak full full banget
+                    const width = window.screen.availWidth - margin * 8;
+                    const height = window.screen.availHeight - margin * 2;
+                    const left = (window.screen.availWidth - width) / 2;
+                    const top = (window.screen.availHeight - height) / 2;
+
+                    const win = window.open(
+                        winUrl,
+                        "win",
+                        `width=${width},height=${height},top=${top},left=${left}`
+                    );
+                }
+            });
+        }
     </script>
 @endpush

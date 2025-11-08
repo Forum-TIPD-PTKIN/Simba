@@ -198,6 +198,7 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
     Route::get('survey', [SurveyController::class, 'index'])->name('surveyor.survey');
     Route::get('/survey/peserta', [SurveyController::class, 'peserta_survei'])->name('surveyor.peserta-survei');
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
+    Route::get('/survey/{id}/berkas-pendaftar', [SurveyController::class, 'berkas_pendaftar'])->name('surveyor.berkas-pendaftar');
 
     Route::post('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
     Route::post('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
@@ -261,3 +262,15 @@ Route::get('file/{root}/{berkas}/{filename}', function ($root, $berkas, $filenam
     }
     return response()->file(storage_path('app/' . $path));
 });
+
+Route::get('download/{path}', function (string $path) {
+    $decrypted = \Crypt::decrypt(urldecode($path));
+
+    $fullPath = storage_path('app/' . $decrypted);
+
+    if (!file_exists($fullPath)) {
+        abort(404, 'File not found');
+    }
+
+    return response()->download($fullPath);
+})->where('path', '.*')->name('download.file');

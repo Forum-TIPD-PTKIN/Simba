@@ -9,7 +9,7 @@
                     <th scope="col">Prodi</th>
                     <th scope="col">Beasiswa</th>
                     <th scope="col" width="25%">Alamat</th>
-                    <th scope="col">Instrumen Survei</th>
+                    <th scope="col">Aksi</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">
@@ -42,9 +42,16 @@
                             </div>
                         </td>
                         <td scope="row">{{ $item->biodata_pendaftar?->data?->biodata?->alamat_ktp?->value }}</td>
-                        <td scope="row"><button class="btn btn-sm btn-danger unduhInstrumenSurvei"
-                                data-pendaftar-id="{{ $item->id }}" title="Cetak Instrumen Survei"><i
-                                    class="far fa-file-alt"></i> Cetak</button></td>
+                        <td scope="row">
+                            <div class="btn-group mb-4" role="group" aria-label="Button Peserta Survei">
+                                <button class="btn btn-sm btn-danger unduhInstrumenSurvei"
+                                    data-pendaftar-id="{{ $item->id }}" title="Cetak Instrumen Survei"><i
+                                        class="fas fa-print"></i> Cetak</button>
+                                <button class="btn btn-sm btn-success"
+                                    onclick="lihatBerkasPendaftar('{{ $item->id }}')"><i
+                                        class="far fa-file-alt"></i> Berkas</button>
+                            </div>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

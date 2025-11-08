@@ -379,4 +379,24 @@ class SurveyController extends Controller
             'view_daftar_responden' => $view_daftar_responden
         ]);
     }
+
+    public function berkas_pendaftar(string $id)
+    {
+        $pendaftar = Pendaftar::with('mahasiswa', 'biodata_pendaftar', 'pemberkasan')
+            ->where('id', $id)
+            ->whereHas('surveyor_detail', function ($query) {
+                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
+                    ->whereHas('surveyor', function ($surveyorQuery) {
+                        $surveyorQuery->where('publish', '1')
+                            ->where('bersedia', '1');
+                    });
+            })
+            ->first();
+
+        if (!$pendaftar) return response()->json('Pendaftar tidak ditemukan', 404);
+
+        return view('surveyor.modal-berkas-pendaftar', [
+            'data' => $pendaftar,
+        ])->render();
+    }
 }
