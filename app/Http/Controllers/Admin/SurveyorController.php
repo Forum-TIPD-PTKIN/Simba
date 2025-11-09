@@ -271,6 +271,14 @@ class SurveyorController extends Controller
     }
     public function removeMahasiswa(Request $request)
     {
+        $surf = SurveyorDetail::with(['surveyor', 'pendaftar'])->find($request->surveyor_detail_id);
+        if ($surf->surveyor->publish === 1 || $surf->pendaftar->hasil_survei->persen > 0) {
+            return response()->json([
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'message' => 'Surveyor sudah di dipublish/dinilai',
+            ], 422);
+        }
         SurveyorDetail::destroy($request->surveyor_detail_id);
         return response()->json([
             'icon' => 'success',

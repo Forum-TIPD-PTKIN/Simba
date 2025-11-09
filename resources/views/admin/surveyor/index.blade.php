@@ -74,14 +74,17 @@
                                     Tidak ada data surveyor yang cocok.
                                 </div>
                                 <a v-for="(surveyor, index) in surveyorBersediaFilter" :key="surveyor.id"
-                                    @click="toggleActiveSurveyor(surveyor.id, surveyor.user.name)"
+                                    @click="surveyor.publish===1 ? null : toggleActiveSurveyor(surveyor.id, surveyor.user.name)"
                                     href="javascript:void(0);" class="list-group-item list-group-item-action"
                                     :class="{ 'active-surveyor': surveyor.id === activeSurveyorId }">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0"><i class="ti ti-user-circle ti-lg"></i></div>
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-0">
-                                                @{{ index + 1 }}. @{{ surveyor.user.name }}</h6>
+                                                @{{ index + 1 }}. @{{ surveyor.user.name }} <span
+                                                    v-if="surveyor.publish===1"
+                                                    class="badge text-bg-primary">Published</span>
+                                            </h6>
                                             <small class="text-muted">@{{ surveyor.alamat }}</small>
                                             <div class="list-detail d-flex gap-1 flex-wrap flex-column mt-2">
                                                 <div class="data-pendaftar-in-detail list-group-item list-group-item-action"
@@ -97,7 +100,11 @@
                                                                 @{{ detail.pendaftar ? detail.pendaftar.biodata_pendaftar.data.biodata.alamat_ktp.value : detail.mahasiswa.alamat }}
                                                             </div>
                                                         </div>
-                                                        <div @click.stop="removeMahasiswa(surveyor, detail)"
+                                                        <div v-if="surveyor.publish===1 || detail.pendaftar.hasil_survei.persen>0"
+                                                            class="text-secondary fs-4" title="Terkunci">
+                                                            <i class="ti ti-lock"></i>
+                                                        </div>
+                                                        <div v-else @click.stop="removeMahasiswa(surveyor, detail)"
                                                             class="text-danger fs-4" title="Hapus"
                                                             style="cursor: pointer;">
                                                             <i class="ti ti-trash"></i>
