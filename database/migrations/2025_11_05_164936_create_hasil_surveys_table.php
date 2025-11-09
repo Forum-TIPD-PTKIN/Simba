@@ -20,7 +20,7 @@ return new class extends Migration
             $table->uuid('pendaftar_id');
             $table->string('aspek', 32);
             $table->boolean('sesuai')->nullable();
-            $table->string('nilai');
+            $table->text('nilai');
             $table->timestamps();
 
             $table->foreign("pendaftar_id")
