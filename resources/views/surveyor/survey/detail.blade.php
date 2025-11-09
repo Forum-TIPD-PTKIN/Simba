@@ -32,14 +32,17 @@
 
 
             <div class="card">
-                <div class="card-header">
-                    <select onchange="reloadPage(this)" class="form-select" aria-label="Default select example">
-                        <option value="" selected disabled> - Pilih Pendaftar - </option>
-                        @foreach ($masterPendaftar as $item)
-                            <option value="{{ $item->id }}" @selected($item->id == $id)>
-                                {{ $item->pendaftar->mahasiswa->nama }}</option>
-                        @endforeach
-                    </select>
+                <div class="card-body">
+                    <div class="d-flex gap-3 align-items-center ">
+                        <div style="white-space: nowrap;">Saat ini :</div>
+                        <select onchange="reloadPage(this)" class="form-select" aria-label="Default select example">
+                            <option value="" selected disabled> - Pilih Pendaftar - </option>
+                            @foreach ($masterPendaftar as $item)
+                                <option value="{{ $item->id }}" @selected($item->id == $id)>
+                                    {{ $item->pendaftar->mahasiswa->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
