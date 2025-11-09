@@ -30,8 +30,20 @@
                 Pastikan status sudah tesimpan (Ter-update).
             </div>
 
-            <div class="row">
 
+            <div class="card">
+                <div class="card-header">
+                    <select onchange="reloadPage(this)" class="form-select" aria-label="Default select example">
+                        <option value="" selected disabled> - Pilih Pendaftar - </option>
+                        @foreach ($masterPendaftar as $item)
+                            <option value="{{ $item->id }}" @selected($item->id == $id)>
+                                {{ $item->pendaftar->mahasiswa->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
                 <div class="col-md-5 col-lg-4">
                     <section class="card shadow-sm border-0">
                         <header class="card-header ext-center py-3">
@@ -62,6 +74,11 @@
                             <section class="text-start small px-2">
                                 <table class="table table-borderless align-middle mb-0">
                                     <tbody>
+                                        <tr>
+                                            <th scope="row" class="text-secondary fw-semibold">Kategori</th>
+                                            <td>{{ $pendaftar->pendaftar->pemberkasan->data->pemberkasan->kategori->valOption }}
+                                            </td>
+                                        </tr>
                                         <tr>
                                             <th scope="row" class="text-secondary fw-semibold">Alamat</th>
                                             <td>{{ $pendaftar->pendaftar->biodata_pendaftar->data->biodata->alamat_ktp->value }}
@@ -891,6 +908,31 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div>
+                                    <label for="berkasGdrive" class="form-label fw-bold mb-0">Url Google Drive</label>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex gap-1 flex-wrap item-align-center">
+                                            Status: <div id="elberkasGdrive">
+                                                @if ($nilaiSurvey->berkasGdriveUpdateAt)
+                                                    <span class="fw-bold text-success"><i class="fas fa-check-circle"></i>
+                                                        update
+                                                        {{ formatDateUpdateAt($nilaiSurvey->berkasGdriveUpdateAt) }}</span>
+                                                @else
+                                                    <span class="text-warning">Belum diperbarui</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="text"
+                                        v-on:input="liveChage('berkasGdrive', survey.berkasGdrive, '#elberkasGdrive')"
+                                        class="form-control" id="berkasGdrive" v-model="survey.berkasGdrive">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="card">
                             <div class="card-body">
                                 {{-- <div v-if="surveyErrors">
@@ -923,6 +965,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="card bg-danger text-bg-danger">
                             <div class="card-body text-center ">
                                 Untuk mengosongkan seluruh penilaian, silakan klik RESET. Tindakan ini bersifat permanen dan
@@ -1083,7 +1126,8 @@
                             kondisi: {!! $nilaiSurvey->kondisiWc !!}
                         },
                     },
-                    catatan: '{{ $nilaiSurvey->catatan }}'
+                    catatan: '{{ $nilaiSurvey->catatan }}',
+                    berkasGdrive: '{{ $nilaiSurvey->berkasGdrive }}'
                 }
             },
             computed: {
@@ -1426,5 +1470,12 @@
                 zoomRatio: 0.6
             });
         })
+
+        function reloadPage(selectElement) {
+            var selectedValue = selectElement.value;
+            let url = '{{ route('surveyor.survey.show', ['id' => 'ID']) }}';
+            url = url.replace('ID', selectedValue);
+            window.location.href = url;
+        }
     </script>
 @endpush

@@ -97,8 +97,9 @@ class Pendaftar extends Uuid
             "kondisiKamarMandi",
             "kepemilikanListrik",
             "tanggunganKeluarga",
+            'berkasGdrive'
         ];
-        $isString = ['ibuNama', 'ayahNama', 'kondisiRumah', 'catatan'];
+        $isString = ['ibuNama', 'ayahNama', 'kondisiRumah', 'catatan', 'berkasGdrive'];
         $valueAutoScore = ['ayahPekerjaan', 'ibuPekerjaan'];
 
         // // tangani khusus nilai "LAINNYA:" untuk pekerjaan

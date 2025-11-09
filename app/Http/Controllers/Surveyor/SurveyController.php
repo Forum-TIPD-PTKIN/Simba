@@ -131,7 +131,14 @@ class SurveyController extends Controller
         if (!$pendaftar) {
             return redirect()->route('surveyor.survey');
         }
-
+        $masterPendaftar = SurveyorDetail::with(['pendaftar.user', 'pendaftar.mahasiswa', 'pendaftar.biodata_pendaftar'])
+            ->whereHas('surveyor', function ($query) {
+                $query->where('bersedia', 1)
+                    ->where('publish', 1)
+                    ->whereUserId(Auth::id());
+            })
+            ->whereSurveyorId($pendaftar->surveyor_id)
+            ->get();
         $nilai = HasilSurvey::where('pendaftar_id', $pendaftar->pendaftar->id)->get();
 
         $nilaiSurvey = (object)[
@@ -183,6 +190,8 @@ class SurveyController extends Controller
             'kondisiWcUpdateAt' => null,
             'catatan' => '',
             'catatanUpdateAt' => null,
+            'berkasGdrive' => '',
+            'berkasGdriveUpdateAt' => null,
         ];
 
         foreach ($nilai as $key => $value) {
@@ -232,7 +241,10 @@ class SurveyController extends Controller
             'masterLantaiRumah',
             'masterKepemilikanListrik',
             'pendaftar',
-            'nilaiSurvey'
+            'nilaiSurvey',
+            'pendaftar',
+            'masterPendaftar',
+            'id'
         ));
     }
 
