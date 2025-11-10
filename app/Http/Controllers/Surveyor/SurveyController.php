@@ -30,7 +30,7 @@ class SurveyController extends Controller
             )
             ->where('bersedia', 1)
             ->where('publish', 1)
-            ->limit(7)
+            ->limit(7) // 7 tahun terakhir
             ->get();
 
         if (request()->ajax()) {
@@ -40,7 +40,10 @@ class SurveyController extends Controller
                         ->where('publish', 1)
                         ->whereUserId(Auth::id());
                 })
-                ->whereSurveyorId($request->surveyor_id);
+                ->whereSurveyorId($request->surveyor_id)
+                ->get()
+                ->sortByDesc(fn($item) => $item->pendaftar->hasil_survei->point ?? 0);
+
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -65,7 +68,10 @@ class SurveyController extends Controller
                     }
                     return '<span class="badge ' . $colorClass . '">' . $percentage . '%</span>';
                 })
-                ->rawColumns(['action', 'fakultas', 'progress'])
+                ->addColumn('point', function ($row) {
+                    return $row->pendaftar->hasil_survei->point;
+                })
+                ->rawColumns(['action', 'fakultas', 'progress', 'point'])
                 ->make(true);
         }
 
@@ -379,6 +385,7 @@ class SurveyController extends Controller
                     });
             })
             ->get();
+
         $view_daftar_responden = view('surveyor.data-peserta-survei', [
             'responden' => $responden
         ])->render();
@@ -410,5 +417,25 @@ class SurveyController extends Controller
         return view('surveyor.modal-berkas-pendaftar', [
             'data' => $pendaftar,
         ])->render();
+    }
+
+    public function cetak_hasil_survei(string $id)
+    {
+        $data = Pendaftar::with('mahasiswa', 'biodata_pendaftar', 'pemberkasan')
+            ->where('id', $id)
+            ->whereHas('surveyor_detail', function ($query) {
+                $query->where('surveyor_id', Surveyor::where('user_id', Auth::id())->pluck('id'))
+                    ->whereHas('surveyor', function ($surveyorQuery) {
+                        $surveyorQuery->where('publish', '1')
+                            ->where('bersedia', '1');
+                    });
+            })
+            ->first();
+
+        if (!$data) return response()->json('Pendaftar tidak ditemukan', 404);
+
+        return view('surveyor.survey.hasil-survei', [
+            'data' => $data
+        ]);
     }
 }

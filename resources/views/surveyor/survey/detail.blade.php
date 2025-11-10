@@ -42,6 +42,7 @@
                                     {{ $item->pendaftar->mahasiswa->nama }}</option>
                             @endforeach
                         </select>
+                        <a href="{{ route('surveyor.hasil-survei', ['id' => $pendaftar->pendaftar->id]) }}">Pratinjau</a>
                     </div>
                 </div>
             </div>
@@ -56,8 +57,8 @@
                         <article class="card-body text-center">
                             <!-- Foto Profil -->
                             <figure class="mb-3">
-                                <img src="https://be.iainmadura.ac.id/api/v1/external/mahasiswa/foto?nim={{ $pendaftar->pendaftar->mahasiswa->nim }}&key=6321afccabf95b9ec00ac8d193479f4f6a849d46ffbe50fc7e14a74011554fc1"
-                                    alt="Foto Mahasiswa Affan One" class="rounded-circle img-thumbnail shadow-sm"
+                                <img src="{{ $pendaftar->pendaftar->mahasiswa->foto }}" alt="Foto Mahasiswa Affan One"
+                                    class="rounded-circle img-thumbnail shadow-sm"
                                     style="width: 120px; height: 120px; object-fit: cover;">
                                 <figcaption class="mt-2">
                                     <h5 class="fw-bold mb-0">{{ $pendaftar->pendaftar->mahasiswa->nama }}</h5>
@@ -160,7 +161,7 @@
                                             </div>
                                         </div>
                                         <div class="d-flex gap-1 flex-wrap item-align-center">
-                                            Tingkat kelayakan:
+                                            Point kelayakan menerima:
                                             <span class="badge"
                                                 :class="kesehatanAyahBadgeClass">@{{ kesehatanAyahSufficiancyText }}</span>
                                         </div>
@@ -175,9 +176,9 @@
                                             step="0.5" v-model.number="survey.ayah.kesehatan">
                                         <div class="d-flex justify-content-between mt-1">
                                             <div class="fw-bold text-danger">
-                                                <i class="fas fa-chevron-left"></i> Tidak layak menerima
+                                                <i class="fas fa-chevron-left"></i> Point 1
                                             </div>
-                                            <div class="fw-bold text-success">Layak menerima <i
+                                            <div class="fw-bold text-success">Point 10 <i
                                                     class="fas fa-chevron-right"></i>
                                             </div>
                                         </div>
@@ -238,7 +239,7 @@
                                             </div>
                                         </div>
                                         <div class="d-flex gap-1 flex-wrap item-align-center">
-                                            Tingkat kelayakan:
+                                            Point kelayakan menerima:
                                             <span class="badge"
                                                 :class="kondisiIbuBadgeClass">@{{ kondisiIbuSufficiancyText }}</span>
                                         </div>
@@ -253,8 +254,8 @@
                                             step="0.5" v-model.number="survey.ibu.kondisi">
                                         <div class="d-flex justify-content-between mt-1">
                                             <div class="fw-bold text-danger"><i class="fas fa-chevron-left"></i>
-                                                Tidak layak menerima</div>
-                                            <div class="fw-bold text-success">Layak menerima <i
+                                                Point 1</div>
+                                            <div class="fw-bold text-success">Point 10 <i
                                                     class="fas fa-chevron-right"></i>
                                             </div>
                                         </div>
@@ -716,7 +717,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="d-flex gap-1 flex-wrap item-align-center">
-                                                            Tingkat kelayakan:
+                                                            Point kelayakan menerima:
                                                             <span class="badge"
                                                                 :class="kondisiDapurBadgeClass">@{{ kondisiDapurSufficiancyText }}</span>
                                                         </div>
@@ -753,8 +754,8 @@
                                                     <div class="d-flex justify-content-between mt-1">
                                                         <div class="fw-bold text-danger"><i
                                                                 class="fas fa-chevron-left"></i>
-                                                            Tidak layak menerima</div>
-                                                        <div class="fw-bold text-success">Layak menerima <i
+                                                            Point 1</div>
+                                                        <div class="fw-bold text-success">Point 10 <i
                                                                 class="fas fa-chevron-right"></i>
                                                         </div>
                                                     </div>
@@ -789,7 +790,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="d-flex gap-1 flex-wrap item-align-center">
-                                                            Tingkat kelayakan:
+                                                            Point kelayakan menerima:
                                                             <span class="badge"
                                                                 :class="kondisiKamarMandiBadgeClass">@{{ kondisiKamarMandiSufficiancyText }}</span>
                                                         </div>
@@ -826,8 +827,8 @@
                                                     <div class="d-flex justify-content-between mt-1">
                                                         <div class="fw-bold text-danger"><i
                                                                 class="fas fa-chevron-left"></i>
-                                                            Tidak layak menerima</div>
-                                                        <div class="fw-bold text-success">Layak menerima <i
+                                                            Point 1</div>
+                                                        <div class="fw-bold text-success">Point 10 <i
                                                                 class="fas fa-chevron-right"></i>
                                                         </div>
                                                     </div>
@@ -862,7 +863,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="d-flex gap-1 flex-wrap item-align-center">
-                                                            Tingkat kelayakan:
+                                                            Point kelayakan menerima:
                                                             <span class="badge"
                                                                 :class="kondisiWcMandiBadgeClass">@{{ kondisiWciSufficiancyText }}</span>
                                                         </div>
@@ -899,8 +900,8 @@
                                                     <div class="d-flex justify-content-between mt-1">
                                                         <div class="fw-bold text-danger"><i
                                                                 class="fas fa-chevron-left"></i>
-                                                            Tidak layak menerima</div>
-                                                        <div class="fw-bold text-success">Layak menerima <i
+                                                            Point 1</div>
+                                                        <div class="fw-bold text-success">Point 10 <i
                                                                 class="fas fa-chevron-right"></i>
                                                         </div>
                                                     </div>

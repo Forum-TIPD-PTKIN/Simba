@@ -56,6 +56,7 @@
                                                 <th>HP</th>
                                                 <th>Alamat</th>
                                                 <th>Progress</th>
+                                                <th>Point</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -115,18 +116,16 @@
                             name: 'pendaftar.mahasiswa.fakultas'
                         }, {
                             data: 'pendaftar.biodata_pendaftar.data.biodata.no_hp.value',
-                            name: 'pendaftar.biodata_pendaftar.data',
-                            orderable: false,
                         }, {
                             data: 'pendaftar.biodata_pendaftar.data.biodata.alamat_ktp.value',
-                            name: 'pendaftar.biodata_pendaftar.data',
-                            orderable: false,
                         },
                         {
                             data: 'progress',
                             name: 'progress',
-                            orderable: false,
-                            searchable: false
+                        },
+                        {
+                            data: 'point',
+                            name: 'point',
                         },
                         {
                             data: 'action',

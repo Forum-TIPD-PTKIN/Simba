@@ -6,6 +6,7 @@ use App\Models\Scopes\PendaftarStatusLates;
 
 class Pendaftar extends Uuid
 {
+    protected static $masterStatic = null;
     protected $fillable = [
         'beasiswa_id',
         'tahun_kegiatan_id',
@@ -73,6 +74,10 @@ class Pendaftar extends Uuid
 
     public function getHasilSurveiAttribute()
     {
+        // kalau sudah ada di cache, kembalikan
+        if (!static::$masterStatic) {
+            static::$masterStatic = MasterStatis::all();
+        }
         if (!$this->attributes['data_survei']) return (object)[
             'nilai' => null,
             'persen' => 0,
@@ -99,8 +104,35 @@ class Pendaftar extends Uuid
             "tanggunganKeluarga",
             'berkasGdrive'
         ];
+        $keyPoints = [
+            'ayahKesehatan',
+            'ayahPekerjaan',
+            'ayahPenghasilan',
+            'bangunanRumah',
+            'ibuKondisi',
+            'ibuPekerjaan',
+            'ibuPenghasilan',
+            'kepemilikanListrik',
+            'kepemilikanRumah',
+            'kondisiDapur',
+            'kondisiKamarMandi',
+            'kondisiWc',
+            'lantaiRumah',
+            'tanggunganKeluarga'
+        ];
         $isString = ['ibuNama', 'ayahNama', 'kondisiRumah', 'catatan', 'berkasGdrive'];
         $valueAutoScore = ['ayahPekerjaan', 'ibuPekerjaan'];
+
+        $keyMasterStatis = (object)[
+            'ayahPekerjaan' => 'pekerjaan',
+            'ibuPekerjaan' => 'pekerjaan',
+            'ayahPenghasilan' => 'penghasilan',
+            'ibuPenghasilan' => 'penghasilan',
+            'kepemilikanListrik' => 'kepemilikan_listrik',
+            'kepemilikanRumah' => 'kepemilikan_rumah',
+            'bangunanRumah' => 'bangunan_rumah',
+            'lantaiRumah' => 'lantai_rumah'
+        ];
 
         // // tangani khusus nilai "LAINNYA:" untuk pekerjaan
         foreach ($valueAutoScore as $pekerjaanKey) {
@@ -113,7 +145,41 @@ class Pendaftar extends Uuid
         foreach ($hasil as $key => $value) {
             if (!in_array($key, $isString)) {
                 if (is_string($value) && $value !== '') {
-                    $hasil->$key = floatval($value);
+                    $nilai = floatval($value);
+                    $nd = collect(static::$masterStatic)->where('nama', $keyMasterStatis->{$key} ?? '??')->first();
+                    if ($nd && $nd->data) {
+                        $nd1 = collect($nd->data)->where('value', $nilai)->first();
+
+                        if ($nd1) {
+                            $hasil->$key = (object)[
+                                'text' => $nd1['label'],
+                                'value' => $nilai
+                            ];
+                        } else {
+                            $hasil->$key = (object)[
+                                'text' => '??',
+                                'value' => $nilai
+                            ];
+                        }
+                    } else {
+                        $nilai2 = 10 - $nilai;
+                        $persen = $nilai2 * 10;
+                        if ($nilai2 >= 9) {
+                            $kategori = 'Sangat Baik';
+                        } elseif ($nilai2 >= 7) {
+                            $kategori = 'Baik';
+                        } elseif ($nilai2 >= 5) {
+                            $kategori = 'Cukup';
+                        } elseif ($nilai2 >= 3) {
+                            $kategori = 'Kurang';
+                        } else {
+                            $kategori = 'Perlu Perhatian';
+                        }
+                        $hasil->$key = (object)[
+                            'text' => "$kategori ($persen%)",
+                            'value' => $nilai
+                        ];
+                    }
                 } elseif ($value === '' || $value === null) {
                     $hasil->$key = null;
                 }
@@ -122,9 +188,13 @@ class Pendaftar extends Uuid
         $totalKey = count($keys);
         $filledCount = 0;
 
+        $point = 0;
         foreach ($keys as $key) {
             if (isset($hasil->$key) && $hasil->$key !== '' && $hasil->$key !== null) {
                 $filledCount++;
+            }
+            if (in_array($key, $keyPoints)) {
+                $point += $hasil->$key->value;
             }
         }
 
@@ -133,6 +203,7 @@ class Pendaftar extends Uuid
         return (object)[
             'nilai' => $hasil,
             'persen' => round($persen, 2),
+            'point' => $point
         ];
     }
 

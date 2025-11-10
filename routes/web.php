@@ -37,6 +37,7 @@ use App\Http\Controllers\Surveyor\{
     PersetujuanController,
     SurveyController,
 };
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
 use function Livewire\store;
@@ -199,6 +200,7 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
     Route::get('/survey/peserta', [SurveyController::class, 'peserta_survei'])->name('surveyor.peserta-survei');
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
     Route::get('/survey/{id}/berkas-pendaftar', [SurveyController::class, 'berkas_pendaftar'])->name('surveyor.berkas-pendaftar');
+    Route::get('/survey/{id}/hasil-survey', [SurveyController::class, 'cetak_hasil_survei'])->name('surveyor.hasil-survei');
 
     Route::post('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
     Route::post('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
@@ -264,7 +266,7 @@ Route::get('file/{root}/{berkas}/{filename}', function ($root, $berkas, $filenam
 });
 
 Route::get('download/{path}', function (string $path) {
-    $decrypted = \Crypt::decrypt(urldecode($path));
+    $decrypted = Crypt::decrypt(urldecode($path));
 
     $fullPath = storage_path('app/' . $decrypted);
 
