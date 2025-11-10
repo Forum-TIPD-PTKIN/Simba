@@ -196,7 +196,7 @@ class Pendaftar extends Uuid
                 $filledCount++;
             }
             if (in_array($key, $keyPoints)) {
-                $point += $hasil->$key->value;
+                $point += $hasil->$key->value ?? 0;
             }
         }
 
