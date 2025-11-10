@@ -88,6 +88,7 @@ class Pendaftar extends Uuid
 
         $keys = [
             "ibuNama",
+            "ayahKesehatan",
             "ayahNama",
             "kondisiWc",
             "ibuKondisi",

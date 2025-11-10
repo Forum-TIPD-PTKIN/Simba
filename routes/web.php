@@ -201,11 +201,11 @@ Route::group(['prefix' => 'surveyor', 'middleware' => ['auth', 'isSurveyor']], f
     Route::get('survey/{id}', [SurveyController::class, 'show'])->name('surveyor.survey.show');
     Route::get('/survey/{id}/berkas-pendaftar', [SurveyController::class, 'berkas_pendaftar'])->name('surveyor.berkas-pendaftar');
     Route::get('/survey/{id}/hasil-survey', [SurveyController::class, 'cetak_hasil_survei'])->name('surveyor.hasil-survei');
+    Route::post('survey/update/skor', [SurveyController::class, 'update_skor'])->name('surveyor.survey.update.skor');
+    Route::delete('survey/update/skor', [SurveyController::class, 'reset_skor'])->name('surveyor.survey.update.skor.reset');
 
     Route::post('/cetak/peserta-survei', [CetakController::class, 'peserta_survei'])->name('surveyor.cetak.peserta-survei');
     Route::post('/cetak/instrumen-survei', [CetakController::class, 'instrumen_survei'])->name('surveyor.cetak.instrumen-survei');
-    Route::post('survey/update/skor', [SurveyController::class, 'update_skor'])->name('surveyor.survey.update.skor');
-    Route::delete('survey/update/skor', [SurveyController::class, 'reset_skor'])->name('surveyor.survey.update.skor.reset');
 
     Route::get('/', function () {
         return redirect()->route('surveyor.dashboard');

@@ -13,6 +13,7 @@
                         <div class="col-md-12">
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="javascript: void(0)">Surveyor</a></li>
+                                <li class="breadcrumb-item"><a href="{{ route('surveyor.survey') }}">Survei</a></li>
                                 <li class="breadcrumb-item" aria-current="page">Detail Survey</li>
                             </ul>
                         </div>
@@ -42,7 +43,8 @@
                                     {{ $item->pendaftar->mahasiswa->nama }}</option>
                             @endforeach
                         </select>
-                        <a href="{{ route('surveyor.hasil-survei', ['id' => $pendaftar->pendaftar->id]) }}">Pratinjau</a>
+                        <a href="{{ route('surveyor.hasil-survei', ['id' => $pendaftar->pendaftar->id]) }}"
+                            class="btn btn-sm btn-dark"><i class="far fa-eye"></i> Pratinjau</a>
                     </div>
                 </div>
             </div>
