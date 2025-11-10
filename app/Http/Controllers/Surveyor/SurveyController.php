@@ -44,7 +44,6 @@ class SurveyController extends Controller
                 ->get()
                 ->sortByDesc(fn($item) => $item->pendaftar->hasil_survei->point ?? 0);
 
-
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {

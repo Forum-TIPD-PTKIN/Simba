@@ -2,6 +2,15 @@
 
 @section('title', 'Detail Survey Kondisi Mahasiswa')
 
+@push('head')
+    <style>
+        .table th,
+        .table td {
+            vertical-align: top;
+        }
+    </style>
+@endpush
+
 @section('content')
     <!-- [ Main Content ] start -->
     <div class="pc-container">
@@ -34,7 +43,7 @@
                                 <h6 class="fw-bold bg-light p-2 border">Identitas Mahasiswa</h6>
                                 <table class="table table-sm table-bordered mb-0">
                                     <tr>
-                                        <th style="width: 138px;">Nama</th>
+                                        <th style="width: 174px;">Nama</th>
                                         <td>{{ $data->mahasiswa->nama ?? '-' }}</td>
                                         <td rowspan="6" class="text-center">
                                             @if (!empty($data->mahasiswa->foto))
@@ -46,7 +55,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>NIM</th>
+                                        <th style="width: 174px;">NIM</th>
                                         <td>{{ $data->mahasiswa->nim ?? '-' }}</td>
                                     </tr>
                                     <tr>
@@ -69,7 +78,7 @@
                                 <h6 class="fw-bold bg-light p-2 border">Informasi Beasiswa</h6>
                                 <table class="table table-sm table-bordered mb-0">
                                     <tr>
-                                        <th width="30%">Nama Beasiswa</th>
+                                        <th style="width: 174px;">Nama Beasiswa</th>
                                         <td>{{ $data->beasiswa->nama ?? '-' }}</td>
                                     </tr>
                                     <tr>
@@ -92,7 +101,7 @@
                                 <h6 class="fw-bold bg-light p-2 border">Biodata Keluarga</h6>
                                 <table class="table table-sm table-bordered mb-0">
                                     <tr>
-                                        <th>Nama Ayah</th>
+                                        <th style="width: 174px;">Nama Ayah</th>
                                         <td>{{ $data->hasil_survei->nilai->ayahNama ?? '-' }}</td>
                                     </tr>
                                     <tr>
@@ -131,7 +140,7 @@
                                 <h6 class="fw-bold bg-light p-2 border">Kondisi Rumah</h6>
                                 <table class="table table-sm table-bordered mb-0">
                                     <tr>
-                                        <th>Status Kepemilikan Rumah</th>
+                                        <th style="width: 174px;">Status Kepemilikan Rumah</th>
                                         <td>{{ $data->hasil_survei->nilai->kepemilikanRumah->text ?? '-' }}</td>
                                     </tr>
                                     <tr>
@@ -166,7 +175,7 @@
                                 <h6 class="fw-bold bg-light p-2 border">Hasil Survei Lapangan</h6>
                                 <table class="table table-sm table-bordered">
                                     <tr>
-                                        <th>Total Point</th>
+                                        <th style="width: 174px;">Total Point</th>
                                         <td>{{ $data->hasil_survei->point ?? '-' }}</td>
                                     </tr>
                                     <tr>

@@ -81,6 +81,7 @@ class Pendaftar extends Uuid
         if (!$this->attributes['data_survei']) return (object)[
             'nilai' => null,
             'persen' => 0,
+            'point' => 0
         ];
 
         $hasil = json_decode($this->attributes['data_survei']);
