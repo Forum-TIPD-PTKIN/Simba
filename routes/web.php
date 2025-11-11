@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\{
     LaporanController,
     PenggunaController,
     RekapController,
+    SeleksiAkhirController,
     SurveyorController,
     TahunKegiatanController,
     TesPotensiAkademikController,
@@ -135,6 +136,14 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-tpa/pelulusan/template', [TesPotensiAkademikController::class, 'pelulusan_template'])->name('admin.seleksi-tpa.pelulusan.template');
     Route::post('/seleksi-tpa/pelulusan/impor', [TesPotensiAkademikController::class, 'impor'])->name('admin.seleksi-tpa.pelulusan.impor');
     Route::put('/seleksi-tpa/pelulusan/update', [TesPotensiAkademikController::class, 'pelulusan_update'])->name('admin.seleksi-tpa.pelulusan.update');
+
+    Route::get('/seleksi-akhir', [SeleksiAkhirController::class, 'index'])->name('admin.seleksi-akhir');
+    Route::post('/seleksi-akhir/data-peserta', [SeleksiAkhirController::class, 'data_peserta'])->name('admin.seleksi-akhir.data-peserta');
+    Route::post('/seleksi-akhir/data-peserta/unduh', [SeleksiAkhirController::class, 'unduh_peserta'])->name('admin.seleksi-akhir.unduh-data-peserta');
+    Route::get('/seleksi-akhir/hasil', [SeleksiAkhirController::class, 'hasil'])->name('admin.seleksi-akhir.hasil');
+    Route::post('/seleksi-akhir/hasil/data', [SeleksiAkhirController::class, 'data_hasil_survei'])->name('admin.seleksi-akhir.data-hasil-survei');
+    Route::get('/seleksi-akhir/hasil/{id}/data', [SeleksiAkhirController::class, 'data_hasil_survei_detail'])->name('admin.seleksi-akhir.data-hasil-survei.show');
+    Route::get('/seleksi-akhir/pelulusan', [SeleksiAkhirController::class, 'pelulusan'])->name('admin.seleksi-akhir.pelulusan');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {

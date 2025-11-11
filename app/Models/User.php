@@ -63,4 +63,9 @@ class User extends Authenticatable
         }
         return null;
     }
+
+    public function surveyor()
+    {
+        return $this->hasMany(Surveyor::class);
+    }
 }

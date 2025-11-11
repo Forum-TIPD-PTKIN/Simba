@@ -2,6 +2,14 @@
 
 @section('title', 'Peserta Survei')
 
+@push('head')
+    <style>
+        .swal2-container {
+            z-index: 2000 !important;
+        }
+    </style>
+@endpush
+
 @section('content')
     <!-- [ Main Content ] start -->
     <div class="pc-container">

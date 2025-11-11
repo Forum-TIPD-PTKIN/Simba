@@ -144,6 +144,27 @@
                     </ul>
                 </li>
 
+                <li class="pc-item pc-hasmenu">
+                    <a href="#!" class="pc-link">
+                        <span class="pc-micon">
+                            <i class="fas fa-award"></i>
+                        </span>
+                        <span class="pc-mtext">Seleksi Akhir</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item">
+                            <a href="{{ route('admin.seleksi-akhir') }}" class="pc-link">Peserta</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.seleksi-akhir.hasil') }}" class="pc-link">Hasil</a>
+                        </li>
+                        <li class="pc-item">
+                            <a href="{{ route('admin.seleksi-akhir.pelulusan') }}" class="pc-link">Pelulusan</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="pc-item pc-caption">
                     <label>Laporan</label>
                     <svg class="pc-icon">
