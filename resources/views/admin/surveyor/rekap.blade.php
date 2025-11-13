@@ -87,6 +87,7 @@
                                             </th>
                                             <th class="text-center"> <i class="fas fa-times text-danger"></i> Belum
                                             </th>
+                                            <th>Progrs (%)</th>
                                             <th class="text-center">Status <span class="text-muted small">(Klik)</span>
                                             </th>
                                             <th class="text-center">Aksi</th>
@@ -154,12 +155,12 @@
                     },
                 },
                 columnDefs: [{
-                    targets: 5,
+                    targets: 4,
                     createdCell: function(td, cellData, rowData, row, col) {
                         $(td).addClass('text-success');
                     }
                 }, {
-                    targets: 4,
+                    targets: 5,
                     createdCell: function(td, cellData, rowData, row, col) {
                         $(td).addClass('text-danger');
                     }
@@ -195,6 +196,10 @@
                     },
                     {
                         data: 'belum_selesai_count',
+                        searchable: false
+                    },
+                    {
+                        data: 'progress',
                         searchable: false
                     },
                     {

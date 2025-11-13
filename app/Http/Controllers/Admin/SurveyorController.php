@@ -74,19 +74,15 @@ class SurveyorController extends Controller
         }
 
         if ($request->ajax()) {
-            $data = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan'])
+            $data = Surveyor::with(['user', 'beasiswa', 'tahun_kegiatan', 'surveyor_detail.pendaftar'])
                 ->where('bersedia', 1)
                 ->whereBeasiswaId($request->beasiswa ?? $kip_select->id)
                 ->whereTahunKegiatanId($request->tahun ?? $tahun_select->id)
                 ->when($request->status, function ($query, $status) {
                     $query->where('publish', $status == 'Publish' ? 1 : 0);
                 })
-                ->withCount('surveyor_detail as details_count')
-                ->withCount(['surveyor_detail as selesai_count' => function ($query) {
-                    $query->whereHas('pendaftar.latestStatus', function ($q) {
-                        $q->where('status', 'SUDAH SURVEY');
-                    });
-                }]);
+                ->withCount('surveyor_detail as details_count');
+
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -96,8 +92,25 @@ class SurveyorController extends Controller
                 ->addColumn('beasiswa', function ($row) {
                     return $row->beasiswa->nama . ' ' . $row->tahun_kegiatan->tahun;
                 })
+                ->addColumn('selesai_count', function ($row) {
+                    $selesai = collect($row->surveyor_detail)->where('pendaftar.hasil_survei.persen', '>=', 100)->count();
+                    return $selesai;
+                })
                 ->addColumn('belum_selesai_count', function ($row) {
-                    return $row->details_count - $row->selesai_count;
+                    $total = count($row->surveyor_detail);
+                    $selesai = collect($row->surveyor_detail)->where('pendaftar.hasil_survei.persen', '>=', 100)->count();
+                    return $total - $selesai;
+                })
+                ->addColumn('progress', function ($row) {
+                    $total = count($row->surveyor_detail);
+
+                    $persentotal = collect($row->surveyor_detail)->reduce(function ($carry, $item) {
+                        // Pastikan struktur datanya sesuai:
+                        // $item->pendaftar->hasil_survei->persen
+                        return $carry + ($item->pendaftar->hasil_survei->persen ?? 0);
+                    }, 0);
+
+                    return round($persentotal / max($total, 1), 2) . '%';
                 })
                 ->addColumn('action', function ($row) {
                     $btn = '<button onclick="openDetal(event)" data-id="' . $row->id . '" class="btn btn-info btn-sm"><i class="ti ti-eye"></i></button>';
