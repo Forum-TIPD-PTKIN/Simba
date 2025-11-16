@@ -1132,7 +1132,7 @@
                             kondisi: {!! $nilaiSurvey->kondisiWc !!}
                         },
                     },
-                    catatan: '{{ $nilaiSurvey->catatan }}',
+                    catatan: `{{ $nilaiSurvey->catatan }}`,
                     berkasGdrive: '{{ $nilaiSurvey->berkasGdrive }}'
                 }
             },
