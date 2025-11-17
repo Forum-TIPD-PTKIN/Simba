@@ -1,6 +1,6 @@
 @extends('surveyor.template.master-template')
 
-@section('title', 'Persetujuan Surveyor')
+@section('title', 'Survei Lapangan')
 
 @section('content')
     <!-- [ Main Content ] start -->
@@ -137,5 +137,15 @@
                 });
             });
         </script>
+
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    title: 'Kesalahan',
+                    icon: 'error',
+                    text: "{{ session('error') }}"
+                });
+            </script>
+        @endif
     @endpush
 @endif

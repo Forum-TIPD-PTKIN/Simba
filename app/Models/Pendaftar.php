@@ -136,7 +136,7 @@ class Pendaftar extends Uuid
             'lantaiRumah' => 'lantai_rumah'
         ];
 
-        // // tangani khusus nilai "LAINNYA:" untuk pekerjaan
+        // tangani khusus nilai "LAINNYA:" untuk pekerjaan
         foreach ($valueAutoScore as $pekerjaanKey) {
             if (isset($hasil->$pekerjaanKey) && is_string($hasil->$pekerjaanKey)) {
                 if (stripos($hasil->$pekerjaanKey, 'LAINNYA:') === 0) {
@@ -196,7 +196,7 @@ class Pendaftar extends Uuid
                 $filledCount++;
             }
             if (in_array($key, $keyPoints)) {
-                $point += $hasil->$key->value ?? 0;
+                $point += $hasil->$key?->value ?? 0;
             }
         }
 

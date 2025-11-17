@@ -133,9 +133,11 @@ class SurveyController extends Controller
             })
             ->first();
 
-        if (!$pendaftar) {
-            return redirect()->route('surveyor.survey');
-        }
+        if (!$pendaftar) return redirect()->route('surveyor.survey');
+
+        $is_jadwal_survei = cek_jadwal($pendaftar->pendaftar?->tahun_kegiatan_id, $pendaftar->pendaftar?->beasiswa_id, 'SURVEI_LOKASI', true);
+        if (!$is_jadwal_survei) return back()->with('error', 'Jadwal pengisian survei lapangan tidak aktif');
+
         $masterPendaftar = SurveyorDetail::with(['pendaftar.user', 'pendaftar.mahasiswa', 'pendaftar.biodata_pendaftar'])
             ->whereHas('surveyor', function ($query) {
                 $query->where('bersedia', 1)
