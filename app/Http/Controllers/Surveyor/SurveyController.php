@@ -170,7 +170,7 @@ class SurveyController extends Controller
             'ibuPekerjaanLainnya' => '',
             'ibuPenghasilan' => '""',
             'ibuPenghasilanUpdateAt' => null,
-            'tanggunganKeluarga' => '"4"',
+            'tanggunganKeluarga' => '""',
             'tanggunganKeluargaUpdateAt' => null,
             'tanggunganKeluargaStatus' => '',
             'kepemilikanRumah' => '""',
@@ -275,15 +275,14 @@ class SurveyController extends Controller
     public function update_skor(Request $request)
     {
         try {
-            if (now()->gt(Carbon::parse('2025-11-17 23:59:00'))) {
-                return response()->json([
-                    'error' => 'Waktu pembaruan telah berakhir.'
-                ], 422);
-            }
             $key = $request->key;
             $nilai = $request->data;
             $pendaftar = $request->pendaftar;
             $sesuai = $request->sesuai ?? null;
+
+            $dt_pendaftar = Pendaftar::find($pendaftar);
+            $is_jadwal_survei = cek_jadwal($dt_pendaftar->tahun_kegiatan_id, $dt_pendaftar->beasiswa_id, 'SURVEI_LOKASI', true);
+            if (!$is_jadwal_survei) return redirect()->to(route('surveyor.survey'))->with('error', 'Jadwal pengisian survei lapangan tidak aktif');
 
             $cek = DB::table('pendaftars')
                 ->whereRaw("
@@ -330,15 +329,14 @@ class SurveyController extends Controller
     public function reset_skor(Request $request)
     {
         try {
-            if (now()->gt(Carbon::parse('2025-11-17 23:59:00'))) {
-                return response()->json([
-                    'error' => 'Waktu pembaruan telah berakhir.'
-                ], 422);
-            }
             $key = $request->key;
             $nilai = $request->data;
             $pendaftar = $request->pendaftar;
             $sesuai = $request->sesuai ?? null;
+
+            $dt_pendaftar = Pendaftar::find($pendaftar);
+            $is_jadwal_survei = cek_jadwal($dt_pendaftar->tahun_kegiatan_id, $dt_pendaftar->beasiswa_id, 'SURVEI_LOKASI', true);
+            if (!$is_jadwal_survei) return redirect()->to(route('surveyor.survey'))->with('error', 'Jadwal pengisian survei lapangan tidak aktif');
 
             $cek = DB::table('pendaftars')
                 ->whereRaw("
