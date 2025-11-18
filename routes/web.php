@@ -142,8 +142,13 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-akhir/data-peserta/unduh', [SeleksiAkhirController::class, 'unduh_peserta'])->name('admin.seleksi-akhir.unduh-data-peserta');
     Route::get('/seleksi-akhir/hasil', [SeleksiAkhirController::class, 'hasil'])->name('admin.seleksi-akhir.hasil');
     Route::post('/seleksi-akhir/hasil/data', [SeleksiAkhirController::class, 'data_hasil_survei'])->name('admin.seleksi-akhir.data-hasil-survei');
+    Route::post('/seleksi-akhir/hasil-survei/unduh', [SeleksiAkhirController::class, 'unduh_hasil_survei'])->name('admin.seleksi-akhir.unduh-hasil-survei');
     Route::get('/seleksi-akhir/hasil/{id}/data', [SeleksiAkhirController::class, 'data_hasil_survei_detail'])->name('admin.seleksi-akhir.data-hasil-survei.show');
     Route::get('/seleksi-akhir/pelulusan', [SeleksiAkhirController::class, 'pelulusan'])->name('admin.seleksi-akhir.pelulusan');
+
+    Route::get('/seleksi-akhir/survei', [SeleksiAkhirController::class, 'survei'])->name('admin.seleksi-akhir.survei');
+    Route::get('/seleksi-akhir/survei/peserta', [SeleksiAkhirController::class, 'peserta_survei'])->name('admin.seleksi-akhir.survei.peserta');
+    Route::post('/seleksi-akhir/survei', [SeleksiAkhirController::class, 'survei_post'])->name('admin.seleksi-akhir.survei.post');
 
     /* Laporan */
     Route::group(['prefix' => 'laporan'], function () {

@@ -137,13 +137,13 @@ class Pendaftar extends Uuid
         ];
 
         // tangani khusus nilai "LAINNYA:" untuk pekerjaan
-        foreach ($valueAutoScore as $pekerjaanKey) {
-            if (isset($hasil->$pekerjaanKey) && is_string($hasil->$pekerjaanKey)) {
-                if (stripos($hasil->$pekerjaanKey, 'LAINNYA:') === 0) {
-                    $hasil->$pekerjaanKey = 6.5;
-                }
-            }
-        }
+        // foreach ($valueAutoScore as $pekerjaanKey) {
+        //     if (isset($hasil->$pekerjaanKey) && is_string($hasil->$pekerjaanKey)) {
+        //         if (stripos($hasil->$pekerjaanKey, 'LAINNYA:') === 0) {
+        //             $hasil->$pekerjaanKey = 6.5;
+        //         }
+        //     }
+        // }
         foreach ($hasil as $key => $value) {
             if (!in_array($key, $isString)) {
                 if (is_string($value) && $value !== '') {
@@ -159,8 +159,8 @@ class Pendaftar extends Uuid
                             ];
                         } else {
                             $hasil->$key = (object)[
-                                'text' => '??',
-                                'value' => $nilai
+                                'text' => $value,
+                                'value' => (stripos($value, 'LAINNYA:') === 0 ? 6.5 : $nilai)
                             ];
                         }
                     } else {
