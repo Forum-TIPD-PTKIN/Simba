@@ -13,6 +13,7 @@ use App\Models\SurveyorDetail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Yajra\DataTables\Facades\DataTables;
 
 class SurveyController extends Controller
@@ -169,7 +170,7 @@ class SurveyController extends Controller
             'ibuPekerjaanLainnya' => '',
             'ibuPenghasilan' => '""',
             'ibuPenghasilanUpdateAt' => null,
-            'tanggunganKeluarga' => '""',
+            'tanggunganKeluarga' => '"4"',
             'tanggunganKeluargaUpdateAt' => null,
             'tanggunganKeluargaStatus' => '',
             'kepemilikanRumah' => '""',
@@ -274,6 +275,11 @@ class SurveyController extends Controller
     public function update_skor(Request $request)
     {
         try {
+            if (now()->gt(Carbon::parse('2025-11-17 23:59:00'))) {
+                return response()->json([
+                    'error' => 'Waktu pembaruan telah berakhir.'
+                ], 422);
+            }
             $key = $request->key;
             $nilai = $request->data;
             $pendaftar = $request->pendaftar;
@@ -324,6 +330,11 @@ class SurveyController extends Controller
     public function reset_skor(Request $request)
     {
         try {
+            if (now()->gt(Carbon::parse('2025-11-17 23:59:00'))) {
+                return response()->json([
+                    'error' => 'Waktu pembaruan telah berakhir.'
+                ], 422);
+            }
             $key = $request->key;
             $nilai = $request->data;
             $pendaftar = $request->pendaftar;
