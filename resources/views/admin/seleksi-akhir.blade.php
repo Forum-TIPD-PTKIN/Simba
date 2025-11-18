@@ -4,10 +4,27 @@
 
 @push('head')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
 
     <style>
         .swal2-container {
             z-index: 2000 !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-results__option {
+            font-size: 0.87rem !important;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single {
+            font-size: 0.87rem !important;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+            font-size: 0.87rem !important;
         }
     </style>
 @endpush
@@ -119,11 +136,16 @@
 
 @push('script')
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         function reloadData() {
             dataTable.ajax.reload(null, false);
         }
+
+        $('#flt_surveyor').select2({
+            theme: 'bootstrap-5',
+        });
     </script>
 
     <script>

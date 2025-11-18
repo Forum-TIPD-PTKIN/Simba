@@ -1,6 +1,6 @@
 ADMINISTRATOR
 ===================================================================
-> Fitur penentuan penerima beasiswa.
+> Fitur penentuan penerima beasiswa (pelulusan)
 > 
 
 VERIFIKATOR
@@ -13,6 +13,4 @@ PENDAFTAR
 
 SURVEYOR
 ===================================================================
-> Cetak daftar nama peserta survei 
-> Cetak instrumen survei
-> 
+> Update data rekening
