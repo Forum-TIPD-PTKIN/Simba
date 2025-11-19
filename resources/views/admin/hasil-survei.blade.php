@@ -310,8 +310,8 @@
     <script>
         $(document).on('click', '#unduhDataPeserta', function() {
             const tahun = $('#flt_tahun').val(),
-                beasiswa = $('#flt_beasiswa').val()
-            surveyor = $('#flt_surveyor').val();
+                beasiswa = $('#flt_beasiswa').val(),
+                surveyor = $('#flt_surveyor').val();
 
             $.ajax({
                 url: "{{ route('admin.seleksi-akhir.unduh-hasil-survei') }}",

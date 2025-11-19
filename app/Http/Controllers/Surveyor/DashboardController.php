@@ -25,10 +25,16 @@ class DashboardController extends Controller
             'responden' => $responden
         ])->render();
 
+        $cek_rekening = Surveyor::whereNull('rekening_bank')
+            ->where('user_id', Auth::id())
+            ->whereBersedia(1)
+            ->first();
+
         return view('surveyor.dashboard', [
             'tahun_kegiatan' => $tahun_kegiatan,
             'beasiswa' => $beasiswa,
-            'view_daftar_responden' => $view_daftar_responden
+            'view_daftar_responden' => $view_daftar_responden,
+            'cek_rekening' => $cek_rekening ?? null
         ]);
     }
 

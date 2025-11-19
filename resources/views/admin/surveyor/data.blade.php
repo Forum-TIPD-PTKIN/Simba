@@ -55,6 +55,12 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-auto g-2 gap-1 mb-3" role="group"
+                                aria-label="Button Unduh Data Surveyor">
+                                <button type="button" class="btn btn-sm btn-success" id="unduhDataSurveyor"><span
+                                        class="far fa-file-excel"></span>
+                                    Unduh Data</button>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped" id="datatable-data-surveyor">
                                     <thead>
@@ -184,5 +190,83 @@
         function reloadData() {
             datatable.ajax.reload();
         }
+    </script>
+
+    <script>
+        $(document).on('click', '#unduhDataSurveyor', function() {
+            const tahun = $('#flt_tahun').val(),
+                beasiswa = $('#flt_beasiswa').val(),
+                status = $('#flt_status').val();
+
+            $.ajax({
+                url: "{{ route('admin.surveyor.unduh') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: tahun,
+                    beasiswa: beasiswa,
+                    status: status
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 2) { // Headers received
+                            if (xhr.status === 200) {
+                                xhr.responseType = 'blob';
+                            } else {
+                                xhr.responseType = 'text'; // For error messages
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Memproses berkas...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        allowOutsideClick: false
+                    });
+                },
+                success: function(response, status, xhr) {
+                    var disposition = xhr.getResponseHeader(
+                        'content-disposition');
+                    var matches = /"([^""]*)"/.exec(disposition);
+                    var filename = (matches != null && matches[1] ? matches[1] :
+                        'Data surveyor.xlsx');
+
+                    var blob = new Blob([response], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    });
+
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                    link.remove();
+
+                    Swal.close();
+                },
+                error: function(error) {
+                    const msg = JSON.parse(error.responseText);
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error && error.status !== 200 ?
+                            (typeof msg === 'string' ? msg : msg.message) :
+                            'Tidak dapat melakukan download file. Terjadi kesalahan atau data tidak tersedia',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        customClass: {
+                            timerProgressBar: 'bg-danger'
+                        }
+                    });
+                }
+            });
+        });
     </script>
 @endpush

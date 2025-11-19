@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Beasiswa;
-use App\Models\Pendaftar;
-use App\Models\Surveyor;
-use App\Models\SurveyorDetail;
-use App\Models\TahunKegiatan;
+use App\Exports\Admin\DataSurveyorExport;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Beasiswa;
+use App\Models\Surveyor;
+use App\Models\Pendaftar;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\TahunKegiatan;
+use App\Models\SurveyorDetail;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class SurveyorController extends Controller
@@ -126,6 +128,25 @@ class SurveyorController extends Controller
         }
 
         return view('admin.surveyor.rekap', compact('master_tahun', 'master_beasiswa', 'status_surveyor', 'kip_select', 'tahun_select'));
+    }
+
+    public function unduh(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+        $status = $request->status;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+        $dt_status = $status === 'u' ? 'Belum Merespon' : ($status === 't' ? 'Tidak Bersedia' : 'Bersedia');
+
+        $filename = "Data Surveyor";
+        if ($status) $filename .= " {$dt_status}";
+        $filename .= " Beasiswa {$dt_beasiswa} Tahun {$dt_tahun}.xlsx";
+
+        return Excel::download(new DataSurveyorExport($tahun, $beasiswa, $status), $filename);
     }
     /**
      * Display a listing of the resource.

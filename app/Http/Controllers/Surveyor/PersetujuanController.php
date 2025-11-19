@@ -102,7 +102,7 @@ class PersetujuanController extends Controller
             $surveyor = Surveyor::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
             // Prevent re-submission
-            if ($surveyor->bersedia !== null) {
+            if ($surveyor->bersedia !== null && !$request->has('update_rekening')) {
                 return response()->json(['message' => 'Anda sudah mengirimkan tanggapan sebelumnya.'], 422);
             }
 
