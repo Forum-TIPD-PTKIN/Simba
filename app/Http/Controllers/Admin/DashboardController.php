@@ -111,6 +111,10 @@ class DashboardController extends Controller
             'PENGAJUAN' => 1,
             'GAGAL ADMINISTRASI' => 2,
             'LOLOS ADMINISTRASI' => 3,
+            'GAGAL TPA' => 4,
+            'LOLOS TPA' => 5,
+            'TIDAK LOLOS PENERIMA' => 6,
+            'LOLOS PENERIMA' => 7,
         ];
 
         switch ($label_filter) {

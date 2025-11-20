@@ -34,6 +34,8 @@ class RekapController extends Controller
             'GAGAL ADMINISTRASI',
             'LOLOS TPA',
             'GAGAL TPA',
+            'LOLOS PENERIMA',
+            'TIDAK LOLOS PENERIMA',
         ];
 
         return view('admin.laporan.rekap-pendaftar', [
@@ -56,10 +58,9 @@ class RekapController extends Controller
                     $query->where('beasiswa_id', $beasiswa);
                 })
                 ->when($request->flt_status, function ($query, $status) {
-                    $query->whereHas(
-                        'latestStatus',
-                        fn($q) => $q->where('status', $status)
-                    );
+                    $query->whereHas('pendaftar_status', function ($query) use ($status) {
+                        $query->where('status', $status);
+                    });
                 })
                 ->orderBy('mahasiswas.fakultas')
                 ->orderBy('mahasiswas.prodi')
