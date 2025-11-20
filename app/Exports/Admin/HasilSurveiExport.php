@@ -256,10 +256,14 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
 
                 // Wrap text
                 $sheet->getStyle('F3:F' . $totalRow)->getAlignment()->setWrapText(true); // Alamat
+                $sheet->getStyle('I3:I' . $totalRow)->getAlignment()->setWrapText(true); // Kategori
                 $sheet->getStyle('AO3:AO' . $totalRow)->getAlignment()->setWrapText(true); // Catatan
 
                 $sheet->getDelegate()->getColumnDimension('F')->setAutoSize(false);
                 $sheet->getDelegate()->getColumnDimension('F')->setWidth(40);
+
+                $sheet->getDelegate()->getColumnDimension('I')->setAutoSize(false);
+                $sheet->getDelegate()->getColumnDimension('I')->setWidth(40);
 
                 $sheet->getDelegate()->getColumnDimension('AO')->setAutoSize(false);
                 $sheet->getDelegate()->getColumnDimension('AO')->setWidth(50);
