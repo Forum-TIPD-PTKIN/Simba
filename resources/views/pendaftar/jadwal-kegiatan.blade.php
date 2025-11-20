@@ -103,18 +103,28 @@
                 }
             },
             createdRow: function(row, data, dataIndex) {
+                function toDate(dmy) {
+                    const [d, m, y] = dmy.split('-').map(Number);
+                    return new Date(y, m - 1, d);
+                }
+
                 // Ambil bagian tanggal saja, buang jam
                 const tanggalMulai = data.tanggal_mulai.split(' ')[0]; // "15-09-2025"
                 const tanggalSelesai = data.tanggal_selesai.split(' ')[0]; // "15-09-2025"
 
                 // Ambil tanggal hari ini dalam format DD-MM-YYYY
                 const now = new Date();
-                const today = String(now.getDate()).padStart(2, '0') + '-' +
+                const todayStr = String(now.getDate()).padStart(2, '0') + '-' +
                     String(now.getMonth() + 1).padStart(2, '0') + '-' +
                     now.getFullYear();
 
+                // Ubah semua menjadi Date
+                const today = toDate(todayStr);
+                const mulai = toDate(tanggalMulai);
+                const selesai = toDate(tanggalSelesai);
+
                 // Bandingkan tanggal
-                if (today >= tanggalMulai && today <= tanggalSelesai) {
+                if (today >= mulai && today <= selesai) {
                     $(row).css({
                         'background-color': '#c0e5d9',
                         'font-weight': 'bold'
@@ -151,6 +161,14 @@
                 {
                     "targets": 0,
                     "width": "5%"
+                },
+                {
+                    "targets": 3,
+                    "width": "17%"
+                },
+                {
+                    "targets": 4,
+                    "width": "17%"
                 },
                 {
                     "targets": 5,

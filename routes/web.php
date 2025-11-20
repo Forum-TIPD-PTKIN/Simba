@@ -22,6 +22,7 @@ use App\Http\Controllers\Pendaftar\{
     PemberkasanController,
     RiwayatController,
     SeleksiAdministrasiController as PendaftarSeleksiAdministrasiController,
+    SeleksiAkhirController as PendaftarSeleksiAkhirController,
     TesPotensiAkademikController as PendaftarTesPotensiAkademikController
 };
 use App\Http\Controllers\Verifikator\{
@@ -145,6 +146,10 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/seleksi-akhir/hasil-survei/unduh', [SeleksiAkhirController::class, 'unduh_hasil_survei'])->name('admin.seleksi-akhir.unduh-hasil-survei');
     Route::get('/seleksi-akhir/hasil/{id}/data', [SeleksiAkhirController::class, 'data_hasil_survei_detail'])->name('admin.seleksi-akhir.data-hasil-survei.show');
     Route::get('/seleksi-akhir/pelulusan', [SeleksiAkhirController::class, 'pelulusan'])->name('admin.seleksi-akhir.pelulusan');
+    Route::post('/seleksi-akhir/pelulusan/data', [SeleksiAkhirController::class, 'pelulusan_data'])->name('admin.seleksi-akhir.pelulusan.data');
+    Route::post('/seleksi-akhir/pelulusan/template', [SeleksiAkhirController::class, 'pelulusan_template'])->name('admin.seleksi-akhir.pelulusan.template');
+    Route::post('/seleksi-akhir/pelulusan/impor', [SeleksiAkhirController::class, 'impor'])->name('admin.seleksi-akhir.pelulusan.impor');
+    Route::put('/seleksi-akhir/pelulusan/update', [SeleksiAkhirController::class, 'pelulusan_update'])->name('admin.seleksi-akhir.pelulusan.update');
 
     Route::get('/seleksi-akhir/survei', [SeleksiAkhirController::class, 'survei'])->name('admin.seleksi-akhir.survei');
     Route::get('/seleksi-akhir/survei/peserta', [SeleksiAkhirController::class, 'peserta_survei'])->name('admin.seleksi-akhir.survei.peserta');
@@ -247,6 +252,8 @@ Route::group(['prefix' => 'pendaftar', 'middleware' => ['auth', 'isMahasiswa']],
 
         Route::get('/seleksi-tpa', [PendaftarTesPotensiAkademikController::class, 'index'])->name('pendaftar.seleksi-tpa');
         Route::post('/seleksi-tpa/kartu-peserta', [PendaftarTesPotensiAkademikController::class, 'generate_kartu'])->name('pendaftar.seleksi-tpa.kartu-ujian');
+
+        Route::get('/seleksi-akhir', [PendaftarSeleksiAkhirController::class, 'index'])->name('pendaftar.seleksi-akhir');
     });
 });
 

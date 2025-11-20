@@ -135,6 +135,15 @@
                             <span class="pc-mtext">Seleksi TPA</span>
                         </a>
                     </li>
+
+                    <li class="pc-item">
+                        <a href="{{ route('pendaftar.seleksi-akhir') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <i class="fas fa-award"></i>
+                            </span>
+                            <span class="pc-mtext">Seleksi Akhir</span>
+                        </a>
+                    </li>
                 @endif
 
             </ul>

@@ -10,12 +10,15 @@ use App\Models\MasterStatis;
 use Illuminate\Http\Request;
 use App\Models\TahunKegiatan;
 use App\Models\SurveyorDetail;
+use App\Models\PendaftarStatus;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\Admin\HasilSurveiExport;
 use Yajra\DataTables\Facades\DataTables;
 use App\Exports\Admin\PesertaSurveiExport;
+use App\Imports\Admin\ImporPelulusanPesertaSurvei;
+use App\Exports\Admin\TemplatePelulusanPesertaSurvei;
 
 class SeleksiAkhirController extends Controller
 {
@@ -212,6 +215,203 @@ class SeleksiAkhirController extends Controller
         return view('admin.modal-detail-nilai-survei', [
             'data' => $data
         ])->render();
+    }
+
+    public function pelulusan()
+    {
+        $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
+            ->get();
+        $beasiswa = Beasiswa::where('status', 1)
+            ->orderBy('nama')
+            ->get();
+        $status = ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA'];
+
+        return view('admin.laporan.pelulusan-akhir', [
+            'tahun_kegiatan' => $tahun_kegiatan,
+            'beasiswa' => $beasiswa,
+            'status' => $status
+        ]);
+    }
+
+    public function pelulusan_data(Request $request)
+    {
+        if ($request->ajax()) {
+            $dt_pendaftar = Pendaftar::with(['mahasiswa'])
+                ->selectRaw('pendaftars.*')
+                ->join('mahasiswas', 'pendaftars.id', '=', 'mahasiswas.pendaftar_id')
+                ->join(
+                    DB::raw('(
+                    SELECT *
+                    FROM pendaftar_statuses AS ps1
+                    WHERE created_at = (
+                        SELECT MAX(created_at)
+                        FROM pendaftar_statuses AS ps2
+                        WHERE ps2.pendaftar_id = ps1.pendaftar_id
+                    )
+                ) as ps'),
+                    'pendaftars.id',
+                    '=',
+                    'ps.pendaftar_id'
+                )
+                ->when($request->flt_tahun, function ($q) use ($request) {
+                    return $q->where('tahun_kegiatan_id', $request->flt_tahun);
+                })
+                ->when($request->flt_beasiswa, function ($q) use ($request) {
+                    return $q->where('beasiswa_id', $request->flt_beasiswa);
+                })
+                ->whereHas('surveyor_detail')
+                ->whereHas('hasil_survey')
+                ->where(function ($query) use ($request) {
+                    if ($request->flt_status) {
+                        return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));
+                    }
+
+                    return $query->whereHas(
+                        'pendaftar_status',
+                        fn($q) => $q->whereIn('status', ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA'])
+                    );
+                })
+                ->orderBy('mahasiswas.fakultas')
+                ->orderBy('mahasiswas.prodi')
+                ->orderBy('mahasiswas.nim');
+
+            return DataTables::of($dt_pendaftar)
+                ->editColumn('beasiswa', function ($data) {
+                    return "
+                            <div class='flex-grow-1'>
+                              <div class='row g-1'>
+                                <div class='col-12'>
+                                  <h6 class='mb-0'>{$data->beasiswa?->nama}</h6>
+                                  <p class='text-muted mb-0'><small>{$data->tahun_kegiatan?->tahun}</small></p>
+                                </div>
+                              </div>
+                            </div>";
+                })
+                ->editColumn('status', function ($data) {
+                    $status_seleksi_tpa = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA']))
+                        ->first();
+                    return "<span class='badge " . ($status_seleksi_tpa?->status === 'LOLOS PENERIMA' ? 'bg-success' : 'bg-danger') . "'>{$status_seleksi_tpa?->status}</span>";
+                })
+                ->addColumn('action', function ($data) {
+                    $status_seleksi_tpa = collect($data->pendaftar_status)
+                        ->filter(fn($item) => in_array($item->status, ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA']))
+                        ->first();
+                    return view('admin.template._action_button_table', [
+                        'data' => $data,
+                        'title' => 'Status Seleksi Akhir',
+                        'showTitle' => false,
+                        'buttons' => [
+                            'lolos' => [
+                                'title' => 'Lolos',
+                                'icon' => 'ti ti-circle-check',
+                                'btn-class' => 'btn btn-success',
+                                'encrypted_id' => $status_seleksi_tpa?->id
+                            ],
+                            'gagal' => [
+                                'title' => 'Gagal',
+                                'icon' => 'ti ti-circle-x',
+                                'btn-class' => 'btn btn-danger',
+                                'encrypted_id' => $status_seleksi_tpa?->id
+                            ]
+                        ]
+                    ])
+                        ->render();
+                })
+                ->rawColumns(['beasiswa', 'status', 'action'])
+                ->make(true);
+        }
+    }
+
+    public function pelulusan_template(Request $request)
+    {
+        set_time_limit(60 * 60);
+
+        $tahun = $request->tahun;
+        $beasiswa = $request->beasiswa;
+
+        $dt_tahun = TahunKegiatan::where('id', $tahun)->pluck('tahun')->first();
+        $dt_beasiswa = Beasiswa::where('id', $beasiswa)->pluck('nama')->first();
+        $filename = "template_pelulusan_akhir_beasiswa_" . strtolower(str_replace(' ', '_', $dt_beasiswa)) . "_" . $dt_tahun . ".xlsx";
+
+        return Excel::download(new TemplatePelulusanPesertaSurvei($tahun, $beasiswa), $filename);
+    }
+
+    public function impor(Request $request)
+    {
+        $request->validate([
+            'tahun_kegiatan' => 'required',
+            'beasiswa'       => 'required',
+            'file_impor' => 'required|file|mimes:xls,xlsx|max:2048'
+        ], [
+            'tahun_kegiatan.requierd' => 'Tahun kegiatan belum dipilih',
+            'beasiswa.required' => 'Beasiswa belum dipilih',
+            'file_impor.required' => 'File template harus dipilih',
+            'file_impor.mimes' => 'Format harus xls/xlsx',
+            'file_impor.max' => 'Ukuran file tidak boleh lebih dari 2 MB'
+        ]);
+
+        try {
+            set_time_limit(60 * 60);
+            $import = new ImporPelulusanPesertaSurvei($request->tahun_kegiatan, $request->beasiswa);
+            Excel::import($import, $request->file('file_impor'));
+
+            $data = array(
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'message' => $import->getRowCount() . ' data peserta survei berhasil disimpan status lulusnya',
+                'jalur' => $request->jalur_masuk
+            );
+            return response()->json($data);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+
+            foreach ($failures as $failure) {
+                $errors[] = [
+                    'row' => $failure->row(),
+                    'attribute' => $failure->attribute(),
+                    'errors' => $failure->errors(),
+                    'values' => $failure->values(),
+                ];
+            }
+
+            return response()->json([
+                'icon' => 'error',
+                'title' => 'Gagal Mengimpor',
+                'message' => 'Terdapat kesalahan pada file Excel.',
+                'errors' => $errors
+            ], 422);
+        }
+    }
+
+    public function pelulusan_update(Request $request)
+    {
+        $request->validate([
+            'status_id' => 'required',
+            'status' => 'required|in:Lolos,Tidak Lolos'
+        ], [
+            'status_id.required' => 'ID status tidak ditemukan',
+            'status.required' => 'Status tidak boleh kosong',
+            'status.in' => 'Status tidak valid'
+        ]);
+
+        try {
+            $status = PendaftarStatus::find($request->status_id);
+            $status->status = $request->status == 'Lolos' ? 'LOLOS PENERIMA' : 'TIDAK LOLOS PENERIMA';
+            $status->update();
+
+            return response()->json([
+                'status' => true,
+                'icon' => 'success',
+                'title' => 'Sukses!',
+                'message' => 'Status kelulusan peserta survei berhasil diupdate'
+            ], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $error = $e->errorInfo;
+
+            return response()->json($error[2], 422);
+        }
     }
 
     public function unduh_peserta(Request $request)
