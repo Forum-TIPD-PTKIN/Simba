@@ -39,6 +39,7 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
             'beasiswa',
             'tahun_kegiatan',
             'biodata_pendaftar',
+            'pemberkasan',
             'surveyor_detail.surveyor.user'
         ])
             ->select('pendaftars.*')
@@ -69,6 +70,7 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
             $data->biodata_pendaftar?->data?->biodata?->alamat_ktp?->value,
             $data->beasiswa?->nama,
             $data->tahun_kegiatan?->tahun,
+            $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption,
             $data->surveyor_detail?->surveyor?->user?->name,
             $data->hasil_survei?->nilai?->ayahNama ?? '',
             $data->hasil_survei?->nilai?->ayahKesehatan?->text ?? '',
@@ -116,6 +118,7 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
             'Alamat',
             'Beasiswa',
             'Tahun',
+            'Kategori',
             'Surveyor',
             'Hasil Survei',
             '',
@@ -150,6 +153,7 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
             '',
             ''
         ], [
+            '',
             '',
             '',
             '',
@@ -244,20 +248,21 @@ class HasilSurveiExport implements FromCollection, WithMapping, WithHeadings, Wi
                 $sheet->mergeCells('F1:F2'); // Alamat
                 $sheet->mergeCells('G1:G2'); // Beasiswa
                 $sheet->mergeCells('H1:H2'); // Tahun
-                $sheet->mergeCells('I1:I2'); // Surveyor
+                $sheet->mergeCells('I1:I2'); // Kategori
+                $sheet->mergeCells('J1:J2'); // Surveyor
 
                 // Merge untuk "Hasil Survei"
-                $sheet->mergeCells('J1:AO1'); // Hasil Survei
+                $sheet->mergeCells('K1:AP1'); // Hasil Survei
 
                 // Wrap text
                 $sheet->getStyle('F3:F' . $totalRow)->getAlignment()->setWrapText(true); // Alamat
-                $sheet->getStyle('AN3:AN' . $totalRow)->getAlignment()->setWrapText(true); // Catatan
+                $sheet->getStyle('AO3:AO' . $totalRow)->getAlignment()->setWrapText(true); // Catatan
 
                 $sheet->getDelegate()->getColumnDimension('F')->setAutoSize(false);
                 $sheet->getDelegate()->getColumnDimension('F')->setWidth(40);
 
-                $sheet->getDelegate()->getColumnDimension('AN')->setAutoSize(false);
-                $sheet->getDelegate()->getColumnDimension('AN')->setWidth(50);
+                $sheet->getDelegate()->getColumnDimension('AO')->setAutoSize(false);
+                $sheet->getDelegate()->getColumnDimension('AO')->setWidth(50);
             }
         ];
     }

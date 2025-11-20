@@ -64,7 +64,7 @@
                                 <option value="" selected disabled> - Pilih Pendaftar - </option>
                                 @foreach ($list_peserta as $item)
                                     <option value="{{ $item->id }}" @selected($item->id == $id)>
-                                        {{ $item->mahasiswa->nama }}</option>
+                                        {{ $item->mahasiswa?->nama }} ({{ $item->mahasiswa?->nim }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -1489,7 +1489,7 @@
                     res.forEach(opt => {
                         $('#flt_peserta').append($('<option>', {
                             value: opt.id,
-                            text: opt.mahasiswa?.nama
+                            text: `${opt.mahasiswa?.nama} (${opt.mahasiswa?.nim})`
                         }));
                     });
 
