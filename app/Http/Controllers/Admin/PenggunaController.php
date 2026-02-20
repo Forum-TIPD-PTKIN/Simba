@@ -94,7 +94,7 @@ class PenggunaController extends Controller
         ]);
 
         try {
-            $dt_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
+            $dt_pegawai = collect(api()->get(env('API_URL') . "/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
 
             $pengguna = new User();
             $pengguna->name = $dt_pegawai?->nama;
@@ -149,7 +149,7 @@ class PenggunaController extends Controller
         ]);
 
         try {
-            $dt_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
+            $dt_pegawai = collect(api()->get(env('API_URL') . "/api/pegawai?kode={$request->pegawai}")->data?->data)->first();
 
             $pengguna = User::findOrFail($id);
             $pengguna->name = $dt_pegawai?->nama;

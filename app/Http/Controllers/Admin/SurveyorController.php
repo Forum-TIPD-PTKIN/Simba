@@ -153,7 +153,7 @@ class SurveyorController extends Controller
      */
     public function index(Request $request)
     {
-        $master_pegawai = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?limit=1000")->data?->data)
+        $master_pegawai = collect(api()->get(env('API_URL') . "/api/pegawai?limit=1000")->data?->data)
             ->map(function ($pegawai) {
                 return (object)[
                     'id' => $pegawai->kode,
@@ -335,7 +335,7 @@ class SurveyorController extends Controller
                 $kip = Beasiswa::where('id', $request->beasiswa_id)->first();
                 $tahun = TahunKegiatan::where('id', $request->tahun_kegiatan_id)->first();
 
-                $userMaster = collect(api()->get("https://api.iainmadura.ac.id/api/pegawai?group_kode=" . implode(",", $request->selected_surveyors) . "&limit=1000")->data?->data);
+                $userMaster = collect(api()->get(env('API_URL') . "/api/pegawai?group_kode=" . implode(",", $request->selected_surveyors) . "&limit=1000")->data?->data);
 
                 $inserted = [];
                 $insertNotifikasi = [];

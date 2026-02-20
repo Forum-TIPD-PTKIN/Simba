@@ -42,7 +42,7 @@ use App\Http\Controllers\Surveyor\{
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
-use function Livewire\store;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -189,6 +189,24 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
     Route::post('/surveyor/plot-mahasiswa', [SurveyorController::class, 'plotMahasiswa'])->name('admin.surveyor.plot');
     Route::post('/surveyor/plot-multi-mahasiswa', [SurveyorController::class, 'plotMultiMahasiswa'])->name('admin.surveyor.plot_multi');
     Route::post('/surveyor/remove-mahasiswa', [SurveyorController::class, 'removeMahasiswa'])->name('admin.surveyor.remove');
+
+    Route::get("/get-data-api", function (Request $request) {
+        $link  = $request->link;
+        $qi    = $request->qi;
+        $limit = $request->limit;
+
+        $url = env('API_URL') . "{$link}?qi={$qi}&limit={$limit}";
+
+        $data = api()->get(
+            url: $url,
+            header: [
+                "Accept" => "application/json"
+            ]
+        )->data;
+
+        return $data ?? [];
+    })
+        ->name('get.data.api');
 });
 
 // Surveyor

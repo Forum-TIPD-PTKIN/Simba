@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>@yield('title')</title>
     <!-- [Favicon] icon -->
-    <link rel="icon" href="https://api.iainmadura.ac.id/assets/imgs/logo.png" type="image/x-icon">
+    <link rel="icon" href="{{ env('API_URL') }}/assets/imgs/logo.png" type="image/x-icon">
     <style>
         /* Import font seram */
         @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');

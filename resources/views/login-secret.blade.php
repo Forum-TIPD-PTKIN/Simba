@@ -15,7 +15,7 @@
     <meta name="author" content="Phoenixcoded">
 
     <!-- [Favicon] icon -->
-    <link rel="icon" href="https://api.iainmadura.ac.id/assets/imgs/logo.png" type="image/x-icon">
+    <link rel="icon" href="{{ env('API_URL') }}/assets/imgs/logo.png" type="image/x-icon">
     <!-- [Font] Family -->
     <link rel="stylesheet" href="{{ asset('assets/admin/fonts/inter/inter.css') }}" id="main-font-link" />
     <!-- [Tabler Icons] https://tablericons.com -->

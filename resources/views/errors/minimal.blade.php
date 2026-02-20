@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>@yield('title')</title>
     <!-- Favicon and Touch Icons -->
-    <link rel="icon" href="https://api.iainmadura.ac.id/assets/imgs/logo.png" type="image/x-icon">
+    <link rel="icon" href="{{ env('API_URL') }}/assets/imgs/logo.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>

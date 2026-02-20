@@ -94,7 +94,7 @@
                 <table style="width: 600px; border-collapse: collapse;" align="center">
                     <tr>
                         <td style="width: 100px; vertical-align: middle; padding: 4px;">
-                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents('https://api.iainmadura.ac.id/assets/imgs/logo.png', false, stream_context_create($arrContextOptions))) }}"
+                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(env('API_URL') . '/assets/imgs/logo.png', false, stream_context_create($arrContextOptions))) }}"
                                 alt="Logo UIN Madura" class="logo-cell">
                         </td>
 
