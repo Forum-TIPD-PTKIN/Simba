@@ -35,7 +35,7 @@ class Api
         try {
             $client = new Client();
             $response = $client->getAsync($url, [
-                "form_params" => $data,
+                "query" => $data,
                 "headers" => $header,
                 "verify" => false,
             ])->wait();
