@@ -15,15 +15,17 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         $key = $request->key;
-        $akun = api()->get('https://api.iainmadura.ac.id/api/onhand/detect?key=' . $key);
+        $akun = api()->post(env('API_URL') . '/api/exchange-ticket', [
+            'ticket' => $key
+        ]);
         if (!$akun->status) {
             return redirect()->route('login')->with('error', 'Token autentikasi gagal divefirikasi!');
         } else if (!$akun->data->status) {
             return redirect()->route('login')->with('error', 'Token autentikasi gagal divefirikasi!');
         }
 
-        $user = User::whereUsername($akun->data->data->user->kode)->first();
-        if ($akun->data->data->user->level == 1 && $user) {
+        $user = User::whereUsername($akun->data?->user?->kode)->first();
+        if ($akun->data?->user?->level == 1 && $user) {
             Auth::loginUsingId($user->id);
 
             if (in_array(0, $user->access)) {
@@ -31,7 +33,7 @@ class LoginController extends Controller
                 session([
                     'is_admin' => true,
                     'level' => 0,
-                    'profil' => $akun?->data?->data?->user?->profil
+                    'profil' => $akun?->data?->user?->profil
                 ]);
                 return redirect()->route('admin.dashboard');
             } else if (in_array(1, $user->access)) {
@@ -39,7 +41,7 @@ class LoginController extends Controller
                 session([
                     'is_verifikator' => true,
                     'level' => 1,
-                    'profil' => $akun?->data?->data?->user?->profil
+                    'profil' => $akun?->data?->user?->profil
                 ]);
                 return redirect()->route('verifikator.dashboard');
             } else if (in_array(3, $user->access)) {
@@ -47,35 +49,35 @@ class LoginController extends Controller
                 session([
                     'is_surveyor' => true,
                     'level' => 3,
-                    'profil' => $akun?->data?->data?->user?->profil
+                    'profil' => $akun?->data?->user?->profil
                 ]);
                 return redirect()->route('verifikator.dashboard');
             }
-        } else if ($akun->data->data->user->level == 1) {
+        } else if ($akun->data?->user?->level == 1) {
             return redirect()->route('login')->with('error', 'Anda tidak memiliki akses pada sistem ini!');
         }
 
-        $profil = $akun->data->data->user->profil;
+        $profil = $akun->data?->user?->profil;
 
         if (!$user) {
             $user = new User;
             $user->name = $profil->nama;
-            $user->username = $akun->data->data->user->kode;
-            $user->email = $akun->data->data->user->kode . '@student.iainmadura.ac.id';
-            $user->access = $akun->data->data->user->level == 2 ? 2 : null;
+            $user->username = $akun->data?->user?->kode;
+            $user->email = $akun->data?->user?->kode . '@student.iainmadura.ac.id';
+            $user->access = $akun->data?->user?->level == 2 ? 2 : null;
         } else {
-            $user->name = $akun->data->data->user->profil->nama;
+            $user->name = $akun->data?->user?->profil?->nama;
         }
         $user->save();
 
         Auth::loginUsingId($user->id);
-        if (isset($akun?->data?->data?->user?->profil->avatar)) {
-            $akun->data->data->user->profil->avatar = 'https://be.iainmadura.ac.id/api/v1/external/mahasiswa/foto?nim=' . $akun?->data?->data?->user?->kode . '&key=6321afccabf95b9ec00ac8d193479f4f6a849d46ffbe50fc7e14a74011554fc1';
+        if (isset($akun?->data?->user?->profil->avatar)) {
+            $akun->data->user->profil->avatar = 'https://be.iainmadura.ac.id/api/v1/external/mahasiswa/foto?nim=' . $akun?->data?->user?->kode . '&key=6321afccabf95b9ec00ac8d193479f4f6a849d46ffbe50fc7e14a74011554fc1';
         }
         session([
             'is_pendaftar' => true,
             'level' => 2,
-            'profil' => $akun?->data?->data?->user?->profil
+            'profil' => $akun?->data?->user?->profil
         ]);
         return redirect()->route('pendaftar.dashboard');
     }

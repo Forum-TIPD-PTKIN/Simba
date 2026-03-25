@@ -140,11 +140,12 @@
                 theme: 'bootstrap-5',
                 minimumInputLength: 1,
                 ajax: {
-                    url: 'https://api.iainmadura.ac.id/api/pegawai', // route di Laravel
+                    url: "{{ route('get.data.api') }}", // route di Laravel
                     dataType: 'json',
                     delay: 250,
                     data: function(params) {
                         return {
+                            link: '/api/pegawai',
                             qi: params
                                 .term, // kirim search term ke API, karena select2 memakai parameter term=? Kalau di API tidak menerima parameter itu, maka pencarian tidak bisa dilakukan
                             limit: 50 // jumlah maksimum response
