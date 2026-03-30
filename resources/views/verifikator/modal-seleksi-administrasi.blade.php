@@ -62,7 +62,7 @@
                                             class="fw-bold text-decoration-underline base-berkas"
                                             onclick="viewControl(this)">{{ $value->value?->name }}</a>
                                     @else
-                                        {{ $value->type === 'select' ? $value->valOption : $value->value }}
+                                        {{ $value->type === 'select' || $value->type === 'radio' ? $value->valOption : $value->value }}
                                     @endif
                                 </td>
                             </tr>

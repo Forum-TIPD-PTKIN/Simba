@@ -71,9 +71,9 @@ class HasilSeleksiAdministrasiExport implements
     public function map($data): array
     {
         $biodata = collect($data->biodata_pendaftar?->data?->biodata)
-            ->map(fn($item) => ($item->type === 'select' ? $item->value . ' - ' . $item->valOption : $item->value))
+            ->map(fn($item) => ($item->type === 'select' || $item->type === 'radio' ? $item->value . ' - ' . $item->valOption : $item->value))
             ->values();
-        $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption;
+        $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption ?? '';
         $status_seleksi_administrasi = collect($data->pendaftar_status)
             ->filter(fn($item) => in_array($item->status, ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI']))
             ->first();
@@ -87,7 +87,7 @@ class HasilSeleksiAdministrasiExport implements
             $data->mahasiswa?->fakultas_name,
             $data->beasiswa?->nama,
             $data->tahun_kegiatan?->tahun,
-            $this->status,
+            $data->latest_status?->status ?? '',
             preg_replace('/\x{00A0}/u', ' ', html_entity_decode(strip_tags($catatan_verifikator)))
         ];
         array_push($row, $kategori);

@@ -88,10 +88,11 @@ class DaftarController extends Controller
                     foreach ($value as $a => $b) {
                         $isFile = $b->type == 'file' ? true : false;
                         $isSelect = $b->type == 'select' ? true : false;
+                        $isRadio = $b->type == 'radio' ? true : false;
                         array_push($biodata, (object)[
                             'text' => $b->text,
                             'url' => $isFile ? $b?->value?->url : null,
-                            'value' => $isFile ? null : ($isSelect ? $b->valOption : $b->value),
+                            'value' => $isFile ? null : (($isSelect || $isRadio) ? $b->valOption : $b->value),
                             'extension' => $isFile ? $b?->value?->extension : null
                         ]);
                     }
@@ -410,6 +411,13 @@ class DaftarController extends Controller
             session()->flash('error_register', 'Sebelum melanjutkan, silahkan konfirmasi terlebih dahulu pendaftaran Anda!');
             return redirect()->to(route('pendaftar.daftar', ['id' => $beasiswa->id]) . '?step=1');
         }
+
+        $user = Auth::user();
+
+        $mahasiswa_api = SiakadMahasiswa::with('prodi.fakultas')
+            ->whereNpm($user->username)
+            ->first();
+
         // Cek Aturan Beasiswa ==================================
         foreach ($beasiswa->config_data_json as $key => $value) {
             foreach ($value as $k => $v) {
@@ -420,9 +428,13 @@ class DaftarController extends Controller
                 }
             }
         }
-        /* =============================== */
 
-        $user = Auth::user();
+        // ! KHUSUS BEASISWA GENBI (PPK)
+        if ($beasiswa->nama === 'Program Pendidikan Kebanksentralan (PPK) BI') {
+            $tgl_lahir = Carbon::parse($mahasiswa_api->tanggal_lahir)->age;
+            if ($tgl_lahir > 23) return response()->json('Usia maksimal 23 tahun', 422);
+        }
+        /* =============================== */
 
         $pendaftar = Pendaftar::where('user_id', $user->id)
             ->where('beasiswa_id', $beasiswa->id)
@@ -440,10 +452,6 @@ class DaftarController extends Controller
         $status->pendaftar_id = $pendaftar->id;
         $status->status = 'DAFTAR';
         $status->save();
-
-        $mahasiswa_api = SiakadMahasiswa::with('prodi.fakultas')
-            ->whereNpm($user->username)
-            ->first();
 
         $mahasiswa = Mahasiswa::where('pendaftar_id', $pendaftar->id)->first();
         if (!$mahasiswa) $mahasiswa = new Mahasiswa();

@@ -53,9 +53,9 @@ class SeleksiAdministrasiController extends Controller
             ->whereRole('TES_POTENSI_AKADEMIK')
             ->first();
         // ! Jadwal cetak kartu sehari sebelum TPA dan tanggal setelahnya
-        $is_jadwal_cetak_kartu = Carbon::now()->gte(
+        $is_jadwal_cetak_kartu = $jadwal_tpa ? Carbon::now()->gte(
             Carbon::parse($jadwal_tpa->tanggal_mulai)->copy()->subDay()
-        );
+        ) : false;
         $jadwal_pengumuman_seleksi_admnistrasi = JadwalKegiatan::whereTahunKegiatanId($pendaftar->tahun_kegiatan_id)
             ->whereBeasiswaId($pendaftar->beasiswa_id)
             ->whereRole('PENGUMUMAN_SELEKSI_ADMINISTRASI')
