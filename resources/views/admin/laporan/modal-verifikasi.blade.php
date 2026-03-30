@@ -20,10 +20,10 @@
             <dd class="col-sm-6">{{ $data->beasiswa?->nama }}/{{ $data->tahun_kegiatan?->tahun }}</dd>
 
             <dt class="col-sm-8">Tahun Masuk Kuliah</dt>
-            <dd class="col-sm-4">{{ $data_pmb->tahun_masuk }}</dd>
+            <dd class="col-sm-4">{{ $data_pmb->tahun_masuk ?? '-' }}</dd>
 
             <dt class="col-sm-8">Tahun Lulus SMA/sederajat</dt>
-            <dd class="col-sm-4">{{ $data_pmb->sekolah_asal?->tahun_lulus }}</dd>
+            <dd class="col-sm-4">{{ $data_pmb->sekolah_asal?->tahun_lulus ?? '-' }}</dd>
         </dl>
     </div>
     <div class="col-12 col-md-6">
