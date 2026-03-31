@@ -434,6 +434,11 @@ class DaftarController extends Controller
             // ^ Cek jenjang harus S1
             if ($mahasiswa_api->prodi?->id_jenjang_pendidikan !== 'S1') return response()->json('Jenjang pendidikan bukan S1', 422);
 
+            // ^ Cek status aktif
+            $get_aktif = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
+            $aktif = $get_semester->status_akademik ?? null;
+            if ($aktif && $aktif  !== 'AKTIF') return response()->json('Status akademik tidak aktif', 422);
+
             // ^ Cek umur maksimal 23 tahun
             $tgl_lahir = Carbon::parse($mahasiswa_api->tanggal_lahir)->age;
             if ($tgl_lahir > 23) return response()->json('Usia maksimal 23 tahun', 422);
