@@ -431,8 +431,53 @@ class DaftarController extends Controller
 
         // ! KHUSUS BEASISWA GENBI (PPK)
         if ($beasiswa->nama === 'Program Pendidikan Kebanksentralan (PPK) BI') {
+            // ^ Cek jenjang harus S1
+            if ($mahasiswa_api->prodi?->id_jenjang_pendidikan !== 'S1') return response()->json('Jenjang pendidikan bukan S1', 422);
+
+            // ^ Cek umur maksimal 23 tahun
             $tgl_lahir = Carbon::parse($mahasiswa_api->tanggal_lahir)->age;
             if ($tgl_lahir > 23) return response()->json('Usia maksimal 23 tahun', 422);
+
+            // ^ Cek prodi
+            $prodi_allowed = [
+                'Manajemen Pendidikan Islam',
+                'Tadris IPS',
+                'Bimbingan dan Konseling Pendidikan Islam',
+                'Tadris Matematika',
+                'Tadris Ilmu Pengetahuan Alam',
+                'Perbankan Syari\'ah',
+                'Ekonomi Syari\'ah',
+                'Akuntansi Syari\'ah',
+                'Manajemen Bisnis Syariah',
+                'Komunikasi dan Penyiaran Islam',
+                'Psikologi Islam',
+                'Hukum Keluarga Islam',
+                'Hukum Ekonomi Syari\'ah',
+                'Hukum Tata Negara'
+            ];
+
+            $nama_prodi = strtolower($mahasiswa_api->prodi?->nama_prodi_id ?? '');
+            $nama_prodi = preg_replace('/\s*\(.*?\)\s*/', '', $nama_prodi);
+
+            $is_prodi_allowed = false;
+            foreach ($prodi_allowed as $allowed) {
+                similar_text($nama_prodi, strtolower($allowed), $percent);
+                if ($percent > 90) { // ambang batas kemiripan
+                    $is_prodi_allowed = true;
+                    break;
+                }
+            }
+            if (!$is_prodi_allowed) return response()->json('Program studi Anda tidak diperbolehkan mengikuti beasiswa ini', 422);
+
+            // ^ Cek IPK minimal 3.30
+            $get_ipk = api()->get("https://tipd.dev/api/public/api/akademik/ipk-sementara/{$mahasiswa_api->npm}");
+            $ipk = $get_ipk->data?->profil?->ipk_akumulatif ?? 0;
+            if ((float) $ipk  < 3.30) return response()->json('IPK minimal 3.30', 422);
+
+            // ^ Cek semester minimal 3
+            $get_semester = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
+            $semester = $get_semester->semester_ke ?? 0;
+            if ($semester  < 3) return response()->json('Minimal semester 3', 422);
         }
         /* =============================== */
 
