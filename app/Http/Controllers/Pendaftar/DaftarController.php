@@ -136,8 +136,8 @@ class DaftarController extends Controller
             $key_pmb = env('PMB_KEY_API');
             $_jalur = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             if ($_jalur->status) {
-                $jalur = $_jalur->data->jalur_masuk;
-                $akunpmb = $_jalur->data->biodata->kode;
+                $jalur = $_jalur->data?->jalur_masuk;
+                $akunpmb = $_jalur->data?->biodata?->kode;
             }
         } else if ($step == 2 && ($pendaftar && $pendaftar->latest_status?->status === 'DAFTAR')) {
             $master_form = FormData::whereBeasiswaId($pendaftar?->beasiswa_id)

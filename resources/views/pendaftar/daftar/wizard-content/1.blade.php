@@ -166,8 +166,8 @@
                                 url: "{{ route('pendaftar.daftar.store', ['id' => $beasiswa->id]) }}",
                                 data: {
                                     '_token': "{{ csrf_token() }}",
-                                    'tahun_masuk': "{{ $jalur->tahun_masuk }}",
-                                    'tahun_lulus': "{{ $jalur->sekolah_asal?->tahun_lulus }}",
+                                    'tahun_masuk': "{{ $jalur->tahun_masuk ?? null }}",
+                                    'tahun_lulus': "{{ $jalur->sekolah_asal?->tahun_lulus ?? null }}",
                                 },
                                 success: function(response) {
                                     Swal.fire({
