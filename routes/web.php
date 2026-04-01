@@ -316,3 +316,58 @@ Route::get('download/{path}', function (string $path) {
 
     return response()->download($fullPath);
 })->where('path', '.*')->name('download.file');
+
+// TOOLS HARAM (ISI OTOMATIS GOOGLE FORM)
+Route::get('generate-code', function () {
+    $year = \App\Models\TahunKegiatan::orderBy('tahun', 'desc')->get();
+    $scholarship = \App\Models\Beasiswa::where('status', 1)->orderBy('nama', 'asc')->get();
+
+    return view('tools.generate-code', [
+        'year' => $year,
+        'scholarship' => $scholarship
+    ]);
+});
+
+Route::get('/get-candidates', function (Request $request) {
+    $year = $request->year;
+    $scholarship = $request->scholarship;
+
+    $candidates = \App\Models\Pendaftar::with(['user', 'mahasiswa', 'biodata_pendaftar', 'pemberkasan'])
+        ->selectRaw('pendaftars.*')
+        ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
+        ->where('tahun_kegiatan_id', $year)
+        ->where('beasiswa_id', $scholarship)
+        ->whereHas(
+            'latestStatus',
+            fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
+        )
+        ->orderBy('mahasiswas.nama')
+        ->get();
+
+    return response()->json($candidates);
+})->name('get.candidates');
+
+Route::get('/get-candidates-code', function (Request $request) {
+    $year = $request->year;
+    $scholarship = $request->scholarship;
+    $candidate = $request->candidate;
+
+    $candidates = \App\Models\Pendaftar::with(['user', 'mahasiswa', 'biodata_pendaftar', 'pemberkasan'])
+        ->where('tahun_kegiatan_id', $year)
+        ->where('beasiswa_id', $scholarship)
+        ->where('id', $candidate)
+        ->whereHas(
+            'latestStatus',
+            fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
+        )
+        ->first();
+
+    [$id_prodi, $nm_prodi] = explode('|', $candidates->mahasiswa?->prodi);
+    $prodi_id = "0{$id_prodi}";
+    $get_prodi = api()->get("https://api.uinmadura.ac.id/api/prodi?id={$prodi_id}");
+    $prodi_long = $get_prodi->data?->data[0]->long ?? '';
+
+    $candidates->mahasiswa->setAttribute('prodi_long_name', $prodi_long);
+
+    return response()->json($candidates);
+})->name('get.candidates.code');
