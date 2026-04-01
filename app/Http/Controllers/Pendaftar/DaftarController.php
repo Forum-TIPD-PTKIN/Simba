@@ -436,7 +436,7 @@ class DaftarController extends Controller
 
             // ^ Cek status aktif
             $get_aktif = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
-            $aktif = $get_aktif->status_akademik ?? null;
+            $aktif = $get_aktif->data?->status_akademik ?? null;
             if ($aktif && $aktif  !== 'AKTIF') return response()->json('Status akademik tidak aktif', 422);
 
             // ^ Cek umur maksimal 23 tahun
@@ -481,7 +481,7 @@ class DaftarController extends Controller
 
             // ^ Cek semester minimal 3
             $get_semester = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
-            $semester = $get_semester->semester_ke ?? 0;
+            $semester = $get_semester->data?->semester_ke ?? 0;
             if ($semester  < 3) return response()->json('Minimal semester 3', 422);
         }
         /* =============================== */
