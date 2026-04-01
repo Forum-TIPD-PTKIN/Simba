@@ -15,8 +15,7 @@ class RekapController extends Controller
 {
     public function index()
     {
-        $master_tahun = TahunKegiatan::where('status', 1)
-            ->orderBy('tahun', 'desc')
+        $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
         $master_beasiswa = Beasiswa::where('status', 1)
             ->get();
