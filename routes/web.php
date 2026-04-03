@@ -39,6 +39,8 @@ use App\Http\Controllers\Surveyor\{
     PersetujuanController,
     SurveyController,
 };
+use App\Models\BiodataPendaftar;
+use App\Models\Pendaftar;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
@@ -371,3 +373,28 @@ Route::get('/get-candidates-code', function (Request $request) {
 
     return response()->json($candidates);
 })->name('get.candidates.code');
+
+Route::get('/change-biodata', function () {
+    BiodataPendaftar::with(['pendaftar.user'])
+        ->whereHas('pendaftar.beasiswa', fn($q) => $q->where('nama', 'Program Pendidikan Kebanksentralan (PPK) BI'))
+        ->chunk(50, function ($pendaftarBatch) {
+            foreach ($pendaftarBatch as $value) {
+                $biodata = $value->data;
+                $mahasiswa = \App\Models\SiakadMahasiswa::with('prodi.fakultas')
+                    ->whereNpm($value->pendaftar->user->username)
+                    ->first();
+
+                $get_ipk = api()->get("https://tipd.dev/api/public/api/akademik/ipk-sementara/{$mahasiswa->npm}");
+                $ipk = $get_ipk->data?->profil?->ipk_akumulatif ?? 0;
+
+                $biodata->biodata->ipk->value = $ipk;
+                $biodata->biodata->ttl->value = $mahasiswa->tempat_lahir . ', ' . \Carbon\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d/m/Y');
+                $biodata->biodata->nama_ibu->value = $mahasiswa->ibu_nama;
+                $biodata->biodata->nama_bapak->value = $mahasiswa->ayah_nama;
+
+                $value->update(['data' => json_encode($biodata)]);
+            }
+        });
+
+    echo 'Selesai';
+});

@@ -270,7 +270,8 @@
 
                             // isi step1 dengan value dari response
                             step1["Nama Mahasiswa"] = response.mahasiswa.nama;
-                            step1["Nama Fakultas"] = response.mahasiswa.fakultas_name;
+                            step1["Nama Fakultas"] =
+                                `Fakultas ${response.mahasiswa.fakultas_name}`;
                             step1["Nama Program Studi"] =
                                 `S1 ${response.mahasiswa.prodi_long_name}`;
                             step1["Nomor Induk Mahasiswa (NIM)"] = response.mahasiswa.nim;

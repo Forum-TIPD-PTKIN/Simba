@@ -24,13 +24,7 @@ class SeleksiAdministrasiController extends Controller
         $beasiswa = Beasiswa::select('beasiswas.*')
             ->join('jadwal_kegiatans', function ($db) {
                 $db->on('jadwal_kegiatans.beasiswa_id', '=', 'beasiswas.id')
-                    ->where('jadwal_kegiatans.role', 'SELEKSI_ADMINISTRASI')
-                    ->whereExists(function ($db) {
-                        $db->select(DB::raw('1'))
-                            ->from('tahun_kegiatans as ta')
-                            ->whereColumn('ta.id', 'jadwal_kegiatans.tahun_kegiatan_id')
-                            ->where('ta.status', 1);
-                    });
+                    ->where('jadwal_kegiatans.role', 'SELEKSI_ADMINISTRASI');
             })
             ->where('beasiswas.status', 1)
             ->orderBy('jadwal_kegiatans.tanggal_mulai', 'desc')
