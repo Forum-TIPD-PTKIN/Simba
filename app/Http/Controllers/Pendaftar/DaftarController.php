@@ -61,8 +61,8 @@ class DaftarController extends Controller
             $_pendaftar = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             $jalur = null;
             if ($_pendaftar->status) {
-                $jalur = $_pendaftar->data->jalur_masuk;
-                $akunpmb = $_pendaftar->data->biodata->kode;
+                $jalur = $_pendaftar->data?->jalur_masuk;
+                $akunpmb = $_pendaftar->data?->biodata?->kode;
             }
 
             $kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', $pendaftar?->tahun_kegiatan_id)
