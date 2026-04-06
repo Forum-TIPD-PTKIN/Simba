@@ -9,6 +9,16 @@ class Api
     public static function post($url, $data = [], $header = [])
     {
         try {
+            $urlParts = parse_url($url);
+            if (isset($urlParts['query'])) {
+                $queryArray = [];
+                parse_str($urlParts['query'], $queryArray);
+                $data = array_merge($queryArray, $data);
+                $url = (isset($urlParts['scheme']) ? $urlParts['scheme'] . '://' : '') .
+                    (isset($urlParts['host']) ? $urlParts['host'] : '') .
+                    (isset($urlParts['port']) ? ':' . $urlParts['port'] : '') . // Tambahkan port agar tidak error di localhost
+                    (isset($urlParts['path']) ? $urlParts['path'] : '');
+            }
             $client = new Client();
             $response = $client->postAsync($url, [
                 "form_params" => $data,
@@ -33,9 +43,19 @@ class Api
     public static function get($url, $data = [], $header = [])
     {
         try {
+            $urlParts = parse_url($url);
+            if (isset($urlParts['query'])) {
+                $queryArray = [];
+                parse_str($urlParts['query'], $queryArray);
+                $data = array_merge($queryArray, $data);
+                $url = (isset($urlParts['scheme']) ? $urlParts['scheme'] . '://' : '') .
+                    (isset($urlParts['host']) ? $urlParts['host'] : '') .
+                    (isset($urlParts['port']) ? ':' . $urlParts['port'] : '') . // Tambahkan port agar tidak error di localhost
+                    (isset($urlParts['path']) ? $urlParts['path'] : '');
+            }
             $client = new Client();
             $response = $client->getAsync($url, [
-                "form_params" => $data,
+                "query" => $data,
                 "headers" => $header,
                 "verify" => false,
             ])->wait();
