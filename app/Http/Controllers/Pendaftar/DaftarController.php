@@ -61,8 +61,8 @@ class DaftarController extends Controller
             $_pendaftar = api()->get("https://pmb.uinmadura.ac.id/api/info/pendaftar/{$nim}?key={$key_pmb}");
             $jalur = null;
             if ($_pendaftar->status) {
-                $jalur = $_pendaftar->data->jalur_masuk;
-                $akunpmb = $_pendaftar->data->biodata->kode;
+                $jalur = $_pendaftar->data?->jalur_masuk;
+                $akunpmb = $_pendaftar->data?->biodata?->kode;
             }
 
             $kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', $pendaftar?->tahun_kegiatan_id)
@@ -176,6 +176,39 @@ class DaftarController extends Controller
                                 if (isset($biodatadata->{$name}) && !($biodatadata->{$name}->type === 'file')) {
                                     $form->setValue($name, $biodatadata->{$name}->value);
                                 }
+
+                                // ^ SET OTOMATIS FORM KHUSUS BEASISWA BI
+                                if ($beasiswa->nama === 'Program Pendidikan Kebanksentralan (PPK) BI') {
+                                    $get_ipk = api()->get("https://tipd.dev/api/public/api/akademik/ipk-sementara/{$mahasiswa->npm}");
+                                    $ipk = $get_ipk->data?->profil?->ipk_akumulatif ?? 0;
+
+                                    if ($name === 'ipk') {
+                                        $form->setReadOnly($name);
+                                        $form->setValue($name, $ipk);
+                                    }
+
+                                    if ($name === 'ttl') {
+                                        $form->setReadOnly($name);
+                                        $form->setValue($name, $mahasiswa->tempat_lahir . ', ' . Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d/m/Y'));
+                                    }
+
+                                    if ($name === 'alamat') {
+                                        $form->setValue($name, $mahasiswa->alamat ?? '');
+                                    }
+
+                                    if ($name === 'nama_ibu') {
+                                        $form->setValue($name, $mahasiswa->ibu_nama ?? '-');
+                                    }
+
+                                    if ($name === 'nama_bapak') {
+                                        $form->setValue($name, $mahasiswa->ayah_nama ?? '-');
+                                    }
+
+                                    if ($name === 'alamat_orang_tua') {
+                                        $form->setValue($name, $mahasiswa->ortu_alamat ?? '-');
+                                    }
+                                }
+                                // ^ SET OTOMATIS FORM KHUSUS BEASISWA BI
                             }
                         }
                     }

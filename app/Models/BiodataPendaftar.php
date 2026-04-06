@@ -29,4 +29,9 @@ class BiodataPendaftar extends Uuid
 
         return json_decode(json_encode($data));
     }
+
+    public function pendaftar()
+    {
+        return $this->belongsTo(Pendaftar::class);
+    }
 }

@@ -22,10 +22,10 @@
     <div class="col-12 col-md-6">
         <dl class="row">
             <dt class="col-sm-9">Tahun Masuk Kuliah</dt>
-            <dd class="col-sm-3">{{ $data_pmb->tahun_masuk }}</dd>
+            <dd class="col-sm-3">{{ $data_pmb->tahun_masuk ?? '-' }}</dd>
 
             <dt class="col-sm-9">Tahun Lulus Jenjang SMA/sederajat</dt>
-            <dd class="col-sm-3">{{ $data_pmb->sekolah_asal?->tahun_lulus }}</dd>
+            <dd class="col-sm-3">{{ $data_pmb->sekolah_asal?->tahun_lulus ?? '-' }}</dd>
         </dl>
     </div>
 </div>
