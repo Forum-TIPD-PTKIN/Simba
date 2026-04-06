@@ -27,7 +27,9 @@ class TesPotensiAkademikController extends Controller
     public function index(Request $request)
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
         $tahun_selected = isset($request->flt_tahun) && $request->flt_tahun ? $request->flt_tahun : $tahun_kegiatan->first()->id;
         $beasiswa_selected = isset($request->flt_beasiswa) && $request->flt_beasiswa ? $request->flt_beasiswa : $beasiswa->first()->id;
@@ -419,8 +421,8 @@ class TesPotensiAkademikController extends Controller
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $beasiswa = Beasiswa::where('status', 1)
-            ->orderBy('nama')
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         $status = ['LOLOS TPA', 'GAGAL TPA'];
 

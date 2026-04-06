@@ -68,6 +68,7 @@
                                             <th scope="col">Nama Pengguna</th>
                                             <th scope="col">Email</th>
                                             <th scope="col">Akses</th>
+                                            <th scope="col">Status</th>
                                             <th scope="col">Aksi</th>
                                         </tr>
                                     </thead>
@@ -293,6 +294,9 @@
                     data: 'access'
                 },
                 {
+                    data: 'status'
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false,
@@ -317,6 +321,10 @@
                 },
                 {
                     "targets": 4,
+                    "width": "7%"
+                },
+                {
+                    "targets": 5,
                     "width": "10%"
                 },
                 {
@@ -400,6 +408,64 @@
                             $.ajax({
                                 url: url,
                                 type: "DELETE",
+                                data: {
+                                    "_token": "{{ csrf_token() }}"
+                                },
+                                success: function(res) {
+                                    dataTable.ajax.reload(null, false);
+
+                                    Swal.fire({
+                                        title: res.title,
+                                        text: res.message,
+                                        icon: res.icon,
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                    });
+                                },
+                                error: function(res) {
+                                    Swal.fire({
+                                        title: 'Gagal',
+                                        icon: 'error',
+                                        text: res.responseJSON.message ??
+                                            'Ada kesalahan'
+                                    });
+                                },
+                                complete: () => {
+                                    $("form.needs-validation").trigger('reset');
+                                }
+                            });
+                        },
+                        allowOutsideClick: false
+                    });
+                }
+            });
+        }
+
+        async function changeStatus(id) {
+            const response = await getData(id);
+
+            Swal.fire({
+                title: 'Apa Anda Yakin?',
+                html: `Anda akan mengubah status <span class="fw-bold text-${response.status_badge_class}">${response.status_label}</span> pengguna : <span class="fw-bold fst-italic">"${response.name}"</span>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: `Ya, ${response.status === 1 ?'Non Aktif':'Aktif'}kan!`,
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    url = "{{ route('admin.pengguna.change-status', ':id') }}";
+                    url = url.replace(':id', id);
+
+                    Swal.fire({
+                        title: 'Sedang memproses...',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            $.ajax({
+                                url: url,
+                                type: "PATCH",
                                 data: {
                                     "_token": "{{ csrf_token() }}"
                                 },

@@ -25,6 +25,7 @@ class LoginController extends Controller
         }
 
         $user = User::whereUsername($akun->data?->user?->kode)->first();
+        if ($user->status !== 1) return redirect()->route('login')->with('error', 'Akun Anda dinonaktifkan!');
         if ($akun->data?->user?->level == 1 && $user) {
             Auth::loginUsingId($user->id);
 
@@ -116,6 +117,10 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+            if ($user->status !== 1) {
+                Auth::logout();
+                return redirect()->route('login')->with('error', 'Akun Anda dinonaktifkan!');
+            }
             if (in_array(0, $user->access)) {
                 // admin
                 session([

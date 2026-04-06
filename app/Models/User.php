@@ -47,7 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = ['access_active'];
+    protected $appends = ['access_active', 'status_label', 'status_badge_class'];
 
     public function getAccessAttribute($akses)
     {
@@ -62,6 +62,24 @@ class User extends Authenticatable
             return session()->get('level');
         }
         return null;
+    }
+
+    public function getStatusBadgeClassAttribute()
+    {
+        return match ($this->status) {
+            0 => 'danger',
+            1 => 'success',
+            default => 'success',
+        };
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return match ($this->status) {
+            0 => 'Non Aktif',
+            1 => 'Aktif',
+            default => 'Aktif',
+        };
     }
 
     public function surveyor()

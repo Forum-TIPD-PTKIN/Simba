@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
-use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,23 +16,20 @@ class DashboardController extends Controller
     public function index()
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::where('status', 1)->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
-        $rekap_status = $this->rekap_data('filter_status', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
-        $view_rekap_status = view('admin.dashboard.status-pendaftar', [
-            'rekap_status' => $rekap_status
-        ])->render();
-
-        $rekap_prodi = $this->rekap_data('filter_prodi', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
-        $view_rekap_prodi = view('admin.dashboard.prodi-pendaftar', [
-            'rekap_prodi' => $rekap_prodi
+        $rekap = $this->rekap_data(count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
+        $view_rekap = view('admin.dashboard.rekap', [
+            'rekap_status' => $rekap['status'],
+            'rekap_prodi' => $rekap['prodi']
         ])->render();
 
         return view('admin.dashboard', [
             'tahun_kegiatan' => $tahun_kegiatan,
             'beasiswa' => $beasiswa,
-            'view_rekap_status' => $view_rekap_status,
-            'view_rekap_prodi' => $view_rekap_prodi
+            'view_rekap' => $view_rekap
         ]);
     }
 
@@ -59,25 +54,12 @@ class DashboardController extends Controller
      */
     public function show(Request $request, string $tahun, string $beasiswa)
     {
-        $rekap = $this->rekap_data($request->filter, $tahun, $beasiswa);
+        $rekap = $this->rekap_data($tahun, $beasiswa);
 
-        switch ($request->filter) {
-            case 'filter_status':
-                return view('admin.dashboard.status-pendaftar', [
-                    'rekap_status' => $rekap
-                ])->render();
-                break;
-
-            case 'filter_prodi':
-                return view('admin.dashboard.prodi-pendaftar', [
-                    'rekap_prodi' => $rekap
-                ])->render();
-                break;
-
-            default:
-                # code...
-                break;
-        }
+        return view('admin.dashboard.rekap', [
+            'rekap_status' => $rekap['status'],
+            'rekap_prodi' => $rekap['prodi']
+        ])->render();
     }
 
     /**
@@ -104,7 +86,7 @@ class DashboardController extends Controller
         //
     }
 
-    public static function rekap_data($label_filter, $tahun, $beasiswa)
+    public static function rekap_data($tahun, $beasiswa)
     {
         $statusOrder = [
             'DAFTAR' => 0,
@@ -117,46 +99,39 @@ class DashboardController extends Controller
             'LOLOS PENERIMA' => 7,
         ];
 
-        switch ($label_filter) {
-            case 'filter_status':
-                $rekap = PendaftarStatus::selectRaw('status, COUNT(status) AS jumlah')
-                    ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
-                        $query->where('tahun_kegiatan_id', $tahun)
-                            ->where('beasiswa_id', $beasiswa);
-                    })
-                    ->groupBy('status')
-                    ->get()
-                    ->sortBy(function ($item) use ($statusOrder) {
-                        return $statusOrder[$item->status] ?? PHP_INT_MAX;
-                    })
-                    ->values();
-                break;
+        $rekap_status = PendaftarStatus::selectRaw('status, COUNT(status) AS jumlah')
+            ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                $query->where('tahun_kegiatan_id', $tahun)
+                    ->where('beasiswa_id', $beasiswa);
+            })
+            ->groupBy('status')
+            ->get()
+            ->sortBy(function ($item) use ($statusOrder) {
+                return $statusOrder[$item->status] ?? PHP_INT_MAX;
+            })
+            ->values();
 
-            case 'filter_prodi':
-                $rekap = PendaftarStatus::selectRaw('mahasiswas.prodi, pendaftar_statuses.status, COUNT(*) as jumlah')
-                    ->join('pendaftars', 'pendaftars.id', '=', 'pendaftar_statuses.pendaftar_id')
-                    ->join('mahasiswas', 'mahasiswas.pendaftar_id', '=', 'pendaftars.id')
-                    ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
-                        $query->where('tahun_kegiatan_id', $tahun)
-                            ->where('beasiswa_id', $beasiswa);
-                    })
-                    ->groupBy('mahasiswas.prodi', 'pendaftar_statuses.status')
-                    ->orderBy('mahasiswas.prodi')
-                    ->get()
-                    ->sortBy(function ($item) use ($statusOrder) {
-                        return [
-                            $item->prodi,
-                            $statusOrder[$item->status] ?? PHP_INT_MAX
-                        ];
-                    })
-                    ->groupBy('prodi');
-                break;
+        $rekap_prodi = PendaftarStatus::selectRaw('mahasiswas.prodi, pendaftar_statuses.status, COUNT(*) as jumlah')
+            ->join('pendaftars', 'pendaftars.id', '=', 'pendaftar_statuses.pendaftar_id')
+            ->join('mahasiswas', 'mahasiswas.pendaftar_id', '=', 'pendaftars.id')
+            ->whereHas('pendaftar', function ($query) use ($tahun, $beasiswa) {
+                $query->where('tahun_kegiatan_id', $tahun)
+                    ->where('beasiswa_id', $beasiswa);
+            })
+            ->groupBy('mahasiswas.prodi', 'pendaftar_statuses.status')
+            ->orderBy('mahasiswas.prodi')
+            ->get()
+            ->sortBy(function ($item) use ($statusOrder) {
+                return [
+                    $item->prodi,
+                    $statusOrder[$item->status] ?? PHP_INT_MAX
+                ];
+            })
+            ->groupBy('prodi');
 
-            default:
-                # code...
-                break;
-        }
-
-        return $rekap;
+        return [
+            'status' => $rekap_status,
+            'prodi' => $rekap_prodi
+        ];
     }
 }

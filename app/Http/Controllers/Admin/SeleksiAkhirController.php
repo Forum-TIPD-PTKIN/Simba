@@ -25,7 +25,9 @@ class SeleksiAkhirController extends Controller
     public function index(Request $request)
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
         $surveyor = User::whereLike('access', '%3%')
             ->whereHas('surveyor', function ($query) use ($request, $tahun_kegiatan, $beasiswa) {
                 $query->where('bersedia', 1)
@@ -48,7 +50,15 @@ class SeleksiAkhirController extends Controller
     public function hasil(Request $request)
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
+        $beasiswa = Beasiswa::select('beasiswas.*')
+            ->join('jadwal_kegiatans', function ($db) {
+                $db->on('jadwal_kegiatans.beasiswa_id', '=', 'beasiswas.id')
+                    ->where('jadwal_kegiatans.role', 'SELEKSI_ADMINISTRASI');
+            })
+            ->where('beasiswas.status', 1)
+            ->orderBy('jadwal_kegiatans.tanggal_mulai', 'desc')
+            ->orderBy('beasiswas.nama')
+            ->get();
         $surveyor = User::whereLike('access', '%3%')
             ->whereHas('surveyor', function ($query) use ($request, $tahun_kegiatan, $beasiswa) {
                 $query->where('bersedia', 1)
@@ -221,8 +231,8 @@ class SeleksiAkhirController extends Controller
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $beasiswa = Beasiswa::where('status', 1)
-            ->orderBy('nama')
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         $status = ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA'];
 

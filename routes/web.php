@@ -121,9 +121,11 @@ Route::group(['prefix' => 'administrator', 'middleware' => ['auth', 'isAdmin']],
             'create' => 'admin.pengguna.create',
             'edit' => 'admin.pengguna.edit',
             'update' => 'admin.pengguna.update',
-            'destroy' => 'admin.pengguna.destroy'
+            'destroy' => 'admin.pengguna.destroy',
         ]
     ]);
+    Route::patch('/pengguna/{id}/change-status', [PenggunaController::class, 'change_status'])
+        ->name('admin.pengguna.change-status');
 
     Route::get('/seleksi-tpa', [TesPotensiAkademikController::class, 'index'])->name('admin.seleksi-tpa');
     Route::post('/seleksi-tpa', [TesPotensiAkademikController::class, 'store'])->name('admin.seleksi-tpa.store');

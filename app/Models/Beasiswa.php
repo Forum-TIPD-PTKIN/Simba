@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
 
 class Beasiswa extends Uuid
@@ -23,7 +24,6 @@ class Beasiswa extends Uuid
         return [];
     }
 
-
     public function scopeDescriptId($query, $enc)
     {
         $id = Crypt::decryptString($enc);
@@ -38,5 +38,28 @@ class Beasiswa extends Uuid
     public function pendaftar()
     {
         return $this->hasMany(Pendaftar::class);
+    }
+
+    public function scopeOrderByActiveRegistration(Builder $query)
+    {
+        return $query->orderByDesc(
+            JadwalKegiatan::selectRaw('COUNT(*)')
+                ->whereColumn('beasiswa_id', 'beasiswas.id')
+                ->whereHas('tahun_kegiatan', function ($query) {
+                    $query->where('status', 1);
+                })
+                ->where('role', 'PENDAFTARAN')
+                ->where('tanggal_mulai', '<=', now())
+                ->where('tanggal_selesai', '>=', now())
+        )->orderBy(
+            JadwalKegiatan::select('tanggal_mulai')
+                ->whereColumn('beasiswa_id', 'beasiswas.id')
+                ->whereHas('tahun_kegiatan', function ($query) {
+                    $query->where('status', 1);
+                })
+                ->where('role', 'PENDAFTARAN')
+                ->orderBy('tanggal_mulai', 'asc')
+                ->limit(1)
+        );
     }
 }

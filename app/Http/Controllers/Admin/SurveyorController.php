@@ -60,7 +60,8 @@ class SurveyorController extends Controller
             ->orderBy('tahun', 'desc')
             ->get()
             ->makeVisible(['id']);
-        $master_beasiswa = Beasiswa::where('status', 1)
+        $master_beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get()
             ->makeVisible(['id']);
 
@@ -165,7 +166,8 @@ class SurveyorController extends Controller
         $master_tahun = TahunKegiatan::where('status', 1)
             ->orderBy('tahun', 'desc')
             ->get();
-        $master_beasiswa = Beasiswa::where('status', 1)
+        $master_beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
 
         if ($request->beasiswa) {
@@ -401,7 +403,8 @@ class SurveyorController extends Controller
     {
         $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $master_beasiswa = Beasiswa::where('status', 1)
+        $master_beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         $status_surveyor = [
             'u' => 'Belum Merespon',

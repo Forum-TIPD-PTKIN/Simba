@@ -20,7 +20,9 @@ class JadwalKegiatanController extends Controller
     public function index()
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
         $role_kegiatan = getEnumValues((new JadwalKegiatan())->getTable(), 'role');
 
         return view('admin.jadwal-kegiatan', [

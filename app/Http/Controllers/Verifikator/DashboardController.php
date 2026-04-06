@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Verifikator;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beasiswa;
-use App\Models\Pendaftar;
 use App\Models\PendaftarStatus;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
@@ -17,7 +16,9 @@ class DashboardController extends Controller
     public function index()
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::where('status', 1)->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
         $rekap_status = $this->rekap_data('filter_status', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
         $view_rekap_status = view('verifikator.dashboard.status-pendaftar', [

@@ -17,7 +17,8 @@ class RekapController extends Controller
     {
         $master_tahun = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $master_beasiswa = Beasiswa::where('status', 1)
+        $master_beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         // $status_pendaftar = Pendaftar::where('tahun_kegiatan_id', count($master_tahun) ? $master_tahun[0]->id : null)
         //     ->where('beasiswa_id', count($master_beasiswa) ? $master_beasiswa[0]->id : null)

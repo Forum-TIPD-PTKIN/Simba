@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Yajra\DataTables\Facades\DataTables;
 
 class PenggunaController extends Controller
@@ -52,6 +53,10 @@ class PenggunaController extends Controller
 
                     return $access;
                 })
+                ->editColumn('status', function ($data) {
+                    $id_encrypt = Crypt::encryptString($data->id);
+                    return "<span onclick='changeStatus(\"{$id_encrypt}\")' class='badge bg-{$data->status_badge_class}' style='cursor: pointer;'>{$data->status_label}</span>";
+                })
                 ->addColumn('action', function ($data) {
                     return view('admin.template._action_button_table', [
                         'data' => $data,
@@ -61,19 +66,19 @@ class PenggunaController extends Controller
                                 'title' => 'Sunting',
                                 'icon' => 'ti ti-edit-circle',
                                 'btn-class' => 'btn btn-primary',
-                                'encrypted_id' => $data->id,
+                                'encrypted_id' => Crypt::encryptString($data->id),
                             ],
                             'delete' => [
                                 'title' => 'Hapus',
                                 'icon' => 'ti ti-trash',
                                 'btn-class' => 'btn btn-danger',
-                                'encrypted_id' => $data->id,
+                                'encrypted_id' => Crypt::encryptString($data->id),
                             ]
                         ]
                     ])
                         ->render();
                 })
-                ->rawColumns(['access', 'action'])
+                ->rawColumns(['access', 'status', 'action'])
                 ->make(true);
         }
     }
@@ -128,7 +133,7 @@ class PenggunaController extends Controller
      */
     public function edit(string $id)
     {
-        $pengguna = User::findOrFail($id);
+        $pengguna = User::findOrFail(Crypt::decryptString($id));
 
         return response()->json($pengguna);
     }
@@ -193,5 +198,18 @@ class PenggunaController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    public function change_status(string $id)
+    {
+        $pengguna = User::findOrFail(Crypt::decryptString($id));
+        $pengguna->status = $pengguna->status == 1 ? 0 : 1;
+        $pengguna->update();
+
+        return response()->json([
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'message' => 'Status pengguna berhasil diubah'
+        ]);
     }
 }

@@ -33,7 +33,9 @@ class FormDataController extends Controller
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->limit(10)
             ->get();
-        $beasiswa = Beasiswa::orderBy('nama', 'asc')->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
         $jenis = FormData::select('jenis')
             ->where('tahun_kegiatan_id', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null)

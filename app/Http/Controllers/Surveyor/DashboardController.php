@@ -18,7 +18,9 @@ class DashboardController extends Controller
     public function index()
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::where('status', 1)->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
         $responden = $this->data(count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null, count($beasiswa) ? $beasiswa[0]->id : null);
         $view_daftar_responden = view('surveyor.dashboard.daftar-responden', [

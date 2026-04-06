@@ -24,48 +24,33 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-                            <h5 class="mb-3 mb-sm-0">Status Pendaftar</h5>
+                            <ul class="nav nav-tabs analytics-tab" id="rekapTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="status-pendaftar-tab" data-bs-toggle="tab"
+                                        data-bs-target="#status-pendaftar-tab-pane" type="button" role="tab"
+                                        aria-controls="status-pendaftar-tab-pane" aria-selected="true">Status
+                                        Pendaftar</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="prodi-pendaftar-tab" data-bs-toggle="tab"
+                                        data-bs-target="#prodi-pendaftar-tab-pane" type="button" role="tab"
+                                        aria-controls="prodi-pendaftar-tab-pane" aria-selected="false"
+                                        tabindex="-1">Program Studi Pendaftar</button>
+                                </li>
+                            </ul>
                             <div class="d-flex gap-1 form-filter">
-                                <input type="hidden" name="flt_label" value="filter_status">
                                 <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
                                     id="flt_tahun">
                                     @foreach ($tahun_kegiatan as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
+                                        <option value="{{ $item->id }}" @selected($loop->first)>
+                                            {{ $item->tahun }}
                                         </option>
                                     @endforeach
                                 </select>
                                 <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
                                     @foreach ($beasiswa as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button class="btn btn-sm btn-primary btnFilter">Filter</button>
-                            </div>
-                        </div>
-
-                        <div class="card-body" id="rekap-data-by-status">
-                            {!! $view_rekap_status !!}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="card ">
-                        <div class="card-header d-flex align-items-center justify-content-between py-3">
-                            <h5 class="mb-0">Program Studi Pendaftar</h5>
-                            <div class="d-flex gap-1 form-filter">
-                                <input type="hidden" name="flt_label" value="filter_prodi">
-                                <select class="form-select form-select-sm" aria-label="Filter tahun kegiatan"
-                                    id="flt_tahun">
-                                    @foreach ($tahun_kegiatan as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->tahun }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select class="form-select form-select-sm" aria-label="Filter beasiswa" id="flt_beasiswa">
-                                    @foreach ($beasiswa as $item)
-                                        <option value="{{ $item->id }}" @selected($loop->first)>{{ $item->nama }}
+                                        <option value="{{ $item->id }}" @selected($loop->first)>
+                                            {{ $item->nama }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -73,8 +58,10 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive table-prodi-card">
-                                {!! $view_rekap_prodi !!}
+                            <div class="row">
+                                <div class="col-12" id="tabContent">
+                                    {!! $view_rekap !!}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -88,7 +75,6 @@
     <script>
         $(document).on('click', '.btnFilter', function() {
             const container = $(this).closest('div.form-filter'),
-                filter = container.find('input[name="flt_label"]').val(),
                 tahun = container.find('#flt_tahun').val(),
                 beasiswa = container.find('#flt_beasiswa').val();
 
@@ -98,9 +84,6 @@
 
             $.ajax({
                 url: url,
-                data: {
-                    filter: filter
-                },
                 beforeSend: () => {
                     Swal.fire({
                         title: 'Mengambil data...',
@@ -113,24 +96,9 @@
                     });
                 },
                 success: (res) => {
-                    let target;
-
-                    switch (filter) {
-                        case 'filter_status':
-                            target = $('#rekap-data-by-status');
-                            target.children().remove();
-                            target.html(res);
-                            break;
-
-                        case 'filter_prodi':
-                            target = $('.table-prodi-card');
-                            target.children().remove();
-                            target.html(res);
-                            break;
-
-                        default:
-                            break;
-                    }
+                    let target = $('#tabContent');
+                    target.children().remove();
+                    target.html(res);
 
                     Swal.close();
                 }

@@ -190,8 +190,8 @@ class SeleksiAdministrasiController extends Controller
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $beasiswa = Beasiswa::where('status', 1)
-            ->orderBy('nama')
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         $status = ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'];
 

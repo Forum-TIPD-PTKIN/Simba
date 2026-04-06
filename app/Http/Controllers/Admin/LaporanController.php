@@ -20,8 +20,8 @@ class LaporanController extends Controller
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')
             ->get();
-        $beasiswa = Beasiswa::where('status', 1)
-            ->orderBy('nama')
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
             ->get();
         $status = ['LOLOS ADMINISTRASI', 'GAGAL ADMINISTRASI'];
         $jadwal_kegiatan = JadwalKegiatan::where('tahun_kegiatan_id', count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null)

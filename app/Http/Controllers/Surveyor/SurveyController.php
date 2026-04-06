@@ -380,7 +380,9 @@ class SurveyController extends Controller
     public function peserta_survei(Request $request)
     {
         $tahun_kegiatan = TahunKegiatan::orderBy('tahun', 'desc')->get();
-        $beasiswa = Beasiswa::where('status', 1)->get();
+        $beasiswa = Beasiswa::where('beasiswas.status', 1)
+            ->orderByActiveRegistration()
+            ->get();
 
         $responden = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'biodata_pendaftar'])
             ->where('tahun_kegiatan_id', isset($request->tahun) && $request->tahun ? $request->tahun : (count($tahun_kegiatan) ? $tahun_kegiatan[0]->id : null))
