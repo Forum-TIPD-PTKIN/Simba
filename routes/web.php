@@ -40,6 +40,7 @@ use App\Http\Controllers\Surveyor\{
     SurveyController,
 };
 use App\Http\Controllers\ToolsController;
+use App\Models\Pemberkasan;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
@@ -308,21 +309,32 @@ Route::get('file/{root}/{berkas}/{filename}', function ($root, $berkas, $filenam
     return response()->file(storage_path('app/' . $path));
 });
 
-Route::get('download/{path}', function (string $path) {
+Route::get('unduh/{path}', function (string $path) {
     $decrypted = Crypt::decrypt(urldecode($path));
 
+    $pemb = Pemberkasan::with('pendaftar.mahasiswa')->where('data', 'like', '%' . $decrypted . '%')->first();
+    $newname = null;
+    if ($pemb) {
+        foreach ($pemb->data->pemberkasan as $key => $value) {
+            if ($value->value->path == $decrypted) {
+                $ekt = $value->value->extension;
+                $newname = $pemb->pendaftar->mahasiswa->nim . '_' . $pemb->pendaftar->mahasiswa->nama . '_' . $key . '.' . $ekt;
+            }
+        }
+    }
     $fullPath = storage_path('app/' . $decrypted);
 
     if (!file_exists($fullPath)) {
         abort(404, 'File not found');
     }
 
-    return response()->download($fullPath);
+    return response()->download($fullPath, $newname);
 })->where('path', '.*')->name('download.file');
 
 // TOOLS HARAM (ISI OTOMATIS GOOGLE FORM)
 Route::get('/generate-code', [ToolsController::class, 'generateCode']);
 Route::get('/get-candidates', [ToolsController::class, 'getCandidates'])->name('get.candidates');
-Route::get('/get-candidates-code', [ToolsController::class], 'getCandidateCode')->name('get.candidates.code');
+Route::get('/get-candidates-code', [ToolsController::class, 'getCandidateCode'])->name('get.candidates.code');
+Route::get('/get-candidates-files', [ToolsController::class, 'getCandidateFiles'])->name('get.candidates.files');
 Route::get('/change-biodata', [ToolsController::class, 'changeBiodata']);
-Route::get('/download-zip/{pendaftarId}', [ToolsController::class, 'downloadZip']);
+Route::get('/download-zip/{scholarship}', [ToolsController::class, 'downloadZip'])->name('get.candidates.zip');

@@ -2,12 +2,10 @@
 <html lang="en" data-bs-theme="auto">
 
 <title>Generator Code</title>
-<!-- Styles -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" />
 <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
-<!-- Or for RTL support -->
 <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
 
@@ -70,18 +68,9 @@
                         <div class="col">
                             <div class="card rounded-3 shadow-sm">
                                 <div class="card-body">
-                                    <ul class="list-group">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            A list item
-                                            <button class="btn btn-sm btn-danger">Download</button>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            A second list item
-                                            <button class="btn btn-sm btn-danger">Download</button>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            A third list item
-                                            <button class="btn btn-sm btn-danger">Download</button>
+                                    <ul class="list-group" id="fileList">
+                                        <li class="list-group-item text-center text-muted">
+                                            Pilih kandidat untuk melihat daftar file.
                                         </li>
                                     </ul>
                                 </div>
@@ -101,9 +90,9 @@
                                     <h4 class="my-0 fw-normal">Code 1</h4>
                                 </div>
                                 <div class="card-body">
-                                    <small>
+                                    <div style="max-height: 112px;overflow: auto;">
                                         <pre id="codeBlock1" class="bg-light p-3 border rounded text-start" style="white-space: pre-wrap;"></pre>
-                                    </small>
+                                    </div>
                                     <button type="button" class="w-100 btn btn-lg btn-outline-primary" id="copyBtn1">
                                         Copy
                                     </button>
@@ -116,9 +105,9 @@
                                     <h4 class="my-0 fw-normal">Code 2</h4>
                                 </div>
                                 <div class="card-body">
-                                    <small>
+                                    <div style="max-height: 112px;overflow: auto;">
                                         <pre id="codeBlock2" class="bg-light p-3 border rounded text-start" style="white-space: pre-wrap;"></pre>
-                                    </small>
+                                    </div>
                                     <button type="button" class="w-100 btn btn-lg btn-outline-primary" id="copyBtn2">
                                         Copy
                                     </button>
@@ -144,7 +133,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -163,35 +151,20 @@
 
                 if (year && scholarship) {
                     $.ajax({
-                        url: "{{ route('get.candidates') }}", // buat route di Laravel
+                        url: "{{ route('get.candidates') }}",
                         type: 'GET',
                         data: {
                             year: year,
                             scholarship: scholarship
                         },
                         success: function(response) {
-                            // kosongkan dulu option candidate
-                            // $('#candidate').empty();
-                            // $('#candidate').append(
-                            //     '<option value="" disabled selected>Choose...</option>');
-
-                            // // isi dengan data dari server
-                            // response.forEach(function(item) {
-                            //     $('#candidate').append(
-                            //         `<option value="${item.id}">${item.mahasiswa?.nama} - ${item.mahasiswa?.nim}</option>`
-                            //     );
-                            // });
-
-                            // $("#candidate").trigger('change');
-
                             $('#candidate').select2({
                                 data: response.map(item => ({
                                     id: item.id,
                                     text: `${item.mahasiswa?.nama} - ${item.mahasiswa?.nim}`
                                 }))
-                            });
-
-                        }
+                            }).trigger('change');
+                        },
                     });
                 }
             }
@@ -202,9 +175,62 @@
             // trigger saat salah satu select berubah
             $('#year, #scholarship').on('change', function() {
                 loadCandidates();
+                $('#codeBlock1').empty();
+                $('#codeBlock2').empty();
+
             });
 
-            // generate code
+            $('#candidate').on('change', function() {
+                let candidateId = $(this).val();
+                let $fileList = $('#fileList');
+                $('#codeBlock1').empty();
+                $('#codeBlock2').empty();
+
+
+                if (candidateId) {
+                    // Tampilkan status loading
+                    $fileList.html(
+                        '<li class="list-group-item text-center text-muted">Loading files...</li>');
+
+                    $.ajax({
+                        url: "{{ route('get.candidates.files') }}",
+                        type: 'GET',
+                        data: {
+                            candidate: candidateId
+                        },
+                        success: function(response) {
+                            $fileList.empty();
+                            if (response && response.length > 0) {
+                                response.forEach(function(file) {
+                                    let listItem = `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center text-start">
+                                            <span>${file.name}</span>
+                                            <a href="${file.url}" class="btn btn-sm btn-danger" target="_blank">Download</a>
+                                        </li>
+                                    `;
+                                    $fileList.append(listItem);
+                                });
+                            } else {
+                                $fileList.html(
+                                    '<li class="list-group-item text-center text-muted">Tidak ada file untuk kandidat ini.</li>'
+                                );
+                            }
+                        },
+                        error: function() {
+                            $fileList.html(
+                                '<li class="list-group-item text-center text-danger">Gagal mengambil data file.</li>'
+                            );
+                        }
+                    });
+                } else {
+                    $fileList.html(
+                        '<li class="list-group-item text-center text-muted">Pilih kandidat untuk melihat daftar file.</li>'
+                    );
+                }
+            });
+            // -------------------------------------------------------------
+
+            // generate code variables
             const step1 = {
                 "Nama Mahasiswa": "",
                 "Universitas/Perguruan Tinggi": "Universitas Islam Negeri Madura",
@@ -254,19 +280,15 @@
 
             function dedent(str) {
                 const lines = str.split('\n');
-
-                // 1. Cari baris konten pertama untuk acuan indentasi
                 const firstContentLine = lines.find(line => line.trim().length > 0);
                 if (!firstContentLine) return str.trim();
 
                 const match = firstContentLine.match(/^[ \t]*/);
                 const indent = match ? match[0].length : 0;
 
-                // 2. Potong spasi HANYA jika jumlah spasi di baris tersebut >= indent
                 return lines
                     .map(line => {
                         const currentIndent = line.match(/^[ \t]*/)[0].length;
-                        // Hanya potong jika barisnya menjorok, jika tidak (seperti isi ${code}), biarkan saja
                         return currentIndent >= indent ? line.slice(indent) : line;
                     })
                     .join('\n')
@@ -317,15 +339,14 @@
                 clear();
             `);
 
-            // ketika tombol generate diklik
-            $('#generateBtn').on('click', function() {
+            function generateCode() {
                 let year = $('#year').val();
                 let scholarship = $('#scholarship').val();
                 let candidate = $('#candidate').val();
 
                 if (year && scholarship && candidate) {
                     $.ajax({
-                        url: "{{ route('get.candidates.code') }}", // buat route di Laravel
+                        url: "{{ route('get.candidates.code') }}",
                         type: 'GET',
                         data: {
                             year: year,
@@ -333,23 +354,17 @@
                             candidate: candidate
                         },
                         success: function(response) {
-                            // ubah object pemberkasan ke array
                             const berkasArr = Object.entries(response.pemberkasan?.data
                                 ?.pemberkasan).map(([key, value]) => ({
                                 key,
                                 ...value
                             }));
 
-                            // urutkan berdasarkan index
                             berkasArr.sort((a, b) => a.index - b.index);
-
-                            // hasil: array terurut
                             console.log(berkasArr);
 
-                            // ambil biodata dari response
                             const bio = response.biodata_pendaftar.data.biodata;
 
-                            // isi step1 dengan value dari response
                             step1["Nama Mahasiswa"] = response.mahasiswa.nama;
                             step1["Nama Fakultas"] =
                                 `Fakultas ${response.mahasiswa.fakultas_name}`;
@@ -370,7 +385,6 @@
                             step1["Alamat Tinggal (Sesuai KTP)"] = bio.alamat_ktp.value;
                             step1["Kabupaten/Kota (Sesuai KTP)"] = bio.kabupaten_ktp.value;
 
-                            // isi step2 dengan value dari response
                             step2["Nama Ibu Kandung/Wali Ibu"] = bio.nama_ibu.value;
                             step2["Pekerjaan Ibu Kandung/Wali Ibu"] = bio.kerja_ibu.value;
                             step2["Penghasilan Ibu Kandung/Wali Ibu"] = bio.penghasilan_ibu
@@ -382,16 +396,10 @@
                             step2["Alamat Tinggal Orangtua/Wali"] = bio.alamat_orang_tua.value;
                             step2["Nama Akun Instagram"] = bio.akun_ig.value;
                             step2["Nama Akun Tiktok"] = bio.akun_tiktok.value;
-                            // step2["Ceklist Berkas Mahasiswa"] = response.pemberkasan.data
-                            //     .pemberkasan ?
-                            //     Object.values(response.pemberkasan.data.pemberkasan).map(item =>
-                            //         item.text) : [];
 
-                            // kosongkan dulu option candidate
                             $('#codeBlock1').empty();
                             $('#codeBlock2').empty();
 
-                            // tampilkan kode sebagai teks
                             $('#codeBlock1').text(dedent(`
                                 const step1 = ${JSON.stringify(step1, null, 2)};
 
@@ -408,6 +416,11 @@
                         }
                     });
                 }
+            }
+
+            // ketika tombol generate diklik
+            $('#generateBtn').on('click', function() {
+                generateCode();
             });
 
             // tombol copy

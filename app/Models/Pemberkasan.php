@@ -9,6 +9,11 @@ class Pemberkasan extends Uuid
         'data'
     ];
 
+    public function pendaftar()
+    {
+        return $this->belongsTo(Pendaftar::class);
+    }
+
     public function getDataAttribute($val)
     {
         $urlorigin = url('file/');

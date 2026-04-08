@@ -7,7 +7,9 @@ use App\Models\BiodataPendaftar;
 use App\Models\Pendaftar;
 use App\Models\TahunKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use ZipArchive;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 
 class ToolsController extends Controller
@@ -95,16 +97,17 @@ class ToolsController extends Controller
         echo 'Selesai';
     }
 
-    public function downloadZip(Request $request, $pendaftarId)
+    public function downloadZip(Request $request, string $pendaftarId)
     {
         $downloadExcept = [
             'sc_follow_ig_bi',
             'sc_follow_yt',
             'sc_follow_tiktok',
             'sc_follow_ig_genbi',
-            'checklist_berkas'
+            'checklist_berkas',
+            'super_tdk_sanksi_kode_etik',
+            'suket_baca_quran'
         ];
-        // $pendaftarId = 'fadd676c-d134-464b-85c8-9f6e9fb26261';
 
         $pendaftar = Pendaftar::with(['biodata_pendaftar', 'pemberkasan', 'mahasiswa'])
             ->whereHas(
@@ -119,25 +122,48 @@ class ToolsController extends Controller
         }
 
         $filePaths = [];
+        $newNameFiles = [];
         foreach ($pendaftar->pemberkasan->data->pemberkasan as $key => $value) {
             if (!in_array($key, $downloadExcept) && isset($value->value->path)) {
                 $filePaths[] = $value->value->path;
+                $newNameFiles[] = $key;
             }
         }
 
         $zip = new ZipArchive;
-        $fileName = $pendaftar->mahasiswa->nim . '_' . $pendaftar->mahasiswa->nama . '.zip';
-        $zipPath = public_path($fileName);
 
-        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-            foreach ($filePaths as $path) {
+        // PERBAIKAN 1: Bersihkan nama dari karakter ilegal
+        $safeNama = Str::slug($pendaftar->mahasiswa->nama, '_');
+        $fileName = $pendaftar->mahasiswa->nim . '_' . $safeNama . '.zip';
+
+        // PERBAIKAN 2: Simpan di folder storage agar tidak kena error hak akses di Ubuntu
+        $zipPath = storage_path('app/' . $fileName);
+
+        $filesAdded = 0; // Buat tracker untuk mengecek apakah ada file yang dimasukkan
+
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+            foreach ($filePaths as $key => $path) {
                 $fullPath = storage_path('app/' . $path);
 
+                // PERBAIKAN 3: Cara aman mengambil ekstensi
+                $exten = pathinfo($path, PATHINFO_EXTENSION);
+
+                // PERBAIKAN 4: Bersihkan karakter ilegal (seperti /) pada nama file di dalam zip
+                $safeInnerName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $newNameFiles[$key]);
+
+                $newName = ($key + 1) . '. ' . $safeInnerName . '.' . $exten;
+
                 if (file_exists($fullPath)) {
-                    $zip->addFile($fullPath, basename($path));
+                    $zip->addFile($fullPath, $newName);
+                    $filesAdded++; // Tambah counter
                 }
             }
             $zip->close();
+        }
+
+        // PERBAIKAN 5: Validasi jika tidak ada file yang berhasil di-zip
+        if ($filesAdded === 0) {
+            return 'Gagal membuat file ZIP karena file berkas (PDF/JPG) tidak ditemukan secara fisik di server.';
         }
 
         if (!file_exists($zipPath)) {
@@ -145,5 +171,47 @@ class ToolsController extends Controller
         }
 
         return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+
+    public function getCandidateFiles(Request $request)
+    {
+        $downloads = [
+            'sc_follow_ig_bi',
+            'sc_follow_yt',
+            'sc_follow_tiktok',
+            'sc_follow_ig_genbi',
+            'checklist_berkas'
+        ];
+        // $pendaftarId = 'fadd676c-d134-464b-85c8-9f6e9fb26261';
+        $pendaftarId = $request->candidate;
+
+        $pendaftar = Pendaftar::with(['biodata_pendaftar', 'pemberkasan', 'mahasiswa'])
+            ->whereHas(
+                'latestStatus',
+                fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
+            )
+            ->whereId($pendaftarId)
+            ->first();
+
+        if (!$pendaftar) {
+            return response()->json('Data pendaftar tidak ditemukan.', 422);
+        }
+
+        $filePaths = [];
+        foreach ($pendaftar->pemberkasan->data->pemberkasan as $key => $value) {
+            if (in_array($key, $downloads) && isset($value->value->path)) {
+                $filePaths[] = [
+                    'url' => route('download.file', ['path' => Crypt::encrypt($value->value->path)]),
+                    'name' => $key
+                ];
+            }
+        }
+
+        $filePaths[] = [
+            'url' => route('get.candidates.zip', ['scholarship' => $pendaftarId]),
+            'name' => $pendaftar->mahasiswa->nim . '_' . $pendaftar->mahasiswa->nama . '.zip'
+        ];
+
+        return response()->json($filePaths);
     }
 }
