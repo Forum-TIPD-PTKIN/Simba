@@ -1,7 +1,15 @@
 <!doctype html>
 <html lang="en" data-bs-theme="auto">
 
-@include('admin.template.head')
+<title>Generator Code</title>
+<!-- Styles -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" />
+<link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<!-- Or for RTL support -->
+<link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
 
 <body class="bg-body-tertiary">
     <div class="container">
@@ -54,13 +62,41 @@
                     </form>
                 </div>
 
-                <div class="col-12">
-                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <div class="col-12 my-3">
+                    <h4 class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-primary">Files</span>
+                    </h4>
+                    <div class="row row-cols-1 text-center">
+                        <div class="col">
+                            <div class="card rounded-3 shadow-sm">
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            A list item
+                                            <button class="btn btn-sm btn-danger">Download</button>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            A second list item
+                                            <button class="btn btn-sm btn-danger">Download</button>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            A third list item
+                                            <button class="btn btn-sm btn-danger">Download</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 my-3">
+                    <h4 class="d-flex justify-content-between align-items-center mb-1">
                         <span class="text-primary">Code</span>
                     </h4>
                     <div class="row row-cols-1 row-cols-md-2 mb-3 text-center">
                         <div class="col">
-                            <div class="card mb-4 rounded-3 shadow-sm">
+                            <div class="card rounded-3 shadow-sm">
                                 <div class="card-header py-3">
                                     <h4 class="my-0 fw-normal">Code 1</h4>
                                 </div>
@@ -75,7 +111,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card mb-4 rounded-3 shadow-sm">
+                            <div class="card rounded-3 shadow-sm">
                                 <div class="card-header py-3">
                                     <h4 class="my-0 fw-normal">Code 2</h4>
                                 </div>
@@ -95,10 +131,32 @@
         </main>
     </div>
 
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="myToast" class="toast bg-success text-light" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notifikasi</strong>
+                <small class="text-muted">Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Pesan toast dari JavaScript.
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js"></script>
     <script>
         $(document).ready(function() {
+            $("#candidate").select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Choose...',
+                allowClear: true
+            });
+
             function loadCandidates() {
                 let year = $('#year').val();
                 let scholarship = $('#scholarship').val();
@@ -113,16 +171,26 @@
                         },
                         success: function(response) {
                             // kosongkan dulu option candidate
-                            $('#candidate').empty();
-                            $('#candidate').append(
-                                '<option value="" disabled selected>Choose...</option>');
+                            // $('#candidate').empty();
+                            // $('#candidate').append(
+                            //     '<option value="" disabled selected>Choose...</option>');
 
-                            // isi dengan data dari server
-                            response.forEach(function(item) {
-                                $('#candidate').append(
-                                    `<option value="${item.id}">${item.mahasiswa?.nama} - ${item.mahasiswa?.nim}</option>`
-                                );
+                            // // isi dengan data dari server
+                            // response.forEach(function(item) {
+                            //     $('#candidate').append(
+                            //         `<option value="${item.id}">${item.mahasiswa?.nama} - ${item.mahasiswa?.nim}</option>`
+                            //     );
+                            // });
+
+                            // $("#candidate").trigger('change');
+
+                            $('#candidate').select2({
+                                data: response.map(item => ({
+                                    id: item.id,
+                                    text: `${item.mahasiswa?.nama} - ${item.mahasiswa?.nim}`
+                                }))
                             });
+
                         }
                     });
                 }
@@ -265,6 +333,19 @@
                             candidate: candidate
                         },
                         success: function(response) {
+                            // ubah object pemberkasan ke array
+                            const berkasArr = Object.entries(response.pemberkasan?.data
+                                ?.pemberkasan).map(([key, value]) => ({
+                                key,
+                                ...value
+                            }));
+
+                            // urutkan berdasarkan index
+                            berkasArr.sort((a, b) => a.index - b.index);
+
+                            // hasil: array terurut
+                            console.log(berkasArr);
+
                             // ambil biodata dari response
                             const bio = response.biodata_pendaftar.data.biodata;
 
@@ -333,15 +414,23 @@
             $('#copyBtn1').on('click', function() {
                 const code = $('#codeBlock1').text();
                 navigator.clipboard.writeText(code).then(() => {
-                    alert('Code 1 copied to clipboard!');
+                    showToast('Code 1 copied to clipboard!');
                 });
             });
             $('#copyBtn2').on('click', function() {
                 const code = $('#codeBlock2').text();
                 navigator.clipboard.writeText(code).then(() => {
-                    alert('Code 2 copied to clipboard!');
+                    showToast('Code 2 copied to clipboard!');
                 });
             });
+
+            function showToast(message) {
+                const toastEl = document.getElementById('myToast');
+                toastEl.querySelector('.toast-body').textContent = message;
+
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
         });
     </script>
 </body>
