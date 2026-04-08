@@ -59,8 +59,10 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-12" id="tabContent">
-                                    {!! $view_rekap !!}
+                                <div class="col-12">
+                                    <div class="tab-content" id="rekapTabContent">
+                                        {!! $view_rekap !!}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -96,9 +98,12 @@
                     });
                 },
                 success: (res) => {
-                    let target = $('#tabContent');
-                    target.children().remove();
+                    let target = $('#rekapTabContent'),
+                        activeTab = $('.nav-tabs .nav-link.active').attr('data-bs-target');
+
                     target.html(res);
+                    $('.tab-pane.fade').removeClass('show active');
+                    $(`${activeTab}`).addClass('show active');
 
                     Swal.close();
                 }

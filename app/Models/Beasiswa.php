@@ -48,7 +48,7 @@ class Beasiswa extends Uuid
                 ->whereHas('tahun_kegiatan', function ($query) {
                     $query->where('status', 1);
                 })
-                ->where('role', 'PENDAFTARAN')
+                // ->where('role', 'PENDAFTARAN')
                 ->where('tanggal_mulai', '<=', now())
                 ->where('tanggal_selesai', '>=', now())
         )->orderBy(
@@ -57,7 +57,7 @@ class Beasiswa extends Uuid
                 ->whereHas('tahun_kegiatan', function ($query) {
                     $query->where('status', 1);
                 })
-                ->where('role', 'PENDAFTARAN')
+                // ->where('role', 'PENDAFTARAN')
                 ->orderBy('tanggal_mulai', 'asc')
                 ->limit(1)
         );
