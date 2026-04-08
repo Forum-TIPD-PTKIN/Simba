@@ -39,6 +39,7 @@ use App\Http\Controllers\Surveyor\{
     PersetujuanController,
     SurveyController,
 };
+use App\Http\Controllers\ToolsController;
 use App\Models\BiodataPendaftar;
 use App\Models\Pendaftar;
 use Illuminate\Support\Facades\Crypt;
@@ -322,81 +323,8 @@ Route::get('download/{path}', function (string $path) {
 })->where('path', '.*')->name('download.file');
 
 // TOOLS HARAM (ISI OTOMATIS GOOGLE FORM)
-Route::get('generate-code', function () {
-    $year = \App\Models\TahunKegiatan::orderBy('tahun', 'desc')->get();
-    $scholarship = \App\Models\Beasiswa::where('status', 1)->orderBy('nama', 'asc')->get();
-
-    return view('tools.generate-code', [
-        'year' => $year,
-        'scholarship' => $scholarship
-    ]);
-});
-
-Route::get('/get-candidates', function (Request $request) {
-    $year = $request->year;
-    $scholarship = $request->scholarship;
-
-    $candidates = \App\Models\Pendaftar::with(['user', 'mahasiswa', 'biodata_pendaftar', 'pemberkasan'])
-        ->selectRaw('pendaftars.*')
-        ->join('mahasiswas', 'mahasiswas.pendaftar_id', 'pendaftars.id')
-        ->where('tahun_kegiatan_id', $year)
-        ->where('beasiswa_id', $scholarship)
-        ->whereHas(
-            'latestStatus',
-            fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
-        )
-        ->orderBy('mahasiswas.nama')
-        ->get();
-
-    return response()->json($candidates);
-})->name('get.candidates');
-
-Route::get('/get-candidates-code', function (Request $request) {
-    $year = $request->year;
-    $scholarship = $request->scholarship;
-    $candidate = $request->candidate;
-
-    $candidates = \App\Models\Pendaftar::with(['user', 'mahasiswa', 'biodata_pendaftar', 'pemberkasan'])
-        ->where('tahun_kegiatan_id', $year)
-        ->where('beasiswa_id', $scholarship)
-        ->where('id', $candidate)
-        ->whereHas(
-            'latestStatus',
-            fn($q) => $q->where('status', 'LOLOS ADMINISTRASI')
-        )
-        ->first();
-
-    [$id_prodi, $nm_prodi] = explode('|', $candidates->mahasiswa?->prodi);
-    $prodi_id = "0{$id_prodi}";
-    $get_prodi = api()->get("https://api.uinmadura.ac.id/api/prodi?id={$prodi_id}");
-    $prodi_long = $get_prodi->data?->data[0]->long ?? '';
-
-    $candidates->mahasiswa->setAttribute('prodi_long_name', $prodi_long);
-
-    return response()->json($candidates);
-})->name('get.candidates.code');
-
-Route::get('/change-biodata', function () {
-    BiodataPendaftar::with(['pendaftar.user'])
-        ->whereHas('pendaftar.beasiswa', fn($q) => $q->where('nama', 'Program Pendidikan Kebanksentralan (PPK) BI'))
-        ->chunk(50, function ($pendaftarBatch) {
-            foreach ($pendaftarBatch as $value) {
-                $biodata = $value->data;
-                $mahasiswa = \App\Models\SiakadMahasiswa::with('prodi.fakultas')
-                    ->whereNpm($value->pendaftar->user->username)
-                    ->first();
-
-                $get_ipk = api()->get("https://tipd.dev/api/public/api/akademik/ipk-sementara/{$mahasiswa->npm}");
-                $ipk = $get_ipk->data?->profil?->ipk_akumulatif ?? 0;
-
-                $biodata->biodata->ipk->value = $ipk;
-                $biodata->biodata->ttl->value = $mahasiswa->tempat_lahir . ', ' . \Carbon\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d/m/Y');
-                $biodata->biodata->nama_ibu->value = $mahasiswa->ibu_nama;
-                $biodata->biodata->nama_bapak->value = $mahasiswa->ayah_nama;
-
-                $value->update(['data' => json_encode($biodata)]);
-            }
-        });
-
-    echo 'Selesai';
-});
+Route::get('/generate-code', [ToolsController::class, 'generateCode']);
+Route::get('/get-candidates', [ToolsController::class, 'getCandidates'])->name('get.candidates');
+Route::get('/get-candidates-code', [ToolsController::class], 'getCandidateCode')->name('get.candidates.code');
+Route::get('/change-biodata', [ToolsController::class, 'changeBiodata']);
+Route::get('/download-zip/{pendaftarId}', [ToolsController::class, 'downloadZip']);
