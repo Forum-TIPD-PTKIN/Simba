@@ -40,8 +40,6 @@ use App\Http\Controllers\Surveyor\{
     SurveyController,
 };
 use App\Http\Controllers\ToolsController;
-use App\Models\BiodataPendaftar;
-use App\Models\Pendaftar;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
