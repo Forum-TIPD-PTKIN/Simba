@@ -462,14 +462,14 @@ class DaftarController extends Controller
             }
         }
 
-        // ! KHUSUS BEASISWA GENBI (PPK)
+        //! KHUSUS BEASISWA GENBI (PPK)
         if ($beasiswa->nama === 'Program Pendidikan Kebanksentralan (PPK) BI') {
             // ^ Cek jenjang harus S1
             if ($mahasiswa_api->prodi?->id_jenjang_pendidikan !== 'S1') return response()->json('Jenjang pendidikan bukan S1', 422);
 
             // ^ Cek status aktif
-            $get_aktif = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
-            $aktif = $get_aktif->data?->status_akademik ?? null;
+            $get_semester_aktif = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
+            $aktif = $get_semester_aktif->data?->status_akademik ?? null;
             if ($aktif && $aktif  !== 'AKTIF') return response()->json('Status akademik tidak aktif', 422);
 
             // ^ Cek umur maksimal 23 tahun
@@ -513,11 +513,31 @@ class DaftarController extends Controller
             if ((float) $ipk  < 3.30) return response()->json('IPK minimal 3.30', 422);
 
             // ^ Cek semester minimal 3
-            $get_semester = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
-            $semester = $get_semester->data?->semester_ke ?? 0;
+            $semester = $get_semester_aktif->data?->semester_ke ?? 0;
             if ($semester  < 3) return response()->json('Minimal semester 3', 422);
         }
-        /* =============================== */
+        //! KHUSUS BEASISWA GENBI (PPK)
+
+        //! KHUSUS BEASISWA DJAVA FOUNDATION HAFIDZ
+        if ($beasiswa->nama === 'Djava Foundation Bagi Hafidz dan Hafidzah') {
+            // ^ Cek jenjang harus S1
+            if ($mahasiswa_api->prodi?->id_jenjang_pendidikan !== 'S1') return response()->json('Jenjang pendidikan bukan S1', 422);
+
+            // ^ Cek status aktif
+            $get_semester_aktif = api()->get("https://tipd.dev/api/public/api/akademik/semester-aktif/{$mahasiswa_api->npm}");
+            $aktif = $get_semester_aktif->data?->status_akademik ?? null;
+            if ($aktif && $aktif  !== 'AKTIF') return response()->json('Status akademik tidak aktif', 422);
+
+            // ^ Cek IPK minimal 3.30
+            $get_ipk = api()->get("https://tipd.dev/api/public/api/akademik/ipk-sementara/{$mahasiswa_api->npm}");
+            $ipk = $get_ipk->data?->profil?->ipk_akumulatif ?? 0;
+            if ((float) $ipk  < 3.30) return response()->json('IPK minimal 3.30', 422);
+
+            // ^ Harus semester 2
+            $semester = $get_semester_aktif->data?->semester_ke ?? 0;
+            if ($semester  !== 2) return response()->json('Khusus semester 2', 422);
+        }
+        //! KHUSUS BEASISWA DJAVA FOUNDATION HAFIDZ
 
         $pendaftar = Pendaftar::where('user_id', $user->id)
             ->where('beasiswa_id', $beasiswa->id)
