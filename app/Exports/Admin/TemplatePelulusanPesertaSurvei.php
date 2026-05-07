@@ -52,7 +52,10 @@ class TemplatePelulusanPesertaSurvei implements
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->where('tahun_kegiatan_id', $this->tahun)
             ->where('beasiswa_id', $this->beasiswa)
-            ->whereHas('surveyor_detail')
+            // ->whereHas('surveyor_detail')
+            ->whereHas('latestStatus', function ($query) {
+                $query->where('status', 'LOLOS TPA');
+            })
             ->whereDoesntHave('latestStatus', function ($query) {
                 $query->whereIn('status', ['LOLOS PENERIMA', 'TIDAK LOLOS PENERIMA']);
             })

@@ -52,7 +52,10 @@ class TemplatePelulusanPesertaTpa implements
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->where('tahun_kegiatan_id', $this->tahun)
             ->where('beasiswa_id', $this->beasiswa)
-            ->whereHas('map_ujian')
+            // ->whereHas('map_ujian')
+            ->whereHas('latestStatus', function ($query) {
+                $query->where('status', 'LOLOS ADMINISTRASI');
+            })
             ->whereDoesntHave('latestStatus', function ($query) {
                 $query->whereIn('status', ['LOLOS TPA', 'GAGAL TPA']);
             })

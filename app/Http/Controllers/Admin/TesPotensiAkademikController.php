@@ -459,7 +459,7 @@ class TesPotensiAkademikController extends Controller
                 ->when($request->flt_beasiswa, function ($q) use ($request) {
                     return $q->where('beasiswa_id', $request->flt_beasiswa);
                 })
-                ->whereHas('map_ujian')
+                // ->whereHas('map_ujian')
                 ->where(function ($query) use ($request) {
                     if ($request->flt_status) {
                         return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));

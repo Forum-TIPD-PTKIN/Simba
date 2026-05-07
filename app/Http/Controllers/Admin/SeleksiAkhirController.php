@@ -269,8 +269,8 @@ class SeleksiAkhirController extends Controller
                 ->when($request->flt_beasiswa, function ($q) use ($request) {
                     return $q->where('beasiswa_id', $request->flt_beasiswa);
                 })
-                ->whereHas('surveyor_detail')
-                ->whereHas('hasil_survey')
+                // ->whereHas('surveyor_detail')
+                // ->whereHas('hasil_survey')
                 ->where(function ($query) use ($request) {
                     if ($request->flt_status) {
                         return $query->whereHas('pendaftar_status', fn($q) => $q->where('status', $request->flt_status));

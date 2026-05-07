@@ -9,11 +9,13 @@
     @if ($status_seleksi_akhir?->status === 'LOLOS PENERIMA')
         <div class="alert alert-success">
             <h4><i class="far fa-grin-stars"></i> Selamat!</h4>
-            <p class="mb-0">Anda dinyatakan <span class="fw-bold fs-5">LOLOS sebagai PENERIMA</span> Beasiswa
+            <p class="mb-1">Anda dinyatakan <span class="fw-bold fs-5">LOLOS sebagai PENERIMA</span> Beasiswa
                 {{ $pendaftar->beasiswa?->nama }} Tahun {{ $pendaftar->tahun_kegiatan?->tahun }}.
             </p>
+            <p class="mb-0">Untuk informasi lebih lengkap, silakan cek pengumuman di website <a
+                    href="https://uinmadura.ac.id" target="_blank" class="fw-bold">UIN Madura</a></p>
         </div>
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-body">
                 <p>Bagi mahasiswa yang dinyatakan LOLOS sebagai PENERIMA Beasiswa {{ $pendaftar->beasiswa?->nama }}
                     Tahun {{ $pendaftar->tahun_kegiatan?->tahun }} wajib hadir pada:</p>
@@ -39,7 +41,7 @@
                     </dd>
                 </dl>
             </div>
-        </div>
+        </div> --}}
     @else
         <div class="alert alert-danger">
             <h4><i class="far fa-sad-tear"></i> Mohon Maaf!</h4>
