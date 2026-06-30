@@ -1,4 +1,4 @@
-# APP Beasiswa
+# Simba App
 
 ![Logo APP Beasiswa](public/assets/admin/images/logo_app_beasiswa.png)
 
