@@ -2,7 +2,9 @@
 
 namespace App\Exports\Admin;
 
+use App\Models\FormData;
 use App\Models\Pendaftar;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -44,7 +46,7 @@ class RekapPendaftarExport implements
 
     public function collection()
     {
-        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan'])
+        $this->results = Pendaftar::with(['mahasiswa', 'beasiswa', 'tahun_kegiatan', 'pemberkasan', 'biodata_pendaftar'])
             ->selectRaw('pendaftars.*')
             ->join('mahasiswas', 'pendaftars.id', 'mahasiswas.pendaftar_id')
             ->when($this->status !== null, function ($query) {
@@ -63,7 +65,18 @@ class RekapPendaftarExport implements
 
     public function map($data): array
     {
-        return [
+        $biodata = collect($data->biodata_pendaftar?->data?->biodata)
+            ->map(fn($item) => ($item->type === 'select' || $item->type === 'radio' ? $item->value . ' - ' . $item->valOption : $item->value))
+            ->values()
+            ->toArray();
+        $berkas = collect($data->pemberkasan?->data?->pemberkasan)
+            ->filter(fn($item) => $item->type === 'file')
+            ->map(fn($item) => $item->value?->url . '|||' . $item->text ?? '')
+            ->values()
+            ->toArray();
+        $kategori = $data->pemberkasan?->data?->pemberkasan?->kategori?->valOption ?? '';
+
+        $row = [
             $this->nomor++,
             $data->mahasiswa?->nim,
             $data->mahasiswa?->nama,
@@ -73,11 +86,35 @@ class RekapPendaftarExport implements
             $data->tahun_kegiatan?->tahun,
             $data->latest_status?->status
         ];
+        array_push($row, $kategori);
+        if (!empty($biodata)) array_push($row, ...$biodata);
+        if (!empty($berkas)) array_push($row, ...$berkas);
+
+        return $row;
     }
 
     public function headings(): array
     {
-        return [
+        $biodata = FormData::where('tahun_kegiatan_id', $this->tahun)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('jenis', 'BIODATA')
+            ->orderBy('indexed')
+            ->get()
+            ->map(fn($item) => $item->config_json['title']);
+        $berkas = FormData::where('tahun_kegiatan_id', $this->tahun)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('jenis', 'PEMBERKASAN')
+            ->orderBy('indexed')
+            ->get()
+            ->map(fn($item) => $item->config_json['title']);
+        $kategori = FormData::where('tahun_kegiatan_id', $this->tahun)
+            ->where('beasiswa_id', $this->beasiswa)
+            ->where('jenis', 'PEMBERKASAN')
+            ->where('config->name', 'kategori')
+            ->orderBy('indexed')
+            ->first()?->config_json['title'];
+
+        $heading = [
             'No',
             'NIM',
             'Nama',
@@ -87,6 +124,11 @@ class RekapPendaftarExport implements
             'Tahun',
             'Status'
         ];
+        array_push($heading, $kategori);
+        array_push($heading, ...$biodata);
+        array_push($heading, ...$berkas);
+
+        return $heading;
     }
 
     public function title(): string
@@ -125,6 +167,43 @@ class RekapPendaftarExport implements
                         ],
                     ],
                 ])->getAlignment();
+
+                $sheet = $event->sheet->getDelegate();
+
+                $highestRow = $sheet->getHighestRow();
+                $highestColumn = Coordinate::columnIndexFromString(
+                    $sheet->getHighestColumn()
+                );
+
+                for ($row = 2; $row <= $highestRow; $row++) {
+
+                    for ($col = 1; $col <= $highestColumn; $col++) {
+
+                        $cell = Coordinate::stringFromColumnIndex($col) . $row;
+
+                        $value = $sheet->getCell($cell)->getValue();
+
+                        if (
+                            is_string($value)
+                            && str_contains($value, '|||')
+                        ) {
+
+                            [$url, $text] = explode('|||', $value, 2);
+
+                            $sheet->setCellValue($cell, $text);
+
+                            $sheet->getCell($cell)
+                                ->getHyperlink()
+                                ->setUrl($url);
+
+                            $sheet->getStyle($cell)
+                                ->getFont()
+                                ->setUnderline(true)
+                                ->getColor()
+                                ->setARGB('0000FF');
+                        }
+                    }
+                }
             }
         ];
     }
